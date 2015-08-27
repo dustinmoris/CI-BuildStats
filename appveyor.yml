@@ -17,7 +17,8 @@ build:
   publish_wap: true
   verbosity: normal
 deploy:
-- provider: WebDeploy
+  provider: WebDeploy
+  skip_symbols: false
   server: https://ci-buildstats.scm.azurewebsites.net:443/msdeploy.axd?site=ci-buildstats
   website: ci-buildstats
   username: $ci-buildstats
@@ -25,3 +26,6 @@ deploy:
     secure: dNuktJi2zyNFdPUvEKzOSvVb4ltb5PVMzdrFEh4IjfFr5keN3OHFkGj4WKM5/aG1y3VrWOEe3FUxWLPBgeTaBw==
   remove_files: true
   app_offline: false
+  on:
+    branch: master
+    appveyor_repo_tag: true
