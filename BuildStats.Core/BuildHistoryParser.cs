@@ -19,7 +19,7 @@ namespace BuildStats.Core
                         item.buildNumber.Value.ToString(),
                         item.version.Value,
                         item.started != null ? item.started.Value : null,
-                        item.finished.Value,
+                        item.finished != null ? item.finished.Value : null,
                         DeserializeStatus(item.status.Value)));
             }
 
@@ -38,6 +38,8 @@ namespace BuildStats.Core
                 case "success": return BuildStatus.Success;
                 case "failed": return BuildStatus.Failed;
                 case "cancelled": return BuildStatus.Cancelled;
+                case "queued": return BuildStatus.Queued;
+                case "running": return BuildStatus.Running;
                 default: throw new NotSupportedException($"Build status {status} is not supported.");
             }
         }

@@ -8,7 +8,7 @@ namespace BuildStats.Core
         public string BuildNumber { get; }
         public string Version { get; }
         public DateTime? Started { get; }
-        public DateTime Finished { get; }
+        public DateTime? Finished { get; }
         public TimeSpan TotalTime { get; }
         public BuildStatus Status { get; set; }
 
@@ -17,7 +17,7 @@ namespace BuildStats.Core
             string buildNumber, 
             string version, 
             DateTime? started, 
-            DateTime finished,
+            DateTime? finished,
             BuildStatus status)
         {
             BuildId = buildId;
@@ -27,8 +27,8 @@ namespace BuildStats.Core
             Finished = finished;
             Status = status;
 
-            TotalTime = Started != null 
-                ? Finished - Started.Value 
+            TotalTime = Started != null && Finished != null
+                ? Finished.Value - Started.Value 
                 : TimeSpan.Zero;
         }
     }

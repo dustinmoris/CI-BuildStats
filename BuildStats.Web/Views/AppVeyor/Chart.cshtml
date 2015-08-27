@@ -23,27 +23,31 @@
         @for (var i = 0; i < Model.Builds.Count; i++)
         {
             var build = Model.Builds[i];
-            var x = i * (Model.Config.BarWidth + Model.Config.BarGap) + Model.Config.PaddingX;
-            var factor = build.TotalTime.TotalMilliseconds/Model.LongestBuildTime.TotalMilliseconds;
-            var height = factor*Model.Config.BarMaxHeight;
-            if (build.Status == BuildStatus.Cancelled)
-            {
-                height = 5;
-            }
-            var y = Model.Config.BarMaxHeight + Model.Config.FontSize * yMultiplier - height + 10;
 
-            var colourCode = Model.Config.SucceededColorCode;
-
-            if (build.Status == BuildStatus.Failed)
+            if (build.Status != BuildStatus.Queued && build.Status != BuildStatus.Running)
             {
-                colourCode = Model.Config.FailedColorCode;
-            }
-            else if (build.Status == BuildStatus.Cancelled)
-            {
-                colourCode = Model.Config.CancelledColorCode;
-            }
+                var x = i*(Model.Config.BarWidth + Model.Config.BarGap) + Model.Config.PaddingX;
+                var factor = build.TotalTime.TotalMilliseconds/Model.LongestBuildTime.TotalMilliseconds;
+                var height = factor*Model.Config.BarMaxHeight;
+                if (build.Status == BuildStatus.Cancelled)
+                {
+                    height = 5;
+                }
+                var y = Model.Config.BarMaxHeight + Model.Config.FontSize*yMultiplier - height + 10;
 
-            <rect id="@build.BuildId" height="@height" width="@Model.Config.BarWidth" y="@y" x="@x" stroke-width="0" fill="@colourCode"/>
+                var colourCode = Model.Config.SucceededColorCode;
+
+                if (build.Status == BuildStatus.Failed)
+                {
+                    colourCode = Model.Config.FailedColorCode;
+                }
+                else if (build.Status == BuildStatus.Cancelled)
+                {
+                    colourCode = Model.Config.CancelledColorCode;
+                }
+
+                <rect id="@build.BuildId" height="@height" width="@Model.Config.BarWidth" y="@y" x="@x" stroke-width="0" fill="@colourCode"/>
+            }
         }
     </g>
     </svg>

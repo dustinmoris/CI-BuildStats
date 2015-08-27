@@ -4,6 +4,8 @@
     {
         Success,
         Failed,
-        Cancelled
+        Cancelled,
+        Queued,
+        Running
     }
 }
