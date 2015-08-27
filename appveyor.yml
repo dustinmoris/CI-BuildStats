@@ -14,4 +14,14 @@ before_build:
   - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
   - nuget restore
 build:
+  publish_wap: true
   verbosity: normal
+deploy:
+- provider: WebDeploy
+  server: https://ci-buildstats.scm.azurewebsites.net:443/msdeploy.axd?site=ci-buildstats
+  website: ci-buildstats
+  username: $ci-buildstats
+  password:
+    secure: dNuktJi2zyNFdPUvEKzOSvVb4ltb5PVMzdrFEh4IjfFr5keN3OHFkGj4WKM5/aG1y3VrWOEe3FUxWLPBgeTaBw==
+  remove_files: true
+  app_offline: false
