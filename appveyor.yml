@@ -1,6 +1,6 @@
 version: 1.0.0.{build}
 os:
-  Visual Studio 2015
+  - Visual Studio 2015
 configuration: Release
 platform: Any CPU
 assembly_info:
@@ -11,8 +11,8 @@ assembly_info:
   assembly_informational_version: '{version}'
 before_build:
   # Force MSBuild 14
-  set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
-  nuget restore
+  - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
+  - nuget restore
 build:
   publish_wap: true
   verbosity: normal
