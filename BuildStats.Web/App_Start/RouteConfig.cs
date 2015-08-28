@@ -11,8 +11,8 @@ namespace BuildStats.Web
 
             routes.MapRoute(
                 name: "AppVeyor_Chart",
-                url: "AppVeyor/Chart/{account}/{project}/{buildCount}",
-                defaults: new { controller = "AppVeyor", action = "Chart", buildCount = UrlParameter.Optional }
+                url: "AppVeyor/Chart/{account}/{project}",
+                defaults: new { controller = "AppVeyor", action = "Chart" }
             );
 
             routes.LowercaseUrls = true;

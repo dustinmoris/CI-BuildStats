@@ -9,9 +9,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildStats.Web", "BuildStat
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "About", "About", "{482C5242-29CA-4CE7-AB82-EDD1DC8350A7}"
 	ProjectSection(SolutionItems) = preProject
-		appveyor.yml = appveyor.yml
 		LICENSE = LICENSE
 		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{761C33B6-49F6-49DC-8085-7E5AB69C6E1C}"
+	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
 	EndProjectSection
 EndProject
 Global
