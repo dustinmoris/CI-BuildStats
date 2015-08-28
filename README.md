@@ -23,6 +23,8 @@ Use this snippet to add a badge to your README:
 ```
 The first URL in this snippet links to the SVG badge and the second URL links to the project's actual build history page in AppVeyor.
 
+You have to replace {account} and {project} with your personal values.
+
 ### Configuration
 
 #### Changing the number of builds
