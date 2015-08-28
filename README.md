@@ -1,6 +1,8 @@
 # CI-BuildStats
 A little SVG badge to display AppVeyor build statistics.
 
+[![Build status](https://ci.appveyor.com/api/projects/status/dchv355fwpsy85xb?svg=true)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats)
+
 [![Build history](http://ci-buildstats.azurewebsites.net/appveyor/chart/dustinmoris/ci-buildstats)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats/history)
 
 ## How to use it
