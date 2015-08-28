@@ -31,15 +31,15 @@ You have to replace {account} and {project} with your personal values.
 
 #### Changing the number of builds
 
-You can specify the maximum build count by appending the build count to the URL (optional):
+You can specify the maximum build count by appending the buildCount parameter to the URL (optional):
 ```
-https://ci-buildstats.azurewebsites.net/appveyor/chart/{account}/{project}/{buildCount}
+https://ci-buildstats.azurewebsites.net/appveyor/chart/{account}/{project}?buildCount={number}
 ```
 
 ##### Example
 Showing 15 builds in the badge:
 
-[![Build history](http://ci-buildstats.azurewebsites.net/appveyor/chart/dustinmoris/dustedcodes/15)](https://ci.appveyor.com/project/dustinmoris/dustedcodes/history)
+[![Build history](http://ci-buildstats.azurewebsites.net/appveyor/chart/dustinmoris/dustedcodes?buildCount=15)](https://ci.appveyor.com/project/dustinmoris/dustedcodes/history)
 
 #### Hiding the text
 
