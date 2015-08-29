@@ -6,6 +6,7 @@
         Failed,
         Cancelled,
         Queued,
-        Running
+        Running,
+        Unkown
     }
 }

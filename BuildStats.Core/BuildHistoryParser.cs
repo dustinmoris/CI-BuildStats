@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
@@ -40,7 +39,7 @@ namespace BuildStats.Core
                 case "cancelled": return BuildStatus.Cancelled;
                 case "queued": return BuildStatus.Queued;
                 case "running": return BuildStatus.Running;
-                default: throw new NotSupportedException($"Build status {status} is not supported.");
+                default:return BuildStatus.Unkown;
             }
         }
     }
