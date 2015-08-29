@@ -45,16 +45,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AppVeyorApiClient.cs" />
-    <Compile Include="AppVeyorUrlHelper.cs" />
+    <Compile Include="AppVeyorFactory.cs" />
+    <Compile Include="BuildHistoryApiClient.cs" />
     <Compile Include="Build.cs" />
-    <Compile Include="BuildHistoryParser.cs" />
+    <Compile Include="AppVeyorBuildHistoryParser.cs" />
     <Compile Include="BuildStatistics.cs" />
     <Compile Include="BuildStatus.cs" />
-    <Compile Include="IAppVeyorApiClient.cs" />
-    <Compile Include="IAppVeyorUrlHelper.cs" />
+    <Compile Include="IBuildHistoryApiClient.cs" />
     <Compile Include="IBuildHistoryParser.cs" />
     <Compile Include="IBuildStatistics.cs" />
+    <Compile Include="IBuildSystemFactory.cs" />
     <Compile Include="IRestfulApiClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RestfulApiClient.cs" />

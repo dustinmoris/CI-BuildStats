@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace BuildStats.Core
 {
-    public sealed class BuildHistoryParser : IBuildHistoryParser
+    public sealed class AppVeyorBuildHistoryParser : IBuildHistoryParser
     {
         public IList<Build> ParseJson(string jsonContent)
         {

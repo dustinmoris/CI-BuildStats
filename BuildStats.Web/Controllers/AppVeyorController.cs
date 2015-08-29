@@ -8,13 +8,13 @@ namespace BuildStats.Web.Controllers
 {
     public sealed class AppVeyorController : Controller
     {
-        private readonly IAppVeyorApiClient _appVeyorApiClient;
+        private readonly IBuildHistoryApiClient _buildHistoryApiClient;
         private readonly IBuildStatistics _buildStatistics;
         private readonly IChartConfig _chartConfig;
 
-        public AppVeyorController(IAppVeyorApiClient appVeyorApiClient, IBuildStatistics buildStatistics, IChartConfig chartConfig)
+        public AppVeyorController(IBuildHistoryApiClient buildHistoryApiClient, IBuildStatistics buildStatistics, IChartConfig chartConfig)
         {
-            _appVeyorApiClient = appVeyorApiClient;
+            _buildHistoryApiClient = buildHistoryApiClient;
             _buildStatistics = buildStatistics;
             _chartConfig = chartConfig;
         }
@@ -24,7 +24,7 @@ namespace BuildStats.Web.Controllers
             if (string.IsNullOrEmpty(account) || string.IsNullOrEmpty(project))
                 return new HttpNotFoundResult();
 
-            var builds = await _appVeyorApiClient.GetBuilds(account, project, buildCount ?? _chartConfig.DefaultBuildCount);
+            var builds = await _buildHistoryApiClient.GetBuilds(account, project, buildCount ?? _chartConfig.DefaultBuildCount);
             var longestBuildTime = _buildStatistics.GetLongestBuildTime(builds);
             var shortestBuildTime = _buildStatistics.GetShortestBuildTime(builds);
             var averageBuildTime = _buildStatistics.GetAverageBuildTime(builds);
