@@ -4,6 +4,6 @@ namespace BuildStats.Core
 {
     public interface IBuildHistoryParser
     {
-        IList<Build> ParseJson(string jsonContent);
+        IList<Build> Parse(string content);
     }
 }

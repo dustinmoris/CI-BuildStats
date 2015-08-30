@@ -2,21 +2,21 @@ using System.Web.Configuration;
 
 namespace BuildStats.Core
 {
-    public sealed class AppVeyorFactory : BuildSystemFactory
+    public sealed class TravisCIFactory : BuildSystemFactory
     {
         public override string CreateBuildHistoryApiUrlFormat()
         {
-            return WebConfigurationManager.AppSettings["AppVeyor_API_BuildHistory_URL_Format"];
+            return WebConfigurationManager.AppSettings["TravisCI_API_BuildHistory_URL_Format"];
         }
 
         public override IBuildHistoryParser CreateBuildHistoryParser()
         {
-            return new AppVeyorBuildHistoryParser(CreateSerializer());
+            return new TravisCIBuildHistoryParser(CreateSerializer());
         }
 
         public override IBuildHistoryClient CreateBuildHistoryClient()
         {
-            return new AppVeyorBuildHistoryClient(
+            return new TravisCIBuildHistoryClient(
                 CreateRestfulApiClient(),
                 CreateBuildHistoryParser(),
                 CreateBuildHistoryApiUrlFormat());

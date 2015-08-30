@@ -4,15 +4,15 @@ namespace BuildStats.Web.Config
     {
         int DefaultBuildCount { get; }
         int FontSize { get; }
-        int PaddingX { get; }
         int BarWidth { get; }
         int BarMaxHeight { get; }
         int BarGap { get; }
         string TimeSpanFormat { get; }
         string TextColorCode { get; }
         string TitleColorCode { get; }
-        string SucceededColorCode { get; }
+        string SuccessColorCode { get; }
         string FailedColorCode { get; }
+        string PendingColorCode { get; }
         string CancelledColorCode { get; }
     }
 }

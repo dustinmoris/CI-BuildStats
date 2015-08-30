@@ -1,0 +1,60 @@
+﻿@using BuildStats.Core
+@model BuildStats.Web.ViewModels.ChartViewModel
+@{
+    Layout = null;
+    var yMultiplier = 1;
+}
+<!--
+    This widget is provided by Dustin Moris Gorski (http://dusted.codes/).
+    All source code is open source and hosted on GitHub (https://github.com/dustinmoris/CI-BuildStats/).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" style="shape-rendering: geometricPrecision; image-rendering: optimizeQuality; fill-rule: evenodd; clip-rule: evenodd">
+    <g font-family="Helvetica,Arial,sans-serif" font-size="@Model.Config.FontSize" fill="@Model.Config.TextColorCode">
+
+        <text x="0" y="@(Model.Config.FontSize*yMultiplier++)" font-weight="bold" 
+              fill="@Model.Config.TitleColorCode">Build history (last @(Model.Builds.Count) builds)</text>
+
+        @if (Model.ShowStats)
+        {
+            @: <text x="0" y="@(Model.Config.FontSize*yMultiplier++ + Model.Config.BarGap)">Longest build time: @Model.LongestBuildTime.ToString(Model.Config.TimeSpanFormat)</text>
+            @: <text x="0" y="@(Model.Config.FontSize*yMultiplier++ + Model.Config.BarGap*2)">Shortest build time: @Model.ShortestBuildTime.ToString(Model.Config.TimeSpanFormat)</text>
+            @: <text x="0" y="@(Model.Config.FontSize*yMultiplier++ + Model.Config.BarGap*3)">Avergae build time: @Model.AverageBuildTime.ToString(Model.Config.TimeSpanFormat)</text>
+        }
+
+        @for (var i = 0; i < Model.Builds.Count; i++)
+        {
+            var build = Model.Builds[i];
+
+            if (build.Status == BuildStatus.Pending || build.Status == BuildStatus.Unknown)
+            {
+                continue;
+            }
+
+            var x = i*(Model.Config.BarWidth + Model.Config.BarGap);
+            var factor = build.TotalTime.TotalMilliseconds/Model.LongestBuildTime.TotalMilliseconds;
+            var height = factor*Model.Config.BarMaxHeight;
+            var colorCode = "#ffffff";
+
+            switch (build.Status)
+            {
+                case BuildStatus.Success:
+                    colorCode = Model.Config.SuccessColorCode;
+                    break;
+                case BuildStatus.Failed:
+                    colorCode = Model.Config.FailedColorCode;
+                    break;
+                case BuildStatus.Pending:
+                    colorCode = Model.Config.PendingColorCode;
+                    height = 7;
+                    break;
+                case BuildStatus.Cancelled:
+                    colorCode = Model.Config.CancelledColorCode;
+                    height = 7;
+                    break;
+            }
+
+            var y = Model.Config.BarMaxHeight + Model.Config.FontSize*yMultiplier - height + 10;
+            <rect id="@build.BuildId" height="@height" width="@Model.Config.BarWidth" y="@y" x="@x" stroke-width="0" fill="@colorCode"/>
+        }
+    </g>
+</svg>

@@ -5,8 +5,7 @@
         Success,
         Failed,
         Cancelled,
-        Queued,
-        Running,
-        Unkown
+        Pending,
+        Unknown
     }
 }

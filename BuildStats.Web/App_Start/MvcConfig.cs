@@ -2,7 +2,7 @@
 
 namespace BuildStats.Web
 {
-    public sealed class MvcConfig
+    public static class MvcConfig
     {
         public static void ApplyChanges()
         {

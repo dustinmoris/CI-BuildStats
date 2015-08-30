@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace BuildStats.Core
 {
-    public interface IBuildHistoryApiClient
+    public interface IBuildHistoryClient
     {
         Task<IList<Build>> GetBuilds(string account, string project, int buildCount);
     }

@@ -4,31 +4,24 @@ namespace BuildStats.Core
 {
     public sealed class Build
     {
-        public string BuildId { get; }
-        public string BuildNumber { get; }
-        public string Version { get; }
-        public DateTime? Started { get; }
-        public DateTime? Finished { get; }
+        public long BuildId { get; }
+        public long BuildNumber { get; }
         public TimeSpan TotalTime { get; }
-        public BuildStatus Status { get; set; }
+        public BuildStatus Status { get; }
 
         public Build(
-            string buildId, 
-            string buildNumber, 
-            string version, 
-            DateTime? started, 
-            DateTime? finished,
-            BuildStatus status)
+            long buildId,
+            long buildNumber,
+            BuildStatus status,
+            DateTime? started,
+            DateTime? finished)
         {
             BuildId = buildId;
             BuildNumber = buildNumber;
-            Version = version;
-            Started = started;
-            Finished = finished;
             Status = status;
 
-            TotalTime = Started != null && Finished != null
-                ? Finished.Value - Started.Value 
+            TotalTime = started != null && finished != null
+                ? finished.Value - started.Value 
                 : TimeSpan.Zero;
         }
     }
