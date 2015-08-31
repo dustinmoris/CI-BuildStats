@@ -25,7 +25,7 @@
         {
             var build = Model.Builds[i];
 
-            if (build.Status == BuildStatus.Pending || build.Status == BuildStatus.Unknown)
+            if (build.Status == BuildStatus.Unknown)
             {
                 continue;
             }
