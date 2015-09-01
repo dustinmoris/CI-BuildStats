@@ -44,6 +44,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Lanem, Version=1.3.5.34, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lanem.1.3.5.34\lib\net452\Lanem.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
       <Private>True</Private>
@@ -137,7 +141,9 @@
       <DependentUpon>Web.config</DependentUpon>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="App_Data\Logs\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BuildStats.Core\BuildStats.Core.csproj">
       <Project>{343396dd-5d19-49cb-8d78-195f190ff9bc}</Project>
