@@ -25,7 +25,8 @@ namespace BuildStats.Core
                         int.Parse(item.number.Value),
                         ConvertStatus(item.state.Value, item.result.Value),
                         item.started_at != null ? item.started_at.Value : null,
-                        item.finished_at != null ? item.finished_at.Value : null));
+                        item.finished_at != null ? item.finished_at.Value : null,
+                        item.branch.Value));
             }
 
             return builds;

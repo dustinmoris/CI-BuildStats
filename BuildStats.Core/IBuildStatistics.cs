@@ -5,8 +5,8 @@ namespace BuildStats.Core
 {
     public interface IBuildStatistics
     {
-        TimeSpan GetLongestBuildTime(IEnumerable<Build> builds);
-        TimeSpan GetShortestBuildTime(IEnumerable<Build> builds);
-        TimeSpan GetAverageBuildTime(IEnumerable<Build> builds);
+        TimeSpan GetLongestBuildTime(ICollection<Build> builds);
+        TimeSpan GetShortestBuildTime(ICollection<Build> builds);
+        TimeSpan GetAverageBuildTime(ICollection<Build> builds);
     }
 }

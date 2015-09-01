@@ -41,6 +41,15 @@ https://travis-ci.org/{account}/{project}/builds
 
 ### Configuration
 
+#### Filtering a specific branch
+
+By default the widget will draw a chart for builds from the "master" branch.
+
+You can select a different branch by appending the branch parameter to the URL (optional):
+```
+https://ci-buildstats.azurewebsites.net/{buildSystem}/chart/{account}/{project}?branch={branch}
+```
+
 #### Changing the number of builds
 
 You can specify the maximum build count by appending the buildCount parameter to the URL (optional):

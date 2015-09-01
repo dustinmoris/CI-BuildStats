@@ -24,7 +24,8 @@ namespace BuildStats.Core
                         item.buildNumber.Value,
                         ConvertStatus(item.status.Value),
                         item.started != null ? item.started.Value : null,
-                        item.finished != null ? item.finished.Value : null));
+                        item.finished != null ? item.finished.Value : null,
+                        item.branch.Value));
             }
 
             return builds;

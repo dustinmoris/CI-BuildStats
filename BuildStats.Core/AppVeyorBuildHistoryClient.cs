@@ -16,9 +16,9 @@ namespace BuildStats.Core
             _urlFormat = urlFormat;
         }
 
-        public async Task<IList<Build>> GetBuilds(string account, string project, int buildCount)
+        public async Task<IList<Build>> GetBuilds(string account, string project, string branch, int buildCount)
         {
-            var url = string.Format(_urlFormat, account, project, buildCount);
+            var url = string.Format(_urlFormat, account, project, branch, buildCount);
             var result = await _restfulApiClient.Get(url);
             return _parser.Parse(result);
         }
