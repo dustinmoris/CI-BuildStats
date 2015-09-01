@@ -18,7 +18,7 @@
         {
             @: <text x="0" y="@(Model.Config.FontSize*yMultiplier++ + Model.Config.BarGap)">Longest build time: @Model.LongestBuildTime.ToString(Model.Config.TimeSpanFormat)</text>
             @: <text x="0" y="@(Model.Config.FontSize*yMultiplier++ + Model.Config.BarGap*2)">Shortest build time: @Model.ShortestBuildTime.ToString(Model.Config.TimeSpanFormat)</text>
-            @: <text x="0" y="@(Model.Config.FontSize*yMultiplier++ + Model.Config.BarGap*3)">Avergae build time: @Model.AverageBuildTime.ToString(Model.Config.TimeSpanFormat)</text>
+            @: <text x="0" y="@(Model.Config.FontSize*yMultiplier++ + Model.Config.BarGap*3)">Average build time: @Model.AverageBuildTime.ToString(Model.Config.TimeSpanFormat)</text>
         }
 
         @for (var i = 0; i < Model.Builds.Count; i++)
