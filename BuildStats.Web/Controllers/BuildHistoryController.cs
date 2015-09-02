@@ -20,11 +20,15 @@ namespace BuildStats.Web.Controllers
         }
 
         public async Task<ActionResult> Chart(string account, string project, string branch = "master", int? buildCount = null, bool showStats = true)
-        {
+       {
             if (string.IsNullOrEmpty(account) || string.IsNullOrEmpty(project))
                 return new HttpNotFoundResult();
 
             var builds = await _buildHistoryClient.GetBuilds(account, project, branch, buildCount ?? _chartConfig.DefaultBuildCount);
+
+            if (builds == null)
+                return new HttpNotFoundResult();
+
             var longestBuildTime = _buildStatistics.GetLongestBuildTime(builds);
             var shortestBuildTime = _buildStatistics.GetShortestBuildTime(builds);
             var averageBuildTime = _buildStatistics.GetAverageBuildTime(builds);

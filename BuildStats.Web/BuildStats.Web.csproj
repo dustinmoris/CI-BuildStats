@@ -109,6 +109,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ErrorPages\BadRequest.html" />
+    <Content Include="ErrorPages\Forbidden.html" />
+    <Content Include="ErrorPages\InternalError.html" />
+    <Content Include="ErrorPages\NotFound.html" />
     <Content Include="Global.asax" />
     <Content Include="Web.config" />
   </ItemGroup>

@@ -43,6 +43,10 @@ namespace BuildStats.Core
                 var afterBuildNumber = builds.Count == 0 ? long.MaxValue : builds.Last().BuildNumber;
                 var url = string.Format(_urlFormat, account, project, afterBuildNumber);
                 var result = await _restfulApiClient.Get(url);
+
+                if (result == null)
+                    return null;
+
                 batch = _parser.Parse(result);
                 builds.AddRange(batch.Where(b => b.Branch == branch));
             } while (builds.Count < buildCount && batch.Count > 0 && --maxAttempts > 0);

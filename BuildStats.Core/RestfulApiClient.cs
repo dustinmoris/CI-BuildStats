@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -9,7 +10,12 @@ namespace BuildStats.Core
         {
             using (var httpClient = new HttpClient())
             {
-                return await httpClient.GetStringAsync(url);
+                var response = await httpClient.GetAsync(url);
+
+                if (response.StatusCode != HttpStatusCode.OK)
+                    return null;
+
+                return await response.Content.ReadAsStringAsync();
             }
         }
     }

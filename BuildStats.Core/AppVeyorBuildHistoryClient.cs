@@ -20,7 +20,7 @@ namespace BuildStats.Core
         {
             var url = string.Format(_urlFormat, account, project, branch, buildCount);
             var result = await _restfulApiClient.Get(url);
-            return _parser.Parse(result);
+            return result != null ? _parser.Parse(result) : null;
         }
     }
 }
