@@ -9,7 +9,7 @@ A little SVG badge to display an AppVeyor or TravisCI build history chart.
 
 The URL to the SVG badge is:
 ```
-https://ci-buildstats.azurewebsites.net/{buildSystem}/chart/{account}/{project}
+https://ci-buildstats.azurewebsites.net/{buildSystem}/chart/{account}/{project}[?buildCount={buildCount}&branch={branch}&includeBuildsFromPullRequest={includeBuildsFromPullRequest}&showStats={true/false}]
 ```
 
 Replace {buildSystem} with one of the supported build systems:
@@ -41,11 +41,11 @@ https://travis-ci.org/{account}/{project}/builds
 
 ### Configuration
 
-#### Filtering a specific branch
+#### Filtering for a specific branch
 
-By default the widget will draw a chart for builds from the "master" branch.
+By default the widget will draw a chart for builds from all branches.
 
-You can select a different branch by appending the branch parameter to the URL (optional):
+You can select a specific branch by appending the branch parameter to the URL (optional):
 ```
 https://ci-buildstats.azurewebsites.net/{buildSystem}/chart/{account}/{project}?branch={branch}
 ```
@@ -55,6 +55,13 @@ https://ci-buildstats.azurewebsites.net/{buildSystem}/chart/{account}/{project}?
 You can specify the maximum build count by appending the buildCount parameter to the URL (optional):
 ```
 https://ci-buildstats.azurewebsites.net/{buildSystem}/chart/{account}/{project}?buildCount={number}
+```
+
+#### Excluding builds from a pull request
+
+Use the includeBuildsFromPullRequest parameter to include or exclude builds from a pull request:
+```
+https://ci-buildstats.azurewebsites.net/{buildSystem}/chart/{account}/{project}?includeBuildsFromPullRequest={true/false}
 ```
 
 ##### Example
