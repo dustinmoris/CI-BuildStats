@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BuildStats.Core
@@ -16,11 +17,17 @@ namespace BuildStats.Core
             _urlFormat = urlFormat;
         }
 
-        public async Task<IList<Build>> GetBuilds(string account, string project, string branch, int buildCount)
+        public async Task<IList<Build>> GetBuilds(string account, string project, string branch, int buildCount, bool includeBuildsFromPullRequest)
         {
             var url = string.Format(_urlFormat, account, project, branch, buildCount);
             var result = await _restfulApiClient.Get(url);
-            return result != null ? _parser.Parse(result) : null;
+
+            if (result == null)
+                return null;
+
+            var builds = _parser.Parse(result);
+
+            return !includeBuildsFromPullRequest ? builds.Where(b => !b.FromPullRequest).ToList() : builds;
         }
     }
 }

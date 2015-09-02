@@ -18,7 +18,7 @@ namespace BuildStats.Core
             _urlFormat = urlFormat;
         }
 
-        public async Task<IList<Build>> GetBuilds(string account, string project, string branch, int buildCount)
+        public async Task<IList<Build>> GetBuilds(string account, string project, string branch, int buildCount, bool includeBuildsFromPullRequest)
         {
             // The TravisCI Rest API does not offer a parameter to filter builds per branch
             // or to retrieve a certain amount of builds. Therefore it needs to be consumed 
@@ -48,7 +48,17 @@ namespace BuildStats.Core
                     return null;
 
                 batch = _parser.Parse(result);
-                builds.AddRange(batch.Where(b => b.Branch == branch));
+
+                foreach (var build in batch)
+                {
+                    if (!string.IsNullOrEmpty(branch) && build.Branch != branch)
+                        continue;
+                 
+                    if (!includeBuildsFromPullRequest && build.FromPullRequest)
+                        continue;
+                       
+                    builds.Add(build);
+                }
             } while (builds.Count < buildCount && batch.Count > 0 && --maxAttempts > 0);
 
             return builds.Count > buildCount ? builds.Take(buildCount).ToList() : builds;

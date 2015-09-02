@@ -19,12 +19,23 @@ namespace BuildStats.Web.Controllers
             _chartConfig = chartConfig;
         }
 
-        public async Task<ActionResult> Chart(string account, string project, string branch = "master", int? buildCount = null, bool showStats = true)
+        public async Task<ActionResult> Chart(
+            string account, 
+            string project, 
+            string branch = "master", 
+            int? buildCount = null, 
+            bool showStats = true,
+            bool includeBuildsFromPullRequest = true)
        {
             if (string.IsNullOrEmpty(account) || string.IsNullOrEmpty(project))
                 return new HttpNotFoundResult();
 
-            var builds = await _buildHistoryClient.GetBuilds(account, project, branch, buildCount ?? _chartConfig.DefaultBuildCount);
+            var builds = await _buildHistoryClient.GetBuilds(
+                account, 
+                project, 
+                branch, 
+                buildCount ?? _chartConfig.DefaultBuildCount, 
+                includeBuildsFromPullRequest);
 
             if (builds == null)
                 return new HttpNotFoundResult();
