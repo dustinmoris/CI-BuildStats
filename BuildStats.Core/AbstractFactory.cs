@@ -12,8 +12,6 @@ namespace BuildStats.Core
             return new RestfulApiClient();
         }
 
-        public abstract string CreateBuildHistoryApiUrlFormat();
-
         public abstract IBuildHistoryParser CreateBuildHistoryParser();
 
         public abstract IBuildHistoryClient CreateBuildHistoryClient();

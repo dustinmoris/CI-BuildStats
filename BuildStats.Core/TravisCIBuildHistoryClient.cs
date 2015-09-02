@@ -9,16 +9,19 @@ namespace BuildStats.Core
     {
         private readonly IRestfulApiClient _restfulApiClient;
         private readonly IBuildHistoryParser _parser;
-        private readonly string _urlFormat;
 
-        public TravisCIBuildHistoryClient(IRestfulApiClient restfulApiClient, IBuildHistoryParser parser, string urlFormat)
+        public TravisCIBuildHistoryClient(IRestfulApiClient restfulApiClient, IBuildHistoryParser parser)
         {
             _restfulApiClient = restfulApiClient;
             _parser = parser;
-            _urlFormat = urlFormat;
         }
 
-        public async Task<IList<Build>> GetBuilds(string account, string project, string branch, int buildCount, bool includeBuildsFromPullRequest)
+        public async Task<IList<Build>> GetBuilds(
+            string account,
+            string project,
+            int buildCount,
+            string branch = null,
+            bool includeBuildsFromPullRequest = true)
         {
             // The TravisCI Rest API does not offer a parameter to filter builds per branch
             // or to retrieve a certain amount of builds. Therefore it needs to be consumed 
@@ -41,7 +44,7 @@ namespace BuildStats.Core
             do
             {
                 var afterBuildNumber = builds.Count == 0 ? long.MaxValue : builds.Last().BuildNumber;
-                var url = string.Format(_urlFormat, account, project, afterBuildNumber);
+                var url = $"https://api.travis-ci.org/repos/{account}/{project}/builds?after_number={afterBuildNumber}";
                 var result = await _restfulApiClient.Get(url);
 
                 if (result == null)

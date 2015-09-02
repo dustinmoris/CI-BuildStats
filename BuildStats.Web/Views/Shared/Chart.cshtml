@@ -3,6 +3,12 @@
 @{
     Layout = null;
     var yMultiplier = 1;
+
+    var branchText = "for all branches";
+    if (!string.IsNullOrEmpty(Model.Branch))
+    {
+        branchText = string.Format("for {0}", Model.Branch);
+    }
 }
 <!--
     This widget is provided by Dustin Moris Gorski (http://dusted.codes/).
@@ -10,9 +16,9 @@
 -->
 <svg xmlns="http://www.w3.org/2000/svg" style="shape-rendering: geometricPrecision; image-rendering: optimizeQuality; fill-rule: evenodd; clip-rule: evenodd">
     <g font-family="Helvetica,Arial,sans-serif" font-size="@Model.Config.FontSize" fill="@Model.Config.TextColorCode">
-
+        
         <text x="0" y="@(Model.Config.FontSize*yMultiplier++)" font-weight="bold" 
-              fill="@Model.Config.TitleColorCode">Build history (last @(Model.Builds.Count) builds)</text>
+              fill="@Model.Config.TitleColorCode">Build history @branchText (last @(Model.Builds.Count) builds)</text>
 
         @if (Model.ShowStats)
         {

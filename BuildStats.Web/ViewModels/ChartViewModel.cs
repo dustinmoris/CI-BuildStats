@@ -29,5 +29,6 @@ namespace BuildStats.Web.ViewModels
         public TimeSpan ShortestBuildTime { get; }
         public TimeSpan AverageBuildTime { get; }
         public bool ShowStats { get; }
+        public string Branch { get; set; }
     }
 }

@@ -20,10 +20,10 @@ namespace BuildStats.Web.Controllers
         }
 
         public async Task<ActionResult> Chart(
-            string account, 
-            string project, 
-            string branch = "master", 
-            int? buildCount = null, 
+            string account,
+            string project,
+            string branch = null,
+            int? buildCount = null,
             bool showStats = true,
             bool includeBuildsFromPullRequest = true)
        {
@@ -32,9 +32,9 @@ namespace BuildStats.Web.Controllers
 
             var builds = await _buildHistoryClient.GetBuilds(
                 account, 
-                project, 
-                branch, 
-                buildCount ?? _chartConfig.DefaultBuildCount, 
+                project,
+                buildCount ?? _chartConfig.DefaultBuildCount,
+                branch,
                 includeBuildsFromPullRequest);
 
             if (builds == null)
@@ -43,7 +43,16 @@ namespace BuildStats.Web.Controllers
             var longestBuildTime = _buildStatistics.GetLongestBuildTime(builds);
             var shortestBuildTime = _buildStatistics.GetShortestBuildTime(builds);
             var averageBuildTime = _buildStatistics.GetAverageBuildTime(builds);
-            var viewModel = new ChartViewModel(_chartConfig, builds, longestBuildTime, shortestBuildTime, averageBuildTime, showStats);
+            var viewModel = new ChartViewModel(
+                _chartConfig, 
+                builds, 
+                longestBuildTime, 
+                shortestBuildTime, 
+                averageBuildTime, 
+                showStats)
+            {
+                Branch = branch
+            };
 
             Response.ContentType = "image/svg+xml";
             return View(viewModel);

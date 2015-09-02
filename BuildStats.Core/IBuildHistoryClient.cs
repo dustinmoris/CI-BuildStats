@@ -5,6 +5,11 @@ namespace BuildStats.Core
 {
     public interface IBuildHistoryClient
     {
-        Task<IList<Build>> GetBuilds(string account, string project, string branch, int buildCount, bool includeBuildsFromPullRequest);
+        Task<IList<Build>> GetBuilds(
+            string account, 
+            string project, 
+            int buildCount, 
+            string branch = null, 
+            bool includeBuildsFromPullRequest = true);
     }
 }
