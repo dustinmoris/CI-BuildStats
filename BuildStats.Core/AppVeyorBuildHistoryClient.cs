@@ -22,20 +22,32 @@ namespace BuildStats.Core
             string branch = null,
             bool includeBuildsFromPullRequest = true)
         {
-            var urlFormat = "https://ci.appveyor.com/api/projects/{0}/{1}/history?recordsNumber={2}";
+            var url = $"https://ci.appveyor.com/api/projects/{account}/{project}/history?recordsNumber={buildCount}";
 
             if (!string.IsNullOrEmpty(branch))
-                urlFormat = $"{urlFormat}&branch={branch}";
+                url = $"{url}&branch={branch}";
 
-            var url = string.Format(urlFormat, account, project, buildCount);
-            var result = await _restfulApiClient.Get(url);
+            var builds = new List<Build>();
+            IList<Build> batch;
+            var attempts = 5;
 
-            if (result == null)
-                return null;
+            do
+            {
+                var result = await _restfulApiClient.Get(url);
 
-            var builds = _parser.Parse(result);
+                if (result == null)
+                    break;
 
-            return !includeBuildsFromPullRequest ? builds.Where(b => !b.FromPullRequest).ToList() : builds;
+                batch = _parser.Parse(result);
+                builds.AddRange(batch.Where(build => includeBuildsFromPullRequest || !build.FromPullRequest));
+                url = $"{url}&startBuildId={batch[batch.Count - 1].BuildId}";
+
+            } while (
+                builds.Count < buildCount 
+                && batch.Count > 0
+                && --attempts > 0);
+
+            return builds.Count > buildCount ? builds.Take(buildCount).ToList() : builds;
         }
     }
 }

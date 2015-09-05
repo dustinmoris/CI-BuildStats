@@ -23,46 +23,32 @@ namespace BuildStats.Core
             string branch = null,
             bool includeBuildsFromPullRequest = true)
         {
-            // The TravisCI Rest API does not offer a parameter to filter builds per branch
-            // or to retrieve a certain amount of builds. Therefore it needs to be consumed 
-            // iteratively until the desired amount of builds has been retrieved.
+            const double fixedAmountOfBuildsPerRequestForTravisCi = 25;
+            const double factor = 5;
+            var attempts = Math.Ceiling((buildCount / fixedAmountOfBuildsPerRequestForTravisCi) * factor);
+
+            var url = $"https://api.travis-ci.org/repos/{account}/{project}/builds";
 
             var builds = new List<Build>();
             IList<Build> batch;
 
-            // Scenario:
-            // A project has a large amount of builds across all branches (1000+).
-            // Then the user specifies buildCount to be 25 and a branch which has less
-            // than 25 builds (e.g. new branch).
-            // Now the below logic will loop through all builds until it realises that
-            // it cannot fill up the builds list with 25 builds of the specified branch.
-            // maxAttempts is a hard limit on web requests to try and fill up the list.
-            const double buildsPerRequest = 25;
-            const double factor = 5;
-            var maxAttempts = Math.Ceiling((buildCount / buildsPerRequest) * factor);
-
             do
             {
-                var afterBuildNumber = builds.Count == 0 ? long.MaxValue : builds.Last().BuildNumber;
-                var url = $"https://api.travis-ci.org/repos/{account}/{project}/builds?after_number={afterBuildNumber}";
                 var result = await _restfulApiClient.Get(url);
 
                 if (result == null)
-                    return null;
+                    break;
 
                 batch = _parser.Parse(result);
+                builds.AddRange(batch
+                    .Where(build => string.IsNullOrEmpty(branch) || build.Branch == branch)
+                    .Where(build => includeBuildsFromPullRequest || !build.FromPullRequest));
+                url = $"{url}?after_number={batch[batch.Count -1].BuildNumber}";
 
-                foreach (var build in batch)
-                {
-                    if (!string.IsNullOrEmpty(branch) && build.Branch != branch)
-                        continue;
-                 
-                    if (!includeBuildsFromPullRequest && build.FromPullRequest)
-                        continue;
-                       
-                    builds.Add(build);
-                }
-            } while (builds.Count < buildCount && batch.Count > 0 && --maxAttempts > 0);
+            } while (
+                builds.Count < buildCount 
+                && batch.Count > 0 
+                && --attempts > 0);
 
             return builds.Count > buildCount ? builds.Take(buildCount).ToList() : builds;
         }

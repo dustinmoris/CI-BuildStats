@@ -37,9 +37,6 @@ namespace BuildStats.Web.Controllers
                 branch,
                 includeBuildsFromPullRequest);
 
-            if (builds == null)
-                return new HttpNotFoundResult();
-
             var longestBuildTime = _buildStatistics.GetLongestBuildTime(builds);
             var shortestBuildTime = _buildStatistics.GetShortestBuildTime(builds);
             var averageBuildTime = _buildStatistics.GetAverageBuildTime(builds);
