@@ -29,7 +29,7 @@
 
         @for (var i = 0; i < Model.Builds.Count; i++)
         {
-            var build = Model.Builds[i];
+            var build = Model.Builds[Model.Builds.Count - 1 - i];
 
             if (build.Status == BuildStatus.Unknown)
             {
