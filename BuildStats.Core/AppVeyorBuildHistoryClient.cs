@@ -28,7 +28,6 @@ namespace BuildStats.Core
                 url = $"{url}&branch={branch}";
 
             var builds = new List<Build>();
-            IList<Build> batch;
             var attempts = 5;
 
             do
@@ -38,13 +37,16 @@ namespace BuildStats.Core
                 if (result == null)
                     break;
 
-                batch = _parser.Parse(result);
+                var batch = _parser.Parse(result);
+
+                if (batch == null || batch.Count == 0)
+                    break;
+
                 builds.AddRange(batch.Where(build => includeBuildsFromPullRequest || !build.FromPullRequest));
                 url = $"{url}&startBuildId={batch[batch.Count - 1].BuildId}";
 
             } while (
-                builds.Count < buildCount 
-                && batch.Count > 0
+                builds.Count < buildCount
                 && --attempts > 0);
 
             return builds.Count > buildCount ? builds.Take(buildCount).ToList() : builds;
