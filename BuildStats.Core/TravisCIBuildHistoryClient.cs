@@ -30,7 +30,6 @@ namespace BuildStats.Core
             var url = $"https://api.travis-ci.org/repos/{account}/{project}/builds";
 
             var builds = new List<Build>();
-            IList<Build> batch;
 
             do
             {
@@ -39,7 +38,11 @@ namespace BuildStats.Core
                 if (result == null)
                     break;
 
-                batch = _parser.Parse(result);
+                var batch = _parser.Parse(result);
+
+                if (batch == null || batch.Count == 0)
+                    break;
+
                 builds.AddRange(batch
                     .Where(build => string.IsNullOrEmpty(branch) || build.Branch == branch)
                     .Where(build => includeBuildsFromPullRequest || !build.FromPullRequest));
@@ -47,7 +50,6 @@ namespace BuildStats.Core
 
             } while (
                 builds.Count < buildCount 
-                && batch.Count > 0 
                 && --attempts > 0);
 
             return builds.Count > buildCount ? builds.Take(buildCount).ToList() : builds;
