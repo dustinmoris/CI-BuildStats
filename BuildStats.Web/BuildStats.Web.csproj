@@ -127,6 +127,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\AppVeyorController.cs" />
     <Compile Include="Controllers\BuildHistoryController.cs" />
+    <Compile Include="Controllers\CircleCIController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\TravisCIController.cs" />
     <Compile Include="Global.asax.cs">

@@ -44,6 +44,9 @@
     <Compile Include="BuildSystemFactory.cs" />
     <Compile Include="AppVeyor\AppVeyorBuildHistoryClient.cs" />
     <Compile Include="AppVeyor\AppVeyorFactory.cs" />
+    <Compile Include="CircleCI\CircleCIBuildHistoryClient.cs" />
+    <Compile Include="CircleCI\CircleCIBuildHistoryParser.cs" />
+    <Compile Include="CircleCI\CircleCIFactory.cs" />
     <Compile Include="ISerializer.cs" />
     <Compile Include="JsonSerializer.cs" />
     <Compile Include="TravisCI\TravisCIBuildHistoryClient.cs" />
