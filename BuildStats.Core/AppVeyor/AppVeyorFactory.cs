@@ -1,4 +1,4 @@
-namespace BuildStats.Core
+namespace BuildStats.Core.AppVeyor
 {
     public sealed class AppVeyorFactory : BuildSystemFactory
     {

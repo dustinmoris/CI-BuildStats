@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BuildStats.Core
+namespace BuildStats.Core.AppVeyor
 {
     public sealed class AppVeyorBuildHistoryClient : IBuildHistoryClient
     {

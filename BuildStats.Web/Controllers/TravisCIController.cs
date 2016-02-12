@@ -1,4 +1,5 @@
 using BuildStats.Core;
+using BuildStats.Core.TravisCI;
 using BuildStats.Web.Config;
 
 namespace BuildStats.Web.Controllers
