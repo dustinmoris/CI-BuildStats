@@ -44,7 +44,6 @@
     <Compile Include="BuildSystemFactory.cs" />
     <Compile Include="AppVeyor\AppVeyorBuildHistoryClient.cs" />
     <Compile Include="AppVeyor\AppVeyorFactory.cs" />
-    <Compile Include="BuildSystem.cs" />
     <Compile Include="ISerializer.cs" />
     <Compile Include="JsonSerializer.cs" />
     <Compile Include="TravisCI\TravisCIBuildHistoryClient.cs" />
