@@ -37,11 +37,11 @@ The complete markdown for the above chart is as following:
 [![Build history](http://buildstats.info/appveyor/chart/dustinmoris/ci-buildstats)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats/history)
 ```
 
-### Configuration
+## Configuration
 
 #### Filtering for a specific branch
 
-By default the widget will render a chart for builds across all branches.
+By default the widget will render a chart for builds from all branches.
 
 You can select a specific branch by appending the `branch` parameter to the URL (optional):
 
@@ -69,7 +69,7 @@ http://buildstats.info/{buildSystem}/chart/{account}/{project}?includeBuildsFrom
 
 You can hide the build stats by appending the `showstats` parameter to the URL (optional):
 ```
-http://buildstats.info/{buildSystem}/chart/{account}/{project}?showstats=false
+http://buildstats.info/{buildSystem}/chart/{account}/{project}?showstats={true/false}
 ```
 
 #### Full URL
@@ -79,6 +79,18 @@ The full URL to the SVG widget is:
 ```
 http://buildstats.info/{buildSystem}/chart/{account}/{project}[?buildCount={buildCount}&branch={branch}&includeBuildsFromPullRequest={includeBuildsFromPullRequest}&showStats={true/false}]
 ```
+
+## Examples
+
+The SVG widget for [Buildstats.info](http://buildstats.info)
+
+-   which is build with AppVeyor
+-   for the last 40 builds
+-   and only from the master branch
+
+is as following:
+
+[![Build history](http://buildstats.info/appveyor/chart/dustinmoris/ci-buildstats?branch=master&buildCount=40)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats/history?branch=master)
 
 ## Contribution
 
