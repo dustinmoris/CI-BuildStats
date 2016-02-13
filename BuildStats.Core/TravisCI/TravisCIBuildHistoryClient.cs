@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BuildStats.Core
+namespace BuildStats.Core.TravisCI
 {
     public sealed class TravisCIBuildHistoryClient : IBuildHistoryClient
     {

@@ -1,0 +1,85 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Buildstats.info - Tests</title>
+    <style>
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+        }
+
+        main {
+            margin: 0 auto;
+            max-width: 480px;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Buildstats.info - Tests</h1>
+
+        @* --------- AppVeyor --------- *@
+
+        <h2>AppVeyor</h2>
+
+        <h3>Default</h3>
+        <img src="~/appveyor/chart/dustinmoris/ci-buildstats" />
+
+        <h3>Specific Branch</h3>
+        <img src="~/appveyor/chart/dustinmoris/ci-buildstats?branch=develop" />
+
+        <h3>Specific number of builds</h3>
+        <img src="~/appveyor/chart/dustinmoris/ci-buildstats?buildCount=40" />
+
+        <h3>Excluding pull requests</h3>
+        <img src="~/appveyor/chart/dustinmoris/ci-buildstats?includeBuildsFromPullRequest=false" />
+
+        <h3>Hide stats</h3>
+        <img src="~/appveyor/chart/dustinmoris/ci-buildstats?showStats=false"/>
+
+        @* --------- TravisCI --------- *@
+
+        <h2>TravisCI</h2>
+
+        <h3>Default</h3>
+        <img src="~/travisci/chart/twbs/bootstrap" />
+
+        <h3>Specific Branch</h3>
+        <img src="~/travisci/chart/twbs/bootstrap?branch=v4-dev" />
+
+        <h3>Specific number of builds</h3>
+        <img src="~/travisci/chart/twbs/bootstrap?buildCount=40" />
+
+        <h3>Excluding pull requests</h3>
+        <img src="~/travisci/chart/twbs/bootstrap?includeBuildsFromPullRequest=false" />
+
+        <h3>Hide stats</h3>
+        <img src="~/travisci/chart/twbs/bootstrap?showStats=false"/>
+
+        @* --------- CircleCI --------- *@
+
+        <h2>CircleCI</h2>
+
+        <h3>Default</h3>
+        <img src="~/circleci/chart/spotify/helios" />
+
+        <h3>Specific Branch</h3>
+        <img src="~/circleci/chart/spotify/helios?branch=apache-httpclient" />
+
+        <h3>Specific number of builds</h3>
+        <img src="~/circleci/chart/spotify/helios?buildCount=40" />
+
+        <h3>Excluding pull requests</h3>
+        <img src="~/circleci/chart/spotify/helios?includeBuildsFromPullRequest=false" />
+
+        <h3>Hide stats</h3>
+        <img src="~/circleci/chart/spotify/helios?showStats=false" />
+    </main>
+</body>
+</html>
