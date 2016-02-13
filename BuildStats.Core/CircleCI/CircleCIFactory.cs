@@ -1,15 +1,15 @@
-namespace BuildStats.Core
+namespace BuildStats.Core.CircleCI
 {
-    public sealed class AppVeyorFactory : BuildSystemFactory
+    public sealed class CircleCIFactory : BuildSystemFactory
     {
         public override IBuildHistoryParser CreateBuildHistoryParser()
         {
-            return new AppVeyorBuildHistoryParser(CreateSerializer());
+            return new CircleCIBuildHistoryParser(CreateSerializer());
         }
 
         public override IBuildHistoryClient CreateBuildHistoryClient()
         {
-            return new AppVeyorBuildHistoryClient(
+            return new CircleCIBuildHistoryClient(
                 CreateRestfulApiClient(),
                 CreateBuildHistoryParser());
         }

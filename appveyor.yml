@@ -1,8 +1,9 @@
-version: 3.0.4.{build}
+version: 3.1.0.{build}
 os:
   - Visual Studio 2015
 configuration: Release
 platform: Any CPU
+skip_tags: true
 assembly_info:
   patch: true
   file: '**\AssemblyInfo.*'
@@ -10,7 +11,6 @@ assembly_info:
   assembly_file_version: '{version}'
   assembly_informational_version: '{version}'
 before_build:
-  # Force MSBuild 14
   - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
   - nuget restore
 build:
@@ -28,4 +28,3 @@ deploy:
   app_offline: false
   on:
     branch: master
-    appveyor_repo_tag: true

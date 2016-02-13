@@ -10,6 +10,8 @@ namespace BuildStats.Core
         {
             using (var httpClient = new HttpClient())
             {
+                httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+
                 var response = await httpClient.GetAsync(url);
 
                 if (response.StatusCode != HttpStatusCode.OK)

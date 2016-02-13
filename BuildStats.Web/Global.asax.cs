@@ -1,5 +1,6 @@
 ﻿using System.Web.Mvc;
 using System.Web.Routing;
+using BuildStats.Web.Config;
 
 namespace BuildStats.Web
 {
@@ -9,7 +10,8 @@ namespace BuildStats.Web
         {
             AreaRegistration.RegisterAllAreas();
             RouteConfig.RegisterRoutes(RouteTable.Routes);
-            MvcConfig.ApplyChanges();
+            MvcConfig.Setup();
+            DependencyConfig.Setup();
         }
     }
 }

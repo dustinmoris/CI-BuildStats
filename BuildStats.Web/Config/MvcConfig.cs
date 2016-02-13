@@ -1,10 +1,10 @@
 ﻿using System.Web.Mvc;
 
-namespace BuildStats.Web
+namespace BuildStats.Web.Config
 {
     public static class MvcConfig
     {
-        public static void ApplyChanges()
+        public static void Setup()
         {
             MvcHandler.DisableMvcResponseHeader = true;
         }
