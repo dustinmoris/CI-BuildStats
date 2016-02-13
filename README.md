@@ -9,7 +9,7 @@ A little SVG widget to display build history charts for public repositories.
 
 The SVG widget currently works for public repositories built with:
 
-<a href="https://www.appveyor.com/" title="AppVeyor"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/feature/Add_support_for_CircleCI/BuildStats.Web/Assets/appveyor.png" width="80px" height="80px" alt="AppVeyor" title="AppVeyor"/></a><a href="https://travis-ci.org/" title="TravisCI"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/feature/Add_support_for_CircleCI/BuildStats.Web/Assets/travisci.jpeg" width="80px" height="80px" alt="TravisCI" title="TravisCI"/></a><a href="https://circleci.com/" title="CircleCI"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/feature/Add_support_for_CircleCI/BuildStats.Web/Assets/circleci.png" width="80px" height="80px" alt="CircleCI" title="CircleCI"/></a>
+<a href="https://www.appveyor.com/" title="AppVeyor"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/BuildStats.Web/Assets/appveyor.png" width="80" height="80" style="margin-right: 10px;" alt="AppVeyor" title="AppVeyor"/></a><a href="https://travis-ci.org/" title="TravisCI"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/BuildStats.Web/Assets/travisci.jpeg" width="80" height="80" style="margin-right: 10px;" alt="TravisCI" title="TravisCI"/></a><a href="https://circleci.com/" title="CircleCI"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/BuildStats.Web/Assets/circleci.png" width="80" height="80" style="margin-right: 10px;" alt="CircleCI" title="CircleCI"/></a>
 
 ## How it works
 
