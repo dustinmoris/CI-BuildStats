@@ -109,6 +109,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\appveyor.png" />
+    <Content Include="Assets\circleci.png" />
+    <Content Include="Assets\travisci.jpeg" />
     <Content Include="ErrorPages\BadRequest.html" />
     <Content Include="ErrorPages\Forbidden.html" />
     <Content Include="ErrorPages\InternalError.html" />

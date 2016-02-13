@@ -9,9 +9,118 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CI BuildStats</title>
+    <title>BuildStats.info - SVG Widgets for AppVeyor, TravisCI and CircleCI builds</title>
+    <style>
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+        }
+
+        main {
+            margin: 0 auto;
+            max-width: 480px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 0;
+        }
+
+        h2 {
+            margin-top: .5em;
+            margin-bottom: 2em;
+            font-size: 1.1em;
+            color: #555;
+        }
+
+        h3:before {
+            content: '> ';
+        }
+
+        a {
+            color: #c30;
+        }
+
+        p {
+            color: #333;
+            line-height: 1.5em;
+        }
+
+        #support {
+            display: flex;
+            -ms-flex-flow: row nowrap;
+            -webkit-flex-flow: row nowrap;
+            flex-flow: row nowrap;
+        }
+
+        #support > div {
+            text-align: center;
+        }
+
+        #support > div > a {
+            font-size: 1.3em;
+            text-decoration: none;
+        }
+
+        #support > div > a > img {
+            margin-top: .5em;
+            width: 100px;
+            height: 100px;
+        }
+
+        #footer {
+            margin: 3em 0;
+            color: #666;
+            font-size: .9em;
+        }
+    </style>
 </head>
 <body>
-    <p>Please visit the <a href="https://github.com/dustinmoris/CI-BuildStats">official documentation</a> for further information on how to use this project.</p>
+    <main>
+        <hgroup>
+            <h1>Buildstats.info</h1>
+            <h2>SVG Widgets for AppVeyor, TravisCI and CircleCI builds</h2>
+        </hgroup>
+
+        <h3>Build history widget</h3>
+        <p>Add a build history widget to your public GitHub repository:</p>
+        <img src="http://buildstats.info/appveyor/chart/dustinmoris/ci-buildstats"
+             alt="Build history chart for the public buildstats.info GitHub repository"
+             title="Build history chart for the public buildstats.info GitHub repository" />
+
+        <h3>Support</h3>
+        <p>Buildstats.info displays build history charts for public repositories which are built with:</p>
+
+        <div id="support">
+            <div>
+                <a href="https://www.appveyor.com/">
+                    AppVeyor
+                    <img src="~/Assets/appveyor.png" />
+                </a>
+            </div>
+            <div>
+                <a href="https://travis-ci.org/">
+                    TravisCI
+                    <img src="~/Assets/travisci.jpeg" />
+                </a>
+            </div>
+            <div>
+                <a href="https://circleci.com/">
+                    CircleCI
+                    <img src="~/Assets/circleci.png" />
+                </a>
+            </div>
+        </div>
+
+        <p>A build history chart can be added as easily as adding a public image to your GitHub repository.</p>
+
+        <h3>Configuration</h3>
+        <p>You can easily configure the number of builds to be displayed, which branch to include and much more.</p>
+
+        <p>For more information please visit the <a href="https://github.com/dustinmoris/CI-BuildStats">official GitHub repository</a>.
+        </p>
+
+        <p id="footer">This project is provided by <a href="http://dusted.codes">dusted.codes</a>.</p>
+    </main>
+
 </body>
 </html>
