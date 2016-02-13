@@ -1,7 +1,7 @@
 ﻿using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace BuildStats.Web
+namespace BuildStats.Web.Config
 {
     public static class RouteConfig
     {
