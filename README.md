@@ -1,88 +1,85 @@
-# CI-BuildStats
-A little SVG badge to display an AppVeyor or TravisCI build history chart.
+# Buildstats.info
+A little SVG widget to display build history charts for public repositories.
 
 [![Build status](https://ci.appveyor.com/api/projects/status/dchv355fwpsy85xb?svg=true)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats)
 
 [![Build history](http://buildstats.info/appveyor/chart/dustinmoris/ci-buildstats)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats/history)
 
-## How to use it
+## Support
 
-The URL to the SVG badge is:
-```
-http://buildstats.info/{buildSystem}/chart/{account}/{project}[?buildCount={buildCount}&branch={branch}&includeBuildsFromPullRequest={includeBuildsFromPullRequest}&showStats={true/false}]
-```
+The SVG widget currently works for public repositories built with:
 
-Replace {buildSystem} with one of the supported build systems:
-- appveyor
-- travisci
+[![AppVeyor]()](https://www.appveyor.com/)
+[![TravisCI]()](https://travis-ci.org/)
+[![CircleCI]()](https://circleci.com/)
 
-Replace {account} and {project} with your personal values.
+## How it works
 
-For example http://buildstats.info/appveyor/chart/dustinmoris/ci-buildstats will display the build history chart for this project.
-
-### Adding the SVG badge to your GitHub README file
-
-Use this snippet to add a badge to your README:
+The base URL to the SVG widget is:
 
 ```
-[![Build history](http://buildstats.info/{buildSystem}/chart/{account}/{project})]({urlToYourBuildHistory})
-```
-The first URL in this snippet links to the SVG badge and {urlToYourBuildHistory} links to the project's actual build history page.
-
-For AppVeyor builds it is in the format of
-```
-https://ci.appveyor.com/project/{account}/{project}/history
+http://buildstats.info/{buildSystem}/chart/{account}/{project}
 ```
 
-For TravisCI builds it is in the format of
+Replace `{buildSystem}` with one of the supported build systems:
+
+-   appveyor
+-   travisci
+-   circleci
+
+Replace `{account}` and `{project}` with your personal values.
+
+For example `http://buildstats.info/appveyor/chart/dustinmoris/ci-buildstats` displays the build history chart for this particular project.
+
+The complete markdown for the above chart is as following:
+
 ```
-https://travis-ci.org/{account}/{project}/builds
+[![Build history](http://buildstats.info/appveyor/chart/dustinmoris/ci-buildstats)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats/history)
 ```
 
 ### Configuration
 
 #### Filtering for a specific branch
 
-By default the widget will draw a chart for builds from all branches.
+By default the widget will render a chart for builds across all branches.
 
-You can select a specific branch by appending the branch parameter to the URL (optional):
+You can select a specific branch by appending the `branch` parameter to the URL (optional):
+
 ```
 http://buildstats.info/{buildSystem}/chart/{account}/{project}?branch={branch}
 ```
 
 #### Changing the number of builds
 
-You can specify the maximum build count by appending the buildCount parameter to the URL (optional):
+You can specify the maximum build count by appending the `buildCount` parameter to the URL (optional):
+
 ```
 http://buildstats.info/{buildSystem}/chart/{account}/{project}?buildCount={number}
 ```
 
 #### Excluding builds from a pull request
 
-Use the includeBuildsFromPullRequest parameter to include or exclude builds from a pull request:
+Use the `includeBuildsFromPullRequest` parameter to include or exclude builds from a pull request (optional):
+
 ```
 http://buildstats.info/{buildSystem}/chart/{account}/{project}?includeBuildsFromPullRequest={true/false}
 ```
 
-##### Example
-Showing 15 builds in the badge:
-
-[![Build history](http://buildstats.info/appveyor/chart/dustinmoris/dustedcodes?buildCount=15)](https://ci.appveyor.com/project/dustinmoris/dustedcodes/history)
-
 #### Hiding the text
 
-You can hide the build stats by appending the showstats parameter to the URL (optional):
+You can hide the build stats by appending the `showstats` parameter to the URL (optional):
 ```
 http://buildstats.info/{buildSystem}/chart/{account}/{project}?showstats=false
 ```
 
-##### Example
-Hiding the build stats:
+#### Full URL
 
-[![Build history](http://buildstats.info/appveyor/chart/dustinmoris/dustedcodes?showstats=false)](https://ci.appveyor.com/project/dustinmoris/dustedcodes/history)
+The full URL to the SVG widget is:
 
-## Support
+```
+http://buildstats.info/{buildSystem}/chart/{account}/{project}[?buildCount={buildCount}&branch={branch}&includeBuildsFromPullRequest={includeBuildsFromPullRequest}&showStats={true/false}]
+```
 
-Currently this works for AppVeyor and TravisCI builds.
+## Contribution
 
-Feedback is much appreciated and pull requests get accepted.
+Feedback is welcome and pull requests get accepted.
