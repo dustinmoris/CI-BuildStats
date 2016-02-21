@@ -1,4 +1,4 @@
-# Buildstats.info
+# [Buildstats.info](http://buildstats.info)
 A little SVG widget to display build history charts for public repositories.
 
 [![Build status](https://ci.appveyor.com/api/projects/status/dchv355fwpsy85xb?svg=true)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats)

@@ -1,4 +1,4 @@
-version: 3.1.0.{build}
+version: 3.2.0.{build}
 os:
   - Visual Studio 2015
 configuration: Release
@@ -19,12 +19,13 @@ build:
 deploy:
   provider: WebDeploy
   skip_symbols: false
-  server: https://ci-buildstats.scm.azurewebsites.net:443/msdeploy.axd?site=ci-buildstats
-  website: ci-buildstats
-  username: $ci-buildstats
+  server: https://buildstats.scm.azurewebsites.net:443/msdeploy.axd?site=buildstats
+  website: buildstats
+  username: $buildstats
   password:
-    secure: dNuktJi2zyNFdPUvEKzOSvVb4ltb5PVMzdrFEh4IjfFr5keN3OHFkGj4WKM5/aG1y3VrWOEe3FUxWLPBgeTaBw==
+    secure: izO3e9FoIB/Rt8Cn72Ypc11tqSe1NnjHYwt70SXvCiuLdAayHKdZvi8GEHURZ0V+mHaknDYkSHK6RwHRibWKgQ==
   remove_files: true
   app_offline: false
+  skip_dirs: '\\App_Data\\Logs'
   on:
     branch: master
