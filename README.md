@@ -1,15 +1,15 @@
 # [Buildstats.info](http://buildstats.info)
 A little SVG widget to display build history charts for public repositories.
 
-[![Build status](https://ci.appveyor.com/api/projects/status/dchv355fwpsy85xb?svg=true)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats)
+[![Build status](https://ci.appveyor.com/api/projects/status/dchv355fwpsy85xb?svg=true)](https://ci.appveyor.com/project/dustinmoris/buildstats)
 
-[![Build history](http://buildstats.info/appveyor/chart/dustinmoris/ci-buildstats)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats/history)
+[![Build history](http://buildstats.info/appveyor/chart/dustinmoris/buildstats)](https://ci.appveyor.com/project/dustinmoris/buildstats/history)
 
 ## Support
 
 The SVG widget currently works for public repositories built with:
 
-<a href="https://www.appveyor.com/" title="AppVeyor"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/BuildStats.Web/Assets/appveyor.png" width="80" height="80" style="margin-right: 10px;" alt="AppVeyor" title="AppVeyor"/></a><a href="https://travis-ci.org/" title="TravisCI"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/BuildStats.Web/Assets/travisci.jpeg" width="80" height="80" style="margin-right: 10px;" alt="TravisCI" title="TravisCI"/></a><a href="https://circleci.com/" title="CircleCI"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/BuildStats.Web/Assets/circleci.png" width="80" height="80" style="margin-right: 10px;" alt="CircleCI" title="CircleCI"/></a>
+<a href="https://www.appveyor.com/" title="AppVeyor"><img src="https://raw.githubusercontent.com/dustinmoris/BuildStats/master/BuildStats.Web/Assets/appveyor.png" width="80" height="80" style="margin-right: 10px;" alt="AppVeyor" title="AppVeyor"/></a><a href="https://travis-ci.org/" title="TravisCI"><img src="https://raw.githubusercontent.com/dustinmoris/BuildStats/master/BuildStats.Web/Assets/travisci.jpeg" width="80" height="80" style="margin-right: 10px;" alt="TravisCI" title="TravisCI"/></a><a href="https://circleci.com/" title="CircleCI"><img src="https://raw.githubusercontent.com/dustinmoris/BuildStats/master/BuildStats.Web/Assets/circleci.png" width="80" height="80" style="margin-right: 10px;" alt="CircleCI" title="CircleCI"/></a>
 
 ## How it works
 
@@ -27,12 +27,12 @@ Replace `{buildSystem}` with one of the supported build systems:
 
 Replace `{account}` and `{project}` with your personal values.
 
-For example `http://buildstats.info/appveyor/chart/dustinmoris/ci-buildstats` displays the build history chart for this particular project.
+For example `http://buildstats.info/appveyor/chart/dustinmoris/buildstats` displays the build history chart for this particular project.
 
 The complete markdown for the above chart is as following:
 
 ```
-[![Build history](http://buildstats.info/appveyor/chart/dustinmoris/ci-buildstats)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats/history)
+[![Build history](http://buildstats.info/appveyor/chart/dustinmoris/buildstats)](https://ci.appveyor.com/project/dustinmoris/buildstats/history)
 ```
 
 ## Configuration
@@ -88,7 +88,7 @@ The SVG widget for [Buildstats.info](http://buildstats.info)
 
 is as following:
 
-[![Build history](http://buildstats.info/appveyor/chart/dustinmoris/ci-buildstats?branch=master&buildCount=40)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats/history?branch=master)
+[![Build history](http://buildstats.info/appveyor/chart/dustinmoris/buildstats?branch=master&buildCount=40)](https://ci.appveyor.com/project/dustinmoris/buildstats/history?branch=master)
 
 ## Contribution
 
