@@ -26,6 +26,6 @@ deploy:
     secure: izO3e9FoIB/Rt8Cn72Ypc11tqSe1NnjHYwt70SXvCiuLdAayHKdZvi8GEHURZ0V+mHaknDYkSHK6RwHRibWKgQ==
   remove_files: true
   app_offline: false
-  skip_dirs: '\\App_Data\\Logs'
+  skip_dirs: '\\App_Data'
   on:
     branch: master
