@@ -127,6 +127,7 @@
     <Compile Include="Controllers\BuildHistoryController.cs" />
     <Compile Include="Controllers\CircleCIController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\NuGetController.cs" />
     <Compile Include="Controllers\TravisCIController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -142,6 +143,7 @@
     <Content Include="Views\Shared\Chart.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Home\Tests.cshtml" />
+    <Content Include="Views\NuGet\Info.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

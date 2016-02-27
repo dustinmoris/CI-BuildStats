@@ -16,6 +16,12 @@ namespace BuildStats.Web.Config
             );
 
             routes.MapRoute(
+                name: "NuGet",
+                url: "nuget/{packageName}",
+                defaults: new { controller = "NuGet", action = "Info" }
+            );
+
+            routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}",
                 defaults: new { controller = "Home", action = "Index" }
