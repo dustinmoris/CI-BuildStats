@@ -9,12 +9,16 @@
     {
         branchText = $"for {Model.Branch}";
     }
+
+    var totalHeigt = Model.ShowStats
+        ? 20 + Model.Config.BarMaxHeight + (Model.Config.FontSize + Model.Config.BarGap)*4
+        : 30 + Model.Config.BarMaxHeight + Model.Config.FontSize + Model.Config.BarGap;
 }
 <!--
     This widget is provided by Dustin Moris Gorski (https://dusted.codes/).
     All source code is open source and hosted on GitHub (https://github.com/dustinmoris/CI-BuildStats/).
 -->
-<svg xmlns="http://www.w3.org/2000/svg" style="shape-rendering: geometricPrecision; image-rendering: optimizeQuality; fill-rule: evenodd; clip-rule: evenodd">
+<svg xmlns="http://www.w3.org/2000/svg" style="shape-rendering: geometricPrecision; image-rendering: optimizeQuality; fill-rule: evenodd; clip-rule: evenodd" height="@totalHeigt">
     <g font-family="Helvetica,Arial,sans-serif" font-size="@Model.Config.FontSize" fill="@Model.Config.TextColorCode">
         
         <text x="0" y="@(Model.Config.FontSize*yMultiplier++)" font-weight="bold" 
