@@ -7,7 +7,7 @@
     var branchText = "for all branches";
     if (!string.IsNullOrEmpty(Model.Branch))
     {
-        branchText = string.Format("for {0}", Model.Branch);
+        branchText = $"for {Model.Branch}";
     }
 }
 <!--
@@ -58,6 +58,8 @@
                     height = 7;
                     break;
             }
+
+            height = Math.Max(height, 3);
 
             var y = Model.Config.BarMaxHeight + Model.Config.FontSize*yMultiplier - height + 10;
             <rect id="@build.BuildId" height="@height" width="@Model.Config.BarWidth" y="@y" x="@x" stroke-width="0" fill="@colorCode"/>
