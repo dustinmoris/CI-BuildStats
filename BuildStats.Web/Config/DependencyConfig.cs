@@ -16,6 +16,7 @@ namespace BuildStats.Web.Config
             builder.RegisterType<JsonSerializer>().As<ISerializer>();
             builder.RegisterType<RestfulApiClient>().As<IRestfulApiClient>();
             builder.RegisterType<NuGetClient>().As<INuGetClient>();
+            builder.RegisterType<NuGetConfig>().As<INuGetConfig>();
 
             builder.RegisterControllers(typeof(MvcApplication).Assembly);
 

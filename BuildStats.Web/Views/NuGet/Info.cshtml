@@ -1,37 +1,43 @@
-﻿@model BuildStats.Core.NuGetPackageInfo
+﻿@model BuildStats.Web.ViewModels.NuGetViewModel
 @{
     Layout = null;
-    var x = 0;
-    var y = 0;
 
-    var badgeHeight = 20;
+    var package = Model.PackageInfo;
+    var config = Model.Config;
 
-    var downloads = Model.Downloads >= 1000000
-        ? $"{Math.Round((double) Model.Downloads/ 1000000, 2)}m"
+    const int x = 0;
+    const int y = 0;
+    const int titleWidth = 50;
+    const string titleText = "nuget";
+
+    var badgeHeight = config.BadgeHeight;
+    var cornerRadius = config.BadgeCornerRadius;
+
+    var downloads = package.Downloads >= 1000000
+        ? $"{Math.Round((double)package.Downloads/ 1000000, 2)}m"
         : (
-            Model.Downloads >= 1000
-                ? $"{Math.Round((double) Model.Downloads/1000, 1)}k"
-                : Model.Downloads.ToString());
+            package.Downloads >= 1000
+                ? $"{Math.Round((double)package.Downloads/1000, 1)}k"
+                : package.Downloads.ToString());
 
-    var nugetTextWidth = 50;
-    var versionWidth = Model.Version.Length * 7 + 15;
+    var versionWidth = package.Version.Length * 7 + 15;
     var downloadsWidth = downloads.Length * 7 + 28;
-    var totalWidth = nugetTextWidth + versionWidth + downloadsWidth;
+    var totalWidth = titleWidth + versionWidth + downloadsWidth;
 }
 <!--
     This widget is provided by Dustin Moris Gorski (https://dusted.codes/).
     All source code is open source and hosted on GitHub (https://github.com/dustinmoris/CI-BuildStats/).
 -->
 <svg xmlns="http://www.w3.org/2000/svg" style="shape-rendering: geometricPrecision; image-rendering: optimizeQuality; fill-rule: evenodd; clip-rule: evenodd" width="@(totalWidth + 5)" height="@badgeHeight">
-    <g font-family="Helvetica,Arial,sans-serif" font-size="12" fill="#000000">
-        <rect x="@x" y="@y" height="@badgeHeight" width="@totalWidth" rx="3" ry="3" stroke-width="0" fill="#444444" />
-        <rect x="@(x + nugetTextWidth)" y="@y" height="@badgeHeight" width="@versionWidth" stroke-width="0" fill="#688A08" />
-        <rect x="@(x + nugetTextWidth + versionWidth)" y="@y" height="@badgeHeight" width="@downloadsWidth" stroke-width="0" fill="#084B8A" />
-        <rect x="@(x + totalWidth - 5)" y="@y" height="@badgeHeight" width="10" stroke-width="0" rx="3" ry="3" fill="#084B8A" />
+    <g font-family="@config.FontFamily" font-size="@config.FontSize" fill="@config.FontColour">
+        <rect x="@x" y="@y" height="@badgeHeight" width="@totalWidth" rx="@cornerRadius" ry="@cornerRadius" stroke-width="0" fill="@config.BackgroundColourTitle" />
+        <rect x="@(x + titleWidth)" y="@y" height="@badgeHeight" width="@versionWidth" stroke-width="0" fill="@config.BackgroundColourVersion" />
+        <rect x="@(x + titleWidth + versionWidth)" y="@y" height="@badgeHeight" width="@downloadsWidth" stroke-width="0" fill="@config.BackgroundColourDownloads" />
+        <rect x="@(x + totalWidth - 5)" y="@y" height="@badgeHeight" width="10" stroke-width="0" rx="@cornerRadius" ry="@cornerRadius" fill="@config.BackgroundColourDownloads" />
 
-        <text x="@(x + 7)" y="@(y + 14)" fill="#ffffff">NuGet</text>
-        <text x="@(x + nugetTextWidth + 7)" y="@(y + 14)" fill="#ffffff">v</text>
-        <text x="@(x + nugetTextWidth + 15)" y="@(y + 14)" fill="#ffffff">@Model.Version</text>
-        <text x="@(x + nugetTextWidth + versionWidth + 7)" y="@(y + 14)" fill="#ffffff">▾ @downloads</text>
+        <text x="@(x + 7)" y="@(y + 14)" fill="#ffffff">@titleText</text>
+        <text x="@(x + titleWidth + 7)" y="@(y + 14)" fill="#ffffff">v</text>
+        <text x="@(x + titleWidth + 15)" y="@(y + 14)" fill="#ffffff">@package.Version</text>
+        <text x="@(x + titleWidth + versionWidth + 7)" y="@(y + 14)" fill="#ffffff">▾ @downloads</text>
     </g>
 </svg>

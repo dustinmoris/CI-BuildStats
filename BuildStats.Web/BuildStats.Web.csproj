@@ -121,7 +121,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config\DependencyConfig.cs" />
+    <Compile Include="Config\INuGetConfig.cs" />
     <Compile Include="Config\MvcConfig.cs" />
+    <Compile Include="Config\NuGetConfig.cs" />
     <Compile Include="Config\RouteConfig.cs" />
     <Compile Include="Controllers\AppVeyorController.cs" />
     <Compile Include="Controllers\BuildHistoryController.cs" />
@@ -136,6 +138,7 @@
     <Compile Include="Config\ChartConfig.cs" />
     <Compile Include="ViewModels\ChartViewModel.cs" />
     <Compile Include="Config\IChartConfig.cs" />
+    <Compile Include="ViewModels\NuGetViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\web.config" />
