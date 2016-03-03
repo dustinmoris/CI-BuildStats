@@ -8,10 +8,5 @@ namespace BuildStats.Web.Controllers
         {
             return View();
         }
-
-        public ActionResult Tests()
-        {
-            return View();
-        }
     }
 }
