@@ -94,7 +94,7 @@ is as following:
 
 ## NuGet Badge
 
-NuGet badges are in alpha state at the moment.
+NuGet badges are in beta state at the moment.
 
 The URL to the NuGet badge is:
 
@@ -102,12 +102,30 @@ The URL to the NuGet badge is:
 https://buildstats.info/nuget/{packageName}
 ```
 
-For example the badge and Markdown for the NUnit NuGet badge would be:
+For example the badge and Markdown for the [NUnit](https://github.com/nunit/nunit) NuGet badge would be:
 
 [![NuGet Badge](https://buildstats.info/nuget/nunit)](https://www.nuget.org/packages/NUnit/)
 
 ```
 [![NuGet Badge](https://buildstats.info/nuget/nunit)](https://www.nuget.org/packages/NUnit/)
+```
+
+## MyGet Badge
+
+MyGet badges are in alpha state.
+
+The URL to the MyGet badge is:
+
+```
+https://buildstats.info/myget/{feedName}/{packageName}
+```
+
+For example the badge and Markdown for the [NEventSocket](https://github.com/danbarua/NEventSocket) MyGet badge would be:
+
+[![MyGet Badge](https://buildstats.info/myget/neventsocket-prerelease/NEventSocket)](https://www.myget.org/feed/neventsocket-prerelease/package/nuget/NEventSocket)
+
+```
+[![MyGet Badge](https://buildstats.info/myget/neventsocket-prerelease/NEventSocket)](https://www.myget.org/feed/neventsocket-prerelease/package/nuget/NEventSocket)
 ```
 
 ## Contribution
