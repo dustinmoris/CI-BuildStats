@@ -121,14 +121,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config\DependencyConfig.cs" />
-    <Compile Include="Config\INuGetConfig.cs" />
+    <Compile Include="Config\IPackageBadgeConfig.cs" />
     <Compile Include="Config\MvcConfig.cs" />
-    <Compile Include="Config\NuGetConfig.cs" />
+    <Compile Include="Config\PackageBadgeConfig.cs" />
     <Compile Include="Config\RouteConfig.cs" />
     <Compile Include="Controllers\AppVeyorController.cs" />
     <Compile Include="Controllers\BuildHistoryController.cs" />
     <Compile Include="Controllers\CircleCIController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\MyGetController.cs" />
     <Compile Include="Controllers\NuGetController.cs" />
     <Compile Include="Controllers\TestsController.cs" />
     <Compile Include="Controllers\TravisCIController.cs" />
@@ -139,7 +140,7 @@
     <Compile Include="Config\ChartConfig.cs" />
     <Compile Include="ViewModels\ChartViewModel.cs" />
     <Compile Include="Config\IChartConfig.cs" />
-    <Compile Include="ViewModels\NuGetViewModel.cs" />
+    <Compile Include="ViewModels\PackageBadgeViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\web.config" />
@@ -147,8 +148,9 @@
     <Content Include="Views\Shared\Chart.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Tests\BuildHistoryChart.cshtml" />
-    <Content Include="Views\NuGet\Info.cshtml" />
-    <None Include="Views\Tests\NuGetBadge.cshtml" />
+    <Content Include="Views\Shared\Badge.cshtml" />
+    <Content Include="Views\Tests\MyGet.cshtml" />
+    <None Include="Views\Tests\NuGet.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

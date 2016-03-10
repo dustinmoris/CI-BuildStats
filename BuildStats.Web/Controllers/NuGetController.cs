@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using BuildStats.Core;
 using BuildStats.Core.PackageBadge.NuGet;
 using BuildStats.Web.Config;
 using BuildStats.Web.ViewModels;
@@ -10,18 +9,18 @@ namespace BuildStats.Web.Controllers
     public class NuGetController : Controller
     {
         private readonly INuGetClient _nugetClient;
-        private readonly INuGetConfig _nugetConfig;
+        private readonly IPackageBadgeConfig _badgeConfig;
 
-        public NuGetController(INuGetClient nugetClient, INuGetConfig nugetConfig)
+        public NuGetController(INuGetClient nugetClient, IPackageBadgeConfig badgeConfig)
         {
             _nugetClient = nugetClient;
-            _nugetConfig = nugetConfig;
+            _badgeConfig = badgeConfig;
         }
 
-        public async Task<ActionResult> Info(string packageName)
+        public async Task<ActionResult> Badge(string packageName)
         {
             var packageInfo = await _nugetClient.GetPackageInfo(packageName);
-            var viewModel = new NuGetViewModel(_nugetConfig, packageInfo);
+            var viewModel = new PackageBadgeViewModel("nuget", _badgeConfig, packageInfo);
 
             Response.ContentType = "image/svg+xml";
             return View(viewModel);

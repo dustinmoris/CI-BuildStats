@@ -2,7 +2,7 @@
 
 namespace BuildStats.Web.Config
 {
-    public sealed class NuGetConfig : INuGetConfig
+    public sealed class PackageBadgeConfig : IPackageBadgeConfig
     {
         public int FontSize => int.Parse(WebConfigurationManager.AppSettings["NuGet_FontSize"]);
         public string FontFamily => WebConfigurationManager.AppSettings["NuGet_FontFamily"];

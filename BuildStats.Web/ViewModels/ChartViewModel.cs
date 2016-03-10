@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using BuildStats.Core;
 using BuildStats.Core.BuildHistoryChart;
 using BuildStats.Web.Config;
 

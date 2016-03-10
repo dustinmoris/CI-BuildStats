@@ -18,7 +18,13 @@ namespace BuildStats.Web.Config
             routes.MapRoute(
                 name: "NuGet",
                 url: "nuget/{packageName}",
-                defaults: new { controller = "NuGet", action = "Info" }
+                defaults: new { controller = "NuGet", action = "Badge" }
+            );
+
+            routes.MapRoute(
+                name: "MyGet",
+                url: "myget/{feedName}/{packageName}",
+                defaults: new { controller = "MyGet", action = "Badge" }
             );
 
             routes.MapRoute(

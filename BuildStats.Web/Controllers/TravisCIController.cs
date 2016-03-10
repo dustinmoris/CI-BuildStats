@@ -1,4 +1,3 @@
-using BuildStats.Core;
 using BuildStats.Core.BuildHistoryChart;
 using BuildStats.Core.BuildHistoryChart.TravisCI;
 using BuildStats.Web.Config;

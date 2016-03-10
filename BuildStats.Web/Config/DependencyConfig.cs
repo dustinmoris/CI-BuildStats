@@ -1,9 +1,9 @@
 using System.Web.Mvc;
 using Autofac;
 using Autofac.Integration.Mvc;
-using BuildStats.Core;
 using BuildStats.Core.BuildHistoryChart;
 using BuildStats.Core.Common;
+using BuildStats.Core.PackageBadge.MyGet;
 using BuildStats.Core.PackageBadge.NuGet;
 
 namespace BuildStats.Web.Config
@@ -19,7 +19,8 @@ namespace BuildStats.Web.Config
             builder.RegisterType<JsonSerializer>().As<ISerializer>();
             builder.RegisterType<RestfulApiClient>().As<IRestfulApiClient>();
             builder.RegisterType<NuGetClient>().As<INuGetClient>();
-            builder.RegisterType<NuGetConfig>().As<INuGetConfig>();
+            builder.RegisterType<MyGetClient>().As<IMyGetClient>();
+            builder.RegisterType<PackageBadgeConfig>().As<IPackageBadgeConfig>();
 
             builder.RegisterControllers(typeof(MvcApplication).Assembly);
 

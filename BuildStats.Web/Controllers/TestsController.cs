@@ -9,7 +9,12 @@ namespace BuildStats.Web.Controllers
             return View();
         }
 
-        public ActionResult NuGetBadge()
+        public ActionResult NuGet()
+        {
+            return View();
+        }
+
+        public ActionResult MyGet()
         {
             return View();
         }

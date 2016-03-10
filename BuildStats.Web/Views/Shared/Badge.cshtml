@@ -1,21 +1,20 @@
-﻿@model BuildStats.Web.ViewModels.NuGetViewModel
+﻿@model BuildStats.Web.ViewModels.PackageBadgeViewModel
 @{
     Layout = null;
-
+    
     var package = Model.PackageInfo;
     var config = Model.Config;
 
     const int x = 0;
     const int y = 0;
     const int padding = 5;
-    const string titleText = "nuget";
 
     var version = $"v{package.Version}";
     var downloads = $"▾ {Model.GetDownloadsText()}";
     var badgeHeight = config.BadgeHeight;
     var cornerRadius = config.BadgeCornerRadius;
     var fontSizeToMeasure = config.FontSize - 3;
-    var titleWidth = Model.MeasureTextWidth(titleText, fontSizeToMeasure) + padding * 2;
+    var titleWidth = Model.MeasureTextWidth(Model.Provider, fontSizeToMeasure) + padding * 2;
     var versionWidth = Model.MeasureTextWidth(version, fontSizeToMeasure) + padding * 2;
     var downloadsWidth = Model.MeasureTextWidth(downloads, fontSizeToMeasure) + padding * 2;
     var totalWidth = titleWidth + versionWidth + downloadsWidth;
@@ -45,7 +44,7 @@
         <rect x="@(x + titleWidth + versionWidth)" y="@y" height="@badgeHeight" width="@downloadsWidth" rx="@cornerRadius" ry="@cornerRadius" stroke-width="0" fill="@config.BackgroundColourDownloads" />
         <rect x="@x" y="@y" height="@badgeHeight" width="@(totalWidth)" rx="@cornerRadius" ry="@cornerRadius" stroke-width="0" fill="url(#grad1)" />
 
-        <text x="@(x + padding + 2)" y="@(y + 14)" fill="#ffffff">@titleText</text>
+        <text x="@(x + padding + 2)" y="@(y + 14)" fill="#ffffff">@Model.Provider</text>
         <text x="@(x + titleWidth + padding + 2)" y="@(y + 14)" fill="#ffffff">@version</text>
         <text x="@(x + titleWidth + versionWidth + padding)" y="@(y + 14)" fill="#ffffff">@downloads</text>
     </g>

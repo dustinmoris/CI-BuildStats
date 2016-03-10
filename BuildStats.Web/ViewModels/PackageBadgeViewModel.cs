@@ -1,22 +1,24 @@
 using System;
 using System.Drawing;
-using BuildStats.Core;
 using BuildStats.Core.PackageBadge;
 using BuildStats.Web.Config;
 
 namespace BuildStats.Web.ViewModels
 {
-    public sealed class NuGetViewModel
+    public sealed class PackageBadgeViewModel
     {
-        public NuGetViewModel(
-            INuGetConfig config,
+        public PackageBadgeViewModel(
+            string provider,
+            IPackageBadgeConfig config,
             PackageInfo packageInfo)
         {
+            Provider = provider;
             Config = config;
             PackageInfo = packageInfo;
         }
 
-        public INuGetConfig Config { get; }
+        public string Provider { get; }
+        public IPackageBadgeConfig Config { get; }
         public PackageInfo PackageInfo { get; }
 
         public string GetDownloadsText()

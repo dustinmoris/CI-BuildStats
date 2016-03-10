@@ -1,6 +1,6 @@
 namespace BuildStats.Web.Config
 {
-    public interface INuGetConfig
+    public interface IPackageBadgeConfig
     {
         int FontSize { get; }
         string FontFamily { get; }
