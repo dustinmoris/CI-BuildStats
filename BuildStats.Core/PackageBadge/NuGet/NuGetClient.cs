@@ -14,9 +14,9 @@ namespace BuildStats.Core.PackageBadge.NuGet
             _serializer = serializer;
         }
 
-        public async Task<PackageInfo> GetPackageInfo(string packageName)
+        public async Task<PackageInfo> GetPackageInfo(string packageName, bool includePreReleases)
         {
-            var url = $"https://api-v3search-0.nuget.org/query?q={packageName}&skip=0&take=1&prerelease=false";
+            var url = $"https://api-v3search-0.nuget.org/query?q={packageName}&skip=0&take=1&prerelease={includePreReleases}";
             var content = await _restfulApiClient.Get(url);
             var searchResult = _serializer.Deserialize(content);
 

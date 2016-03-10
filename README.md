@@ -110,6 +110,16 @@ For example the badge and Markdown for the [NUnit](https://github.com/nunit/nuni
 [![NuGet Badge](https://buildstats.info/nuget/nunit)](https://www.nuget.org/packages/NUnit/)
 ```
 
+### Including PreRelease packages
+
+You can append the `includePreReleases=true` flag to include pre-release packages:
+
+[![NuGet Badge](https://buildstats.info/nuget/NServiceBus.PostgreSQL?includePreReleases=true)](https://www.nuget.org/packages/NServiceBus.PostgreSQL/1.0.0-CI00021)
+
+```
+[![NuGet Badge](https://buildstats.info/nuget/NServiceBus.PostgreSQL?includePreReleases=true)](https://www.nuget.org/packages/NServiceBus.PostgreSQL/1.0.0-CI00021)
+```
+
 ## MyGet Badge
 
 MyGet badges are in alpha state.

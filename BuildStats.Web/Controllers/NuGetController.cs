@@ -17,9 +17,9 @@ namespace BuildStats.Web.Controllers
             _badgeConfig = badgeConfig;
         }
 
-        public async Task<ActionResult> Badge(string packageName)
+        public async Task<ActionResult> Badge(string packageName, bool includePreReleases = false)
         {
-            var packageInfo = await _nugetClient.GetPackageInfo(packageName);
+            var packageInfo = await _nugetClient.GetPackageInfo(packageName, includePreReleases);
             var viewModel = new PackageBadgeViewModel("nuget", _badgeConfig, packageInfo);
 
             Response.ContentType = "image/svg+xml";

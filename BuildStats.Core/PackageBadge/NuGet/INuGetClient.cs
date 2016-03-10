@@ -4,6 +4,6 @@ namespace BuildStats.Core.PackageBadge.NuGet
 {
     public interface INuGetClient
     {
-        Task<PackageInfo> GetPackageInfo(string packageName);
+        Task<PackageInfo> GetPackageInfo(string packageName, bool includePreReleases);
     }
 }
