@@ -1,5 +1,6 @@
 ﻿using BuildStats.Core;
-using BuildStats.Core.AppVeyor;
+using BuildStats.Core.BuildHistoryChart;
+using BuildStats.Core.BuildHistoryChart.AppVeyor;
 using BuildStats.Web.Config;
 
 namespace BuildStats.Web.Controllers

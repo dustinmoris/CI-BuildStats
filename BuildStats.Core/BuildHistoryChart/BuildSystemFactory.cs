@@ -1,4 +1,6 @@
-namespace BuildStats.Core
+using BuildStats.Core.Common;
+
+namespace BuildStats.Core.BuildHistoryChart
 {
     public abstract class BuildSystemFactory
     {

@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace BuildStats.Core
+namespace BuildStats.Core.Common
 {
     public sealed class RestfulApiClient : IRestfulApiClient
     {

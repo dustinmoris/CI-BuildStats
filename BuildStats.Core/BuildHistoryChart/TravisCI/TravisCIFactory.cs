@@ -1,4 +1,4 @@
-namespace BuildStats.Core.TravisCI
+namespace BuildStats.Core.BuildHistoryChart.TravisCI
 {
     public sealed class TravisCIFactory : BuildSystemFactory
     {

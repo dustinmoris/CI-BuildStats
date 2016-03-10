@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BuildStats.Core.Common;
 
-namespace BuildStats.Core.TravisCI
+namespace BuildStats.Core.BuildHistoryChart.TravisCI
 {
     public sealed class TravisCIBuildHistoryClient : IBuildHistoryClient
     {

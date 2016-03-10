@@ -1,5 +1,6 @@
 ﻿using BuildStats.Core;
-using BuildStats.Core.CircleCI;
+using BuildStats.Core.BuildHistoryChart;
+using BuildStats.Core.BuildHistoryChart.CircleCI;
 using BuildStats.Web.Config;
 
 namespace BuildStats.Web.Controllers

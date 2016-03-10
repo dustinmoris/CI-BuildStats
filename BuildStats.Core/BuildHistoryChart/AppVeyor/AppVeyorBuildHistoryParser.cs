@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using BuildStats.Core.Common;
 
-namespace BuildStats.Core.AppVeyor
+namespace BuildStats.Core.BuildHistoryChart.AppVeyor
 {
     public sealed class AppVeyorBuildHistoryParser : IBuildHistoryParser
     {

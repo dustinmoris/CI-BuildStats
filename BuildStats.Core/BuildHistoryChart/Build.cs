@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BuildStats.Core
+namespace BuildStats.Core.BuildHistoryChart
 {
     public sealed class Build
     {

@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace BuildStats.Core
+namespace BuildStats.Core.Common
 {
     public interface IRestfulApiClient
     {

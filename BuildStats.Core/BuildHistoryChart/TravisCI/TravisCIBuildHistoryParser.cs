@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using BuildStats.Core.Common;
 
-namespace BuildStats.Core.TravisCI
+namespace BuildStats.Core.BuildHistoryChart.TravisCI
 {
     public sealed class TravisCIBuildHistoryParser : IBuildHistoryParser
     {

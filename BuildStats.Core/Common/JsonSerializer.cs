@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace BuildStats.Core
+namespace BuildStats.Core.Common
 {
     public sealed class JsonSerializer : ISerializer
     {

@@ -1,17 +1,16 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
+using BuildStats.Core.Common;
 
-namespace BuildStats.Core.CircleCI
+namespace BuildStats.Core.BuildHistoryChart.AppVeyor
 {
-    public sealed class CircleCIBuildHistoryClient : IBuildHistoryClient
+    public sealed class AppVeyorBuildHistoryClient : IBuildHistoryClient
     {
         private readonly IRestfulApiClient _restfulApiClient;
         private readonly IBuildHistoryParser _parser;
 
-        public CircleCIBuildHistoryClient(IRestfulApiClient restfulApiClient, IBuildHistoryParser parser)
+        public AppVeyorBuildHistoryClient(IRestfulApiClient restfulApiClient, IBuildHistoryParser parser)
         {
             _restfulApiClient = restfulApiClient;
             _parser = parser;
@@ -24,16 +23,13 @@ namespace BuildStats.Core.CircleCI
             string branch = null,
             bool includeBuildsFromPullRequest = true)
         {
-            var url = $"https://circleci.com/api/v1/project/{account}/{project}";
+            var url = $"https://ci.appveyor.com/api/projects/{account}/{project}/history?recordsNumber={buildCount}";
 
             if (!string.IsNullOrEmpty(branch))
-                url = $"{url}/tree/{WebUtility.UrlEncode(branch)}";
-
-            url = $"{url}?limit={buildCount}";
+                url = $"{url}&branch={branch}";
 
             var builds = new List<Build>();
-            var attempt = 0;
-            const int maxAttempts = 5;
+            var attempts = 5;
 
             do
             {
@@ -48,11 +44,11 @@ namespace BuildStats.Core.CircleCI
                     break;
 
                 builds.AddRange(batch.Where(build => includeBuildsFromPullRequest || !build.FromPullRequest));
-                url = $"{url}&offset={attempt}";
+                url = $"{url}&startBuildId={batch[batch.Count - 1].BuildId}";
 
             } while (
                 builds.Count < buildCount
-                && ++attempt < maxAttempts);
+                && --attempts > 0);
 
             return builds.Count > buildCount ? builds.Take(buildCount).ToList() : builds;
         }

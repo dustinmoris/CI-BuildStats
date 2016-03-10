@@ -1,4 +1,4 @@
-namespace BuildStats.Core
+namespace BuildStats.Core.Common
 {
     public interface ISerializer
     {

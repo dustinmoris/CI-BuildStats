@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using BuildStats.Core;
+using BuildStats.Core.PackageBadge;
 using BuildStats.Web.Config;
 
 namespace BuildStats.Web.ViewModels
@@ -9,14 +10,14 @@ namespace BuildStats.Web.ViewModels
     {
         public NuGetViewModel(
             INuGetConfig config,
-            NuGetPackageInfo packageInfo)
+            PackageInfo packageInfo)
         {
             Config = config;
             PackageInfo = packageInfo;
         }
 
         public INuGetConfig Config { get; }
-        public NuGetPackageInfo PackageInfo { get; }
+        public PackageInfo PackageInfo { get; }
 
         public string GetDownloadsText()
         {

@@ -2,6 +2,9 @@ using System.Web.Mvc;
 using Autofac;
 using Autofac.Integration.Mvc;
 using BuildStats.Core;
+using BuildStats.Core.BuildHistoryChart;
+using BuildStats.Core.Common;
+using BuildStats.Core.PackageBadge.NuGet;
 
 namespace BuildStats.Web.Config
 {

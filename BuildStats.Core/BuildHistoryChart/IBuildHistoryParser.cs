@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace BuildStats.Core
+namespace BuildStats.Core.BuildHistoryChart
 {
     public interface IBuildHistoryParser
     {

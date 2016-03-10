@@ -1,4 +1,4 @@
-namespace BuildStats.Core.CircleCI
+namespace BuildStats.Core.BuildHistoryChart.CircleCI
 {
     public sealed class CircleCIFactory : BuildSystemFactory
     {

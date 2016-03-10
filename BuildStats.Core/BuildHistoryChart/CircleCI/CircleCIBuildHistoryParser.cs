@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using BuildStats.Core.Common;
 
-namespace BuildStats.Core.CircleCI
+namespace BuildStats.Core.BuildHistoryChart.CircleCI
 {
     public sealed class CircleCIBuildHistoryParser : IBuildHistoryParser
     {

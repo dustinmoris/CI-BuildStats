@@ -1,8 +1,8 @@
-namespace BuildStats.Core
+namespace BuildStats.Core.PackageBadge
 {
-    public sealed class NuGetPackageInfo
+    public sealed class PackageInfo
     {
-        public NuGetPackageInfo(
+        public PackageInfo(
             string name,
             string version,
             int downloads)

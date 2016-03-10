@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using BuildStats.Core;
+using BuildStats.Core.PackageBadge.NuGet;
 using BuildStats.Web.Config;
 using BuildStats.Web.ViewModels;
 

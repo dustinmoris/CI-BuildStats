@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BuildStats.Core
+namespace BuildStats.Core.BuildHistoryChart
 {
     public sealed class BuildStatistics : IBuildStatistics
     {
