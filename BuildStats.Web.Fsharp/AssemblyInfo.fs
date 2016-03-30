@@ -10,9 +10,9 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyTitle("BuildStats.Web.Fsharp")>]
 [<assembly: AssemblyDescription("")>]
 [<assembly: AssemblyConfiguration("")>]
-[<assembly: AssemblyCompany("Gamesys Ltd")>]
+[<assembly: AssemblyCompany("")>]
 [<assembly: AssemblyProduct("BuildStats.Web.Fsharp")>]
-[<assembly: AssemblyCopyright("Copyright © Gamesys Ltd 2016")>]
+[<assembly: AssemblyCopyright("Copyright © Dustin Moris Gorski 2016")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyCulture("")>]
 
