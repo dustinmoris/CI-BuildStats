@@ -10,15 +10,7 @@ type BuildStatsModule(nugetClient : INuGetClient) as this =
 
     do this.Get.["/"] <- fun _ -> 
         "Hello World"
-        |> box
-
-    do this.Get.["/some", true] <- fun (ctx, ct) -> Task.FromResult("")
-
-//    do this.Get.["/nuget/{packageName}", true, fun (ctx, ct) -> 
-//        async {
-//            ""
-//        }]
-        
+        |> box        
 
 type Startup() =
     member this.Configuration (app : IAppBuilder) =
