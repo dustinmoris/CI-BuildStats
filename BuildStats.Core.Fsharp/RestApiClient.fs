@@ -28,15 +28,3 @@ type RestApiClient() =
                     return Some content
                 | _ -> return None
             }
-
-type PackageInfo =
-    {
-        Name        : string
-        Version     : string
-        Downloads   : int
-    }
-
-//type NuGetClient() =
-//    let client = new RestApiClient()
-//    let x =
-//        ()
