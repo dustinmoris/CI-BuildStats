@@ -23,6 +23,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Git", "Git", "{8EC8EB38-C26
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BuildStats.Core.Fsharp", "BuildStats.Core.Fsharp\BuildStats.Core.Fsharp.fsproj", "{51806663-6F6C-456B-A633-1CADFC8CACA7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{E369B66F-B189-4228-A2BB-4DF6A2560CA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E369B66F-B189-4228-A2BB-4DF6A2560CA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E369B66F-B189-4228-A2BB-4DF6A2560CA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51806663-6F6C-456B-A633-1CADFC8CACA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51806663-6F6C-456B-A633-1CADFC8CACA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51806663-6F6C-456B-A633-1CADFC8CACA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51806663-6F6C-456B-A633-1CADFC8CACA7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
