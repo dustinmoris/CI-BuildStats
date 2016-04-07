@@ -13,13 +13,19 @@ type BuildStatsModule(nugetClient : INuGetClient) as this =
         "Hello World"
         |> box
 
-    do this.Get.["/nuget/{packageName}", true] <- fun ctx ct ->
+    do this.Get.["/nuget/{packageName}?includePreReleases={includePreReleases}", true] <- fun ctx ct ->
         async {
-            let! packageInfo = nugetClient.GetPackageInfo "Lanem" false
-            match packageInfo with
-            | Some packageInfo  -> return packageInfo.Version :> obj
-            | None              -> return "test" :> obj
+            let packageName = this.GetParameter ctx "packageName"
+            let includePreReleases = this.GetParameter ctx "includePreReleases"
+            let! package = nugetClient.GetPackageAsync packageName includePreReleases
+            match package with
+            | Some package  -> return package.Version :> obj
+            | None          -> return "test" :> obj
         } |> Async.StartAsTask
+
+    member this.GetParameter<'T> (ctx : obj) (param : string) : 'T =
+        ((ctx :?> Nancy.DynamicDictionary).[param] 
+        :?> Nancy.DynamicDictionaryValue).Value :?> 'T
 
 type Bootstrapper() =
     inherit DefaultNancyBootstrapper()
