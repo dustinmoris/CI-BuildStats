@@ -1,7 +1,9 @@
-﻿namespace BuildStats.Core.Fsharp
+﻿module PackageServices
 
-open Newtonsoft.Json.Linq
 open System.Net
+open Newtonsoft.Json.Linq
+open Serializers
+open RestClient
 
 type Package =
     {
@@ -10,51 +12,38 @@ type Package =
         Downloads   : int
     }
 
-type INuGetClient =
-    abstract member GetPackageAsync : string -> bool -> Async<Option<Package>>
-
-type IMyGetClient =
-    abstract member GetPackageAsync : string -> string -> bool -> Async<Option<Package>>
-
-type NuGetClient(restApiClient : IRestApiClient, serializer : ISerializer) =
-
-    let deserialize (json : string) =
-        let obj = (serializer.Deserialize json) :?> JObject
-        let data = obj.Value<JArray> "data"
-        {
-            Name = data.[0].Value<string> "id"
-            Version = data.[0].Value<string> "version"
-            Downloads = data.[0].Value<int> "totalDownloads"
-        }
-
-    interface INuGetClient with
-        member this.GetPackageAsync (packageName : string) (includePreReleases : bool) =
-            async {
-                let url = sprintf "https://api-v3search-0.nuget.org/query?q=%s&skip=0&take=1&prerelease=%b" packageName includePreReleases
-                let! content = restApiClient.GetAsync url Json
-                match content with
-                | Some json -> return Some <| deserialize json
-                | None      -> return None
+let getNuGetPackageAsync    (packageName : string) 
+                            (includePreReleases : bool) =
+    async {
+        let deserialize (json : string) =
+            let obj = deserializeJson json :?> JObject
+            let data = obj.Value<JArray> "data"
+            {
+                Name = data.[0].Value<string> "id"
+                Version = data.[0].Value<string> "version"
+                Downloads = data.[0].Value<int> "totalDownloads"
             }
 
-type MyGetClient(restApiClient : IRestApiClient, serializer : ISerializer) =
-    
-    let deserialize (json : string) =
-        let obj = (serializer.Deserialize json) :?> JObject
-        let data = obj.Value<JArray> "d"
-        {
-            Name = data.[0].Value<string> "Id"
-            Version = data.[0].Value<string> "Version"
-            Downloads = data.[0].Value<int> "DownloadCount"
-        }
+        let url = sprintf "https://api-v3search-0.nuget.org/query?q=%s&skip=0&take=1&prerelease=%b" packageName includePreReleases
+        let! json = getAsync url Json
+        return deserialize json
+    }
 
-    interface IMyGetClient with
-        member this.GetPackageAsync (feedName : string) (packageName : string) (includePreReleases : bool) =
-            async {
-                let filter = sprintf "Id eq '%s'" packageName |> WebUtility.UrlEncode
-                let url = sprintf "https://www.myget.org/F/%s/api/v2/Packages()?$filter=%s&$orderby=Published desc&$top=1" feedName filter
-                let! content = restApiClient.GetAsync url Json
-                match content with
-                | Some json -> return Some <| deserialize json
-                | None      -> return None
+let getMyGetPackageAsync    (feedName : string) 
+                            (packageName : string)
+                            (includePreReleases : bool) =
+    async {
+        let deserialize (json : string) =
+            let obj = deserializeJson json :?> JObject
+            let data = obj.Value<JArray> "d"
+            {
+                Name = data.[0].Value<string> "Id"
+                Version = data.[0].Value<string> "Version"
+                Downloads = data.[0].Value<int> "DownloadCount"
             }
+
+        let filter = sprintf "Id eq '%s'" packageName |> WebUtility.UrlEncode
+        let url = sprintf "https://www.myget.org/F/%s/api/v2/Packages()?$filter=%s&$orderby=Published desc&$top=1" feedName filter
+        let! json = getAsync url Json
+        return deserialize json
+    }

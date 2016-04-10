@@ -1,11 +1,9 @@
-﻿namespace BuildStats.Core.Fsharp
+﻿module Serializers
 
 open Newtonsoft.Json
 
-type ISerializer =
-    abstract member Deserialize : string -> obj
+let serializeJson obj =
+    JsonConvert.SerializeObject(obj)
 
-type JsonSerializer() =
-    interface ISerializer with
-        member this.Deserialize (content : string) =
-            JsonConvert.DeserializeObject(content)
+let deserializeJson(json : string) =
+    JsonConvert.DeserializeObject(json)
