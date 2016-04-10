@@ -25,9 +25,7 @@ namespace BuildStats.Core.PackageBadge.MyGet
             var content = await _restfulApiClient.Get(url);
             var searchResult = _serializer.Deserialize(content);
 
-            var packageInfo = (searchResult.d as IEnumerable<dynamic>).First(
-                x => x.id.Value.ToString()
-                .Equals(packageName, StringComparison.InvariantCultureIgnoreCase));
+            var packageInfo = searchResult.d[0];
 
             return new PackageInfo(
                 packageInfo.Id.Value.ToString(),
