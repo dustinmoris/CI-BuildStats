@@ -18,13 +18,14 @@ let getNuGetPackageAsync    (packageName : string)
         let deserialize (json : string) =
             let obj = deserializeJson json :?> JObject
             let data = obj.Value<JArray> "data"
+            
             {
                 Name = data.[0].Value<string> "id"
                 Version = data.[0].Value<string> "version"
                 Downloads = data.[0].Value<int> "totalDownloads"
             }
 
-        let url = sprintf "https://api-v3search-0.nuget.org/query?q=%s&skip=0&take=1&prerelease=%b" packageName includePreReleases
+        let url = sprintf "https://api-v3search-0.nuget.org/query?q=%s&skip=0&take=10&prerelease=%b" packageName includePreReleases
         let! json = getAsync url Json
         return deserialize json
     }

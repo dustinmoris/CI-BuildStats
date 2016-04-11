@@ -13,12 +13,19 @@ let sleep milliseconds message: WebPart =
       return! OK message x
     }
 
-    
+
+
+let getNuGetPackage packageName : WebPart =
+    fun (x : HttpContext) ->
+        async {
+            let! package = getNuGetPackageAsync packageName false
+            return! OK "" x
+        }
 
 let app =
   choose
     [ GET >=> choose
-        [ pathScan "/nuget/%s" (fun packageName -> OK <| serializeJson(getNuGetPackageAsync packageName false))
+        [ pathScan "/nuget/%s" (fun packageName -> getNuGetPackage packageName)
           //pathScan "/nuget/%s" (fun packageName -> mapJson (fun _ -> getNuGetPackageAsync packageName false))
           path "/goodbye" >=> OK "Good bye GET" ] ]
 
