@@ -1,4 +1,4 @@
-﻿module PackageServicesTests
+﻿module NuGetPackageTests
 
 open NUnit.Framework
 open FsUnit
@@ -6,25 +6,103 @@ open PackageServices
 open RestClient
 
 [<Test>]
-let ``NuGet package Lanem returns correct result``() =    
-    let package = getNuGetPackageAsync "lanem" false |> Async.RunSynchronously
+let ``Lanem returns correct result``() =    
+    let package = getNuGetPackageAsync "Lanem" false |> Async.RunSynchronously
         
-    package.Name        |> should equal "Lanem"
-    package.Version     |> should equal "2.0.0"
-    package.Downloads   |> should be (greaterThan 900)
+    package.Value.Name        |> should equal "Lanem"
+    package.Value.Version     |> should equal "2.0.0"
+    package.Value.Downloads   |> should be (greaterThan 900)
 
 [<Test>]
-let ``NuGet package Newtonsoft.Json returns correct result``() =    
+let ``Guardo returns correct result``() =    
+    let package = getNuGetPackageAsync "Guardo" false |> Async.RunSynchronously
+        
+    package.Value.Name        |> should equal "Guardo"
+    package.Value.Version     |> should equal "0.0.1"
+    package.Value.Downloads   |> should be (greaterThan 49)
+
+[<Test>]
+let ``Moq returns correct result``() =    
+    let package = getNuGetPackageAsync "Moq" false |> Async.RunSynchronously
+        
+    package.Value.Name        |> should equal "Moq"
+    package.Value.Version     |> should equal "4.2.1510.2205"
+    package.Value.Downloads   |> should be (greaterThan 5909080)
+
+[<Test>]
+let ``NUnit returns correct result``() =    
+    let package = getNuGetPackageAsync "NUnit" false |> Async.RunSynchronously
+        
+    package.Value.Name        |> should equal "NUnit"
+    package.Value.Version     |> should equal "3.2.1"
+    package.Value.Downloads   |> should be (greaterThan 4547830)
+
+[<Test>]
+let ``NSubstitute returns correct result``() =    
+    let package = getNuGetPackageAsync "NSubstitute" false |> Async.RunSynchronously
+        
+    package.Value.Name        |> should equal "NSubstitute"
+    package.Value.Version     |> should equal "1.10.0"
+    package.Value.Downloads   |> should be (greaterThan 919740)
+
+[<Test>]
+let ``jQuery returns correct result``() =    
+    let package = getNuGetPackageAsync "jQuery" false |> Async.RunSynchronously
+        
+    package.Value.Name        |> should equal "jQuery"
+    package.Value.Version     |> should equal "2.2.3"
+    package.Value.Downloads   |> should be (greaterThan 20534740)
+
+[<Test>]
+let ``Microsoft.AspNet.Mvc returns correct result``() =    
+    let package = getNuGetPackageAsync "Microsoft.AspNet.Mvc" false |> Async.RunSynchronously
+        
+    package.Value.Name        |> should equal "Microsoft.AspNet.Mvc"
+    package.Value.Version     |> should equal "5.2.3"
+    package.Value.Downloads   |> should be (greaterThan 16069410)
+
+[<Test>]
+let ``EntityFramework returns correct result``() =    
+    let package = getNuGetPackageAsync "EntityFramework" false |> Async.RunSynchronously
+        
+    package.Value.Name        |> should equal "EntityFramework"
+    package.Value.Version     |> should equal "6.1.3"
+    package.Value.Downloads   |> should be (greaterThan 17403100)
+
+[<Test>]
+let ``NServiceBus.PostgreSQL PreRelease package returns correct result``() =    
+    let package = getNuGetPackageAsync "NServiceBus.PostgreSQL" true |> Async.RunSynchronously
+        
+    package.Value.Name        |> should equal "NServiceBus.PostgreSQL"
+    package.Value.Version     |> should equal "1.0.0-CI00021"
+    package.Value.Downloads   |> should be (greaterThan 550)
+
+[<Test>]
+let ``Newtonsoft.Json returns correct result``() =    
+    let package = getNuGetPackageAsync "Newtonsoft.Json" false |> Async.RunSynchronously
+        
+    package.Value.Name        |> should equal "Newtonsoft.Json"
+    package.Value.Version     |> should equal "8.0.3"
+    package.Value.Downloads   |> should be (greaterThan 4998550)
+
+[<Test>]
+let ``Paket returns correct result``() =    
+    let package = getNuGetPackageAsync "Paket" false |> Async.RunSynchronously
+        
+    package.Value.Name        |> should equal "Paket"
+    package.Value.Version     |> should equal "2.63.2"
+    package.Value.Downloads   |> should be (greaterThan 127890)
+
+[<Test>]
+let ``Package written in lowercase returns correct result``() =    
     let package = getNuGetPackageAsync "newtonsoft.json" false |> Async.RunSynchronously
         
-    package.Name        |> should equal "Newtonsoft.Json"
-    package.Version     |> should equal "8.0.3"
-    package.Downloads   |> should be (greaterThan 4998550)
+    package.Value.Name        |> should equal "Newtonsoft.Json"
+    package.Value.Version     |> should equal "8.0.3"
+    package.Value.Downloads   |> should be (greaterThan 4998550)
 
 [<Test>]
-let ``NuGet package Paket returns correct result``() =    
-    let package = getNuGetPackageAsync "paket" false |> Async.RunSynchronously
+let ``Non existing package returns none``() =    
+    let package = getNuGetPackageAsync "myPackage.which.does.not.exist" false |> Async.RunSynchronously
         
-    package.Name        |> should equal "Paket"
-    package.Version     |> should equal "3.0.0-alpha109"
-    package.Downloads   |> should be (greaterThan 127890)
+    package.IsNone |> should equal true

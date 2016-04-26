@@ -5,29 +5,28 @@ open Suave.Successful
 open PackageServices
 open Suave.Json
 open Serializers
-
-let sleep milliseconds message: WebPart =
-  fun (x : HttpContext) ->
-    async {
-      do! Async.Sleep milliseconds
-      return! OK message x
-    }
+open Suave.RequestErrors
 
 
+let JSON obj =
+    serializeJson obj
+    |> OK
+    >=> Writers.setMimeType "application/json; charset=utf-8"
 
-let getNuGetPackage packageName : WebPart =
-    fun (x : HttpContext) ->
+let getNuGetPackage packageName =
+    fun (ctx : HttpContext) ->
         async {
             let! package = getNuGetPackageAsync packageName false
-            return! OK "" x
+            return!
+                match package with
+                | None      -> NOT_FOUND (sprintf "NuGet package %s could not be found." packageName) ctx
+                | Some pkg  -> JSON pkg ctx
         }
 
-let app =
-  choose
-    [ GET >=> choose
-        [ pathScan "/nuget/%s" (fun packageName -> getNuGetPackage packageName)
-          //pathScan "/nuget/%s" (fun packageName -> mapJson (fun _ -> getNuGetPackageAsync packageName false))
-          path "/goodbye" >=> OK "Good bye GET" ] ]
+let app = 
+    GET >=> choose [
+        pathScan "/nuget/%s" getNuGetPackage
+    ]
 
 [<EntryPoint>]
 let main argv = 

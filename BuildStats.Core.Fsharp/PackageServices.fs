@@ -1,5 +1,6 @@
 ﻿module PackageServices
 
+open System
 open System.Net
 open Newtonsoft.Json.Linq
 open Serializers
@@ -17,17 +18,28 @@ let getNuGetPackageAsync    (packageName : string)
     async {
         let deserialize (json : string) =
             let obj = deserializeJson json :?> JObject
-            let data = obj.Value<JArray> "data"
-            
-            {
-                Name = data.[0].Value<string> "id"
-                Version = data.[0].Value<string> "version"
-                Downloads = data.[0].Value<int> "totalDownloads"
-            }
+            obj.Value<JArray> "data"            
+
+        let tryFindDesiredItem (data : JArray) =
+            data |> Seq.tryFind(fun item -> 
+                (item.Value<string> "id").Equals(packageName, StringComparison.InvariantCultureIgnoreCase))
+
+        let convertIntoPackage (item : JToken option) =
+            match item with
+            | Some x ->
+                Some {
+                    Name = x.Value<string> "id"
+                    Version = x.Value<string> "version"
+                    Downloads = x.Value<int> "totalDownloads"
+                }
+            | None -> None
 
         let url = sprintf "https://api-v3search-0.nuget.org/query?q=%s&skip=0&take=10&prerelease=%b" packageName includePreReleases
         let! json = getAsync url Json
-        return deserialize json
+        return json
+            |> deserialize 
+            |> tryFindDesiredItem
+            |> convertIntoPackage
     }
 
 let getMyGetPackageAsync    (feedName : string) 
