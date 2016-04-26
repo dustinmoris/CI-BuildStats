@@ -7,7 +7,6 @@ open Suave.Json
 open Serializers
 open Suave.RequestErrors
 
-
 let JSON obj =
     serializeJson obj
     |> OK
@@ -16,7 +15,11 @@ let JSON obj =
 let getNuGetPackage packageName =
     fun (ctx : HttpContext) ->
         async {
-            let! package = getNuGetPackageAsync packageName false
+            let includePreReleases =
+                match ctx.request.queryParam "includePreReleases" with
+                | Choice1Of2 value  -> bool.Parse value
+                | _                 -> false
+            let! package = getNuGetPackageAsync packageName includePreReleases
             return!
                 match package with
                 | None      -> NOT_FOUND (sprintf "NuGet package %s could not be found." packageName) ctx
