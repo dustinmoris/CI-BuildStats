@@ -52,7 +52,7 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Library1.fs" />
+    <Compile Include="NuGetPackageTests.fs" />
     <Content Include="packages.config" />
     <Content Include="App.config" />
   </ItemGroup>
