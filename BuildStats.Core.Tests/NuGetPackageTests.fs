@@ -43,7 +43,7 @@ let ``NSubstitute returns correct result``() =
         
     package.Value.Name        |> should equal "NSubstitute"
     package.Value.Version     |> should equal "1.10.0"
-    package.Value.Downloads   |> should be (greaterThan 916453)
+    package.Value.Downloads   |> should be (greaterThan 916450)
 
 [<Test>]
 let ``jQuery returns correct result``() =    

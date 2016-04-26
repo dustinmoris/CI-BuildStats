@@ -1,35 +1,33 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildStats.Core", "BuildStats.Core\BuildStats.Core.csproj", "{343396DD-5D19-49CB-8D78-195F190FF9BC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildStats.Web", "BuildStats.Web\BuildStats.Web.csproj", "{E369B66F-B189-4228-A2BB-4DF6A2560CA7}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "About", "About", "{482C5242-29CA-4CE7-AB82-EDD1DC8350A7}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "project", "project", "{482C5242-29CA-4CE7-AB82-EDD1DC8350A7}"
 	ProjectSection(SolutionItems) = preProject
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{761C33B6-49F6-49DC-8085-7E5AB69C6E1C}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{761C33B6-49F6-49DC-8085-7E5AB69C6E1C}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Git", "Git", "{8EC8EB38-C26C-4F4B-82BD-0A8BE30F769E}"
-	ProjectSection(SolutionItems) = preProject
-		.gitignore = .gitignore
-	EndProjectSection
-EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BuildStats.Core.Fsharp", "BuildStats.Core.Fsharp\BuildStats.Core.Fsharp.fsproj", "{51806663-6F6C-456B-A633-1CADFC8CACA7}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BuildStats.Web.Fsharp", "BuildStats.Web.Fsharp\BuildStats.Web.Fsharp.fsproj", "{024F1CA9-B2E2-4DE4-AB15-9E1E09C3B5C4}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BuildStats.Suave", "BuildStats.Suave\BuildStats.Suave.fsproj", "{773994EF-32A5-4A09-B38A-B5927DF8FE1E}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BuildStats.Core.Tests", "BuildStats.Core.Tests\BuildStats.Core.Tests.fsproj", "{54CA8B73-463A-4827-BB1C-E77459A021EA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "git", "git", "{6713C540-E398-481D-87B7-F7AA072D8808}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,10 +47,6 @@ Global
 		{51806663-6F6C-456B-A633-1CADFC8CACA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51806663-6F6C-456B-A633-1CADFC8CACA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51806663-6F6C-456B-A633-1CADFC8CACA7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{024F1CA9-B2E2-4DE4-AB15-9E1E09C3B5C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{024F1CA9-B2E2-4DE4-AB15-9E1E09C3B5C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{024F1CA9-B2E2-4DE4-AB15-9E1E09C3B5C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{024F1CA9-B2E2-4DE4-AB15-9E1E09C3B5C4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{773994EF-32A5-4A09-B38A-B5927DF8FE1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{773994EF-32A5-4A09-B38A-B5927DF8FE1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{773994EF-32A5-4A09-B38A-B5927DF8FE1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
