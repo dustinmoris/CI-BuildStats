@@ -12,6 +12,10 @@ type Package =
         Version     : string
         Downloads   : int
     }
+ 
+let matches (name1 : string) 
+            (name2 : string) =
+    name1.Equals(name2, StringComparison.InvariantCultureIgnoreCase)
 
 let getNuGetPackageAsync    (packageName : string) 
                             (includePreReleases : bool) =
@@ -21,8 +25,7 @@ let getNuGetPackageAsync    (packageName : string)
             obj.Value<JArray> "data"            
 
         let tryFindDesiredItem (data : JArray) =
-            data |> Seq.tryFind(fun item -> 
-                (item.Value<string> "id").Equals(packageName, StringComparison.InvariantCultureIgnoreCase))
+            data |> Seq.tryFind(fun item -> item.Value<string> "id" |> matches packageName)
 
         let convertIntoPackage (item : JToken option) =
             match item with
@@ -58,5 +61,8 @@ let getMyGetPackageAsync    (feedName : string)
         let filter = sprintf "Id eq '%s'" packageName |> WebUtility.UrlEncode
         let url = sprintf "https://www.myget.org/F/%s/api/v2/Packages()?$filter=%s&$orderby=Published desc&$top=1" feedName filter
         let! json = getAsync url Json
-        return deserialize json
+        return
+            match deserialize json with
+            | p when p.Name |> matches packageName  -> Some p
+            | _                                     -> None
     }
