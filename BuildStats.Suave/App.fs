@@ -67,9 +67,12 @@ let getMyGetPackage (feedName, packageName) =
 
 
 let app = 
-    GET >=> choose [
-        pathScan "/nuget/%s"    getNuGetPackage
-        pathScan "/myget/%s/%s" getMyGetPackage
+    choose [
+        GET >=> choose [
+            pathScan "/nuget/%s"    getNuGetPackage
+            pathScan "/myget/%s/%s" getMyGetPackage
+        ]
+        NOT_FOUND "The requested resource could not be found. Please note that URLs are case sensitive."
     ]
 
 

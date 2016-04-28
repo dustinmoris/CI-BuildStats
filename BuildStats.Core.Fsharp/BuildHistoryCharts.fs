@@ -38,11 +38,26 @@ let parseAppVeyorContent (json : string) =
 let getAppVeyorBuilds   (account : string) 
                         (project : string) 
                         (buildCount : int) 
-                        (branch : string) 
+                        (branch : string option) 
                         (includeBuildsFromPullRequest : bool) = 
     async {
-        let url = sprintf "https://ci.appveyor.com/api/projects/%s/%s/history?recordsNumber=%d" account project buildCount
+        let additionalFilter =
+            match branch with
+            | Some b -> sprintf "&branch=%s" b
+            | None   -> ""
+
+        let recordsNumber = 5 * buildCount
+
+        let url = sprintf "https://ci.appveyor.com/api/projects/%s/%s/history?recordsNumber=%d%s" account project recordsNumber additionalFilter
+
+        let pullRequestFilter build =
+            includeBuildsFromPullRequest || not build.FromPullRequest
+
         let! json = getAsync url Json
-        return json |> parseAppVeyorContent
+
+        return json
+            |> parseAppVeyorContent
+            |> Seq.filter pullRequestFilter
+            |> Seq.truncate buildCount
     }
     

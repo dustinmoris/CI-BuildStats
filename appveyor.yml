@@ -16,6 +16,7 @@ before_build:
 build:
   publish_wap: true
   verbosity: normal
+test: off
 deploy:
   provider: WebDeploy
   skip_symbols: false
