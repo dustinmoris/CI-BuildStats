@@ -56,10 +56,11 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="ViewModels.fs" />
     <Compile Include="App.fs" />
-    <Content Include="PackageBadge.svg">
+    <None Include="Package.svg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
     <None Include="App.config" />
     <Content Include="packages.config" />
   </ItemGroup>

@@ -39,10 +39,14 @@ let getNuGetPackageAsync    (packageName : string)
 
         let url = sprintf "https://api-v3search-0.nuget.org/query?q=%s&skip=0&take=10&prerelease=%b" packageName includePreReleases
         let! json = getAsync url Json
-        return json
-            |> deserialize 
-            |> tryFindDesiredItem
-            |> convertIntoPackage
+        return
+            match json with
+            | "" -> None
+            | _  ->
+                json
+                |> deserialize 
+                |> tryFindDesiredItem
+                |> convertIntoPackage
     }
 
 let getMyGetPackageAsync    (feedName : string) 
@@ -62,7 +66,10 @@ let getMyGetPackageAsync    (feedName : string)
         let url = sprintf "https://www.myget.org/F/%s/api/v2/Packages()?$filter=%s&$orderby=Published desc&$top=1" feedName filter
         let! json = getAsync url Json
         return
-            match deserialize json with
-            | p when p.Name |> matches packageName  -> Some p
-            | _                                     -> None
+            match json with
+            | "" -> None
+            | _  ->
+                match deserialize json with
+                | p when p.Name |> matches packageName  -> Some p
+                | _                                     -> None
     }

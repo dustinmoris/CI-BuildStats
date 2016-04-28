@@ -1,0 +1,30 @@
+﻿<!--
+    This widget is provided by Dustin Moris Gorski (https://dusted.codes/).
+    All source code is open source and hosted on GitHub (https://github.com/dustinmoris/CI-BuildStats/).
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     style="shape-rendering: geometricPrecision;
+            image-rendering: optimizeQuality;
+            fill-rule: evenodd;
+            clip-rule: evenodd"
+     width="{{ model.total_width }}"
+     height="{{ model.total_height }}">
+    <g font-family="{{ model.font_family }}" font-size="{{ model.font_size }}" fill="{{ model.font_colour }}">
+        <defs>
+            <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color: rgb(255, 255, 255); stop-opacity: 0.3" />
+                <stop offset="100%" style="stop-color: rgb(255, 255, 255); stop-opacity: 0" />
+            </linearGradient>
+        </defs>
+
+        <rect x="{{ model.x }}" y="{{ model.y }}" height="{{ model.total_height }}" width="{{ model.total_width | minus: 50 }}" rx="{{ model.corner_radius }}" ry="{{ model.corner_radius }}" stroke-width="0" fill="{{ model.feed_bg_colour }}" />
+        <rect x="{{ model.x | plus: model.feed_width }}" y="{{ model.y }}" height="{{ model.total_height }}" width="{{ model.version_width }}" stroke-width="0" fill="{{ model.version_bg_colour }}" />
+        <rect x="{{ model.x | plus: model.feed_width | plus: model.version_width }}" y="{{ model.y }}" height="{{ model.total_height }}" width="{{ model.downloads_width | minus: 10 }}" stroke-width="0" fill="{{ model.downloads_bg_colour }}" />
+        <rect x="{{ model.x | plus: model.feed_width | plus: model.version_width }}" y="{{ model.y }}" height="{{ model.total_height }}" width="{{ model.downloads_width }}" rx="{{ model.corner_radius }}" ry="{{ model.corner_radius }}" stroke-width="0" fill="{{ model.downloads_bg_colour }}" />
+        <rect x="0" y="{{ model.y }}" height="{{ model.total_height }}" width="{{ model.total_width }}" rx="{{ model.corner_radius }}" ry="{{ model.corner_radius }}" stroke-width="0" fill="url(#grad1)" />
+
+        <text x="{{ model.x | plus: model.padding | plus: 2 }}" y="{{ model.y | plus: 14 }}" fill="#ffffff">{{ model.feed }}</text>
+        <text x="{{ model.x | plus: model.feed_width | plus: model.padding | plus: 2 }}" y="{{ model.y | plus: 14 }}" fill="#ffffff">{{ model.version }}</text>
+        <text x="{{ model.x | plus: model.feed_width | plus: model.version_width | plus: model.padding | plus: 2 }}" y="{{ model.y | plus: 14 }}" fill="#ffffff">{{ model.downloads }}</text>
+    </g>
+</svg>
