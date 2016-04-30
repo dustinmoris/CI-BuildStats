@@ -26,8 +26,7 @@ type PackageViewModel =
         DownloadsWidth      : int
     }
 
-let createPackageModel (package : Package)
-                       (feed    : string) =
+let createPackageModel (package : Package)  =
 
     let version = sprintf "v%s" package.Version
 
@@ -54,12 +53,12 @@ let createPackageModel (package : Package)
 
     let addPadding width = width + padding * 2
 
-    let feedWidth       = feed      |> measureTextWidth |> addPadding
-    let versionWidth    = version   |> measureTextWidth |> addPadding
-    let downloadsWidth  = downloads |> measureTextWidth |> addPadding
+    let feedWidth       = package.Feed  |> measureTextWidth |> addPadding
+    let versionWidth    = version       |> measureTextWidth |> addPadding
+    let downloadsWidth  = downloads     |> measureTextWidth |> addPadding
 
     {
-        Feed = feed
+        Feed = package.Feed
         Version = version
         Downloads = downloads
         X = 0

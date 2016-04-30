@@ -33,48 +33,39 @@ let SVG template model =
     page template model
     >=> Writers.setMimeType "image/svg+xml"
 
-let preReleasesQueryParamKey = "includePreReleases"
-
-let preReleaseQueryParamParseErrorMsg = 
-    sprintf "Could not parse query parameter \"%s\" into a Boolean value." preReleasesQueryParamKey
-
-let getNuGetPackage packageName =
-    fun (ctx : HttpContext) ->       
-        match getBoolFromQueryParam ctx preReleasesQueryParamKey false with
-        | Value includePreReleases ->
-            async { 
-                let! package = getNuGetPackageAsync packageName includePreReleases
-                return!
-                    match package with
-                    | None      -> NOT_FOUND (sprintf "NuGet package \"%s\" could not be found." packageName) ctx
-                    | Some pkg  -> SVG "Package.svg" (createPackageModel pkg "nuget") ctx
-            }
-        | ParsingError          -> BAD_REQUEST preReleaseQueryParamParseErrorMsg ctx
-
-
-let getMyGetPackage (feedName, packageName) =
+let getPackage (getPackageFunc : bool -> Async<Package option>) =
     fun (ctx : HttpContext) ->
-        match getBoolFromQueryParam ctx preReleasesQueryParamKey false with
+        match getBoolFromQueryParam ctx "includePreReleases" false with
         | Value includePreReleases ->
             async { 
-                let! package = getMyGetPackageAsync feedName packageName includePreReleases
+                let! package = getPackageFunc includePreReleases
                 return!
                     match package with
-                    | None      -> NOT_FOUND (sprintf "MyGet package \"%s\" could not be found." packageName) ctx
-                    | Some pkg  -> SVG "Package.svg" (createPackageModel pkg "myget") ctx
+                    | None      -> NOT_FOUND <| sprintf "Package could not be found." <| ctx
+                    | Some pkg  -> SVG "Package.liquid" <| createPackageModel pkg <| ctx
             }
-        | ParsingError          -> BAD_REQUEST preReleaseQueryParamParseErrorMsg ctx
+        | ParsingError          -> BAD_REQUEST "Could not parse query parameter \"includePreReleases\" into a Boolean value." ctx
 
+let nugetFunc packageName = 
+    fun includePreReleases -> 
+        async { 
+            return! getNuGetPackageAsync packageName includePreReleases 
+        }
+
+let mygetFunc (feedName, packageName) =
+    fun includePreReleases -> 
+        async { 
+            return! getMyGetPackageAsync feedName packageName includePreReleases 
+        }
 
 let app = 
     choose [
         GET >=> choose [
-            pathScan "/nuget/%s"    getNuGetPackage
-            pathScan "/myget/%s/%s" getMyGetPackage
+            pathScan "/nuget/%s"    (fun x -> nugetFunc x |> getPackage)
+            pathScan "/myget/%s/%s" (fun x -> mygetFunc x |> getPackage)
         ]
         NOT_FOUND "The requested resource could not be found. Please note that URLs are case sensitive."
     ]
-
 
 [<EntryPoint>]
 let main argv = 

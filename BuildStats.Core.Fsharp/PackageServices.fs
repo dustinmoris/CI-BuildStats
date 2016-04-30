@@ -8,6 +8,7 @@ open RestClient
 
 type Package =
     {
+        Feed        : string
         Name        : string
         Version     : string
         Downloads   : int
@@ -31,6 +32,7 @@ let getNuGetPackageAsync    (packageName : string)
             match item with
             | Some x ->
                 Some {
+                    Feed = "nuget"
                     Name = x.Value<string> "id"
                     Version = x.Value<string> "version"
                     Downloads = x.Value<int> "totalDownloads"
@@ -57,6 +59,7 @@ let getMyGetPackageAsync    (feedName : string)
             let obj = deserializeJson json :?> JObject
             let data = obj.Value<JArray> "d"
             {
+                Feed = "myget"
                 Name = data.[0].Value<string> "Id"
                 Version = data.[0].Value<string> "Version"
                 Downloads = data.[0].Value<int> "DownloadCount"
