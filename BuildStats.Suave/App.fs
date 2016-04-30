@@ -49,13 +49,13 @@ let getPackage (getPackageFunc : bool -> Async<Package option>) =
 let nugetFunc packageName = 
     fun includePreReleases -> 
         async { 
-            return! getNuGetPackageAsync packageName includePreReleases 
+            return! NuGet.getPackageAsync packageName includePreReleases 
         }
 
 let mygetFunc (feedName, packageName) =
     fun includePreReleases -> 
         async { 
-            return! getMyGetPackageAsync feedName packageName includePreReleases 
+            return! MyGet.getPackageAsync feedName packageName includePreReleases 
         }
 
 let app = 
