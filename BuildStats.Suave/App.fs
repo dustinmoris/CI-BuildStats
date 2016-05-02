@@ -9,25 +9,32 @@ open PackageServices
 open Serializers
 open ViewModels
 
-let tryParseWith tryParseFunc = tryParseFunc >> function
-    | true  , value -> Some value
-    | false , _     -> None
+module UrlQuery =
 
-let tryParseBool = tryParseWith bool.TryParse
+    let tryParseWith tryParseFunc = tryParseFunc >> function
+        | true  , value -> Some value
+        | false , _     -> None
 
-let (|Bool|_|) = tryParseBool
+    let tryParseBool = tryParseWith bool.TryParse
 
-type QueryParamValue<'T> =
-    | Value of 'T
-    | ParsingError
+    let (|Bool|_|) = tryParseBool
 
-let getBoolFromQueryParam (ctx : HttpContext) (key : string) (defaultValue : bool) =
-    match ctx.request.queryParam key with
-    | Choice1Of2 value  ->
-        match value with
-        | Bool b    -> Value b
-        | _         -> ParsingError
-    | _             -> Value defaultValue
+    type QueryParamValue<'T> =
+        | Value of 'T
+        | ParsingError
+
+    let getBool (ctx : HttpContext) 
+                (key : string) 
+                (defaultValue : bool) =
+
+        match ctx.request.queryParam key with
+        | Choice1Of2 value  ->
+            match value with
+            | Bool b    -> Value b
+            | _         -> ParsingError
+        | _             -> Value defaultValue
+
+open UrlQuery
 
 let SVG template model =
     page template model
@@ -35,7 +42,7 @@ let SVG template model =
 
 let getPackage (getPackageFunc : bool -> Async<Package option>) =
     fun (ctx : HttpContext) ->
-        match getBoolFromQueryParam ctx "includePreReleases" false with
+        match getBool ctx "includePreReleases" false with
         | Value includePreReleases ->
             async { 
                 let! package = getPackageFunc includePreReleases

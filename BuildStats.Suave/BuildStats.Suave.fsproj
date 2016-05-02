@@ -58,11 +58,12 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="ViewModels.fs" />
     <Compile Include="App.fs" />
+    <None Include="BuildHistory.svg" />
+    <None Include="App.config" />
+    <Content Include="packages.config" />
     <None Include="Package.liquid">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="App.config" />
-    <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="DotLiquid">

@@ -3,6 +3,118 @@
 open System
 open System.Drawing
 open PackageServices
+open BuildHistoryCharts
+
+type TextModel =
+    {
+        X    : int
+        Y    : int
+        Text : string
+    }
+
+type BuildBarModel =
+    {
+        X       : int
+        Y       : int
+        Height  : int
+        Colour  : string
+        BuildId : string
+    }
+
+type BuildHistoryViewModel =
+    {      
+        TotalWidth          : int
+        TotalHeight         : int
+        FontSize            : int
+        FontFamily          : string
+        FontColour          : string
+        BranchTextColour    : string
+        BranchText          : TextModel
+        LongestBuildText    : TextModel
+        ShortestBuildText   : TextModel
+        AverageBuildText    : TextModel
+        BarWidth            : int
+        Builds              : BuildBarModel list
+    }
+
+let createBuildHistoryModel (builds : Build list) =
+    let fontSize = 12
+    let gap = 3
+
+    let branches =
+        builds
+        |> List.distinctBy (fun x -> x.Branch)
+
+    let branchText =
+        match branches.Length with
+        | 0 -> "No builds found"
+        | 1 -> sprintf "Build history for %s" branches.[0].Branch
+        | _ -> "Build history for all branches"
+    
+    let formatTimeSpan (timeSpan : TimeSpan) = 
+        timeSpan.ToString("hh\:mm\:ss\.ff")
+
+    let longestBuildText =
+        builds
+        |> List.maxBy (fun x -> x.TimeTaken.TotalMilliseconds)
+        |> fun x -> x.TimeTaken
+        |> formatTimeSpan
+
+    let shortestBuildText =
+        builds
+        |> List.minBy (fun x -> x.TimeTaken.TotalMilliseconds)
+        |> fun x -> x.TimeTaken
+        |> formatTimeSpan
+
+    let averageBuildText =
+        builds
+        |> List.averageBy (fun x -> x.TimeTaken.TotalMilliseconds)
+        |> TimeSpan.FromMilliseconds
+        |> formatTimeSpan
+
+    {        
+        TotalWidth = 0
+        TotalHeight = 0
+        FontSize = fontSize
+        FontFamily = "Helvetica,Arial,sans-serif"
+        FontColour = "#777777"
+        BranchTextColour = "#000000"
+        BranchText =
+            {
+                X = 0
+                Y = fontSize
+                Text = branchText
+            }
+        LongestBuildText =
+            {
+                X = 0
+                Y = fontSize * 2 + gap
+                Text = longestBuildText
+            }
+        ShortestBuildText =
+            {
+                X = 0
+                Y = fontSize * 3 + gap * 2
+                Text = shortestBuildText
+            }
+        AverageBuildText =
+            {
+                X = 0
+                Y = fontSize * 4 + gap * 3
+                Text = averageBuildText
+            }
+        BarWidth = 5
+        Builds =
+            [
+                {
+                    X = 0
+                    Y = 0
+                    Height = 0
+                    Colour = "#000000"                    
+                    BuildId = ""
+                }
+            ]
+    }
 
 type PackageViewModel = 
     {
@@ -24,7 +136,7 @@ type PackageViewModel =
         VersionWidth        : int        
         DownloadsBgColour   : string
         DownloadsWidth      : int
-    }
+    }    
 
 let createPackageModel (package : Package)  =
 
