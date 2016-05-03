@@ -16,9 +16,9 @@ type BuildBarModel =
     {
         X       : int
         Y       : int
-        Height  : int
+        Height  : float
+        BuildId : int
         Colour  : string
-        BuildId : string
     }
 
 type BuildHistoryViewModel =
@@ -40,6 +40,7 @@ type BuildHistoryViewModel =
 let createBuildHistoryModel (builds : Build list) =
     let fontSize = 12
     let gap = 3
+    let maxBarHeight = 50.0
 
     let branches =
         builds
@@ -54,10 +55,13 @@ let createBuildHistoryModel (builds : Build list) =
     let formatTimeSpan (timeSpan : TimeSpan) = 
         timeSpan.ToString("hh\:mm\:ss\.ff")
 
-    let longestBuildText =
+    let longestBuildTime =
         builds
         |> List.maxBy (fun x -> x.TimeTaken.TotalMilliseconds)
         |> fun x -> x.TimeTaken
+    
+    let longestBuildText =
+        longestBuildTime
         |> formatTimeSpan
 
     let shortestBuildText =
@@ -105,15 +109,29 @@ let createBuildHistoryModel (builds : Build list) =
             }
         BarWidth = 5
         Builds =
-            [
-                {
-                    X = 0
-                    Y = 0
-                    Height = 0
-                    Colour = "#000000"                    
-                    BuildId = ""
-                }
-            ]
+            builds
+            |> List.mapi (
+
+                fun index build ->
+                    let f = 
+                        build.TimeTaken.TotalMilliseconds /
+                        longestBuildTime.TotalMilliseconds
+                    let height = 
+                        Math.Max(f * maxBarHeight, 3.0)
+
+                    {
+                        X = 0
+                        Y = 0
+                        Height = height
+                        Colour = 
+                            match build.Status with
+                            | Success   -> "#04b431"
+                            | Failed    -> "#ff0000"
+                            | Pending   -> "#ffbf00"
+                            | Cancelled -> "#888888"   
+                            | Unkown    -> "#ffffff"                
+                        BuildId = build.Id
+                    })          
     }
 
 type PackageViewModel = 
