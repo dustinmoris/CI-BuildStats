@@ -16,7 +16,7 @@ type BuildBarModel =
     {
         X       : int
         Y       : int
-        Height  : float
+        Height  : int
         BuildId : int
         Colour  : string
     }
@@ -37,10 +37,12 @@ type BuildHistoryViewModel =
         Builds              : BuildBarModel list
     }
 
-let createBuildHistoryModel (builds : Build list) =
+let createBuildHistoryModel (builds     : Build list)
+                            (showStats  : bool) =
     let fontSize = 12
+    let barWidth = 5
     let gap = 3
-    let maxBarHeight = 50.0
+    let maxBarHeight = 50
 
     let branches =
         builds
@@ -55,30 +57,20 @@ let createBuildHistoryModel (builds : Build list) =
     let formatTimeSpan (timeSpan : TimeSpan) = 
         timeSpan.ToString("hh\:mm\:ss\.ff")
 
-    let longestBuildTime =
-        builds
-        |> List.maxBy (fun x -> x.TimeTaken.TotalMilliseconds)
-        |> fun x -> x.TimeTaken
-    
+    let longestBuildTime = BuildMetrics.longestBuildTime builds
+
     let longestBuildText =
-        longestBuildTime
-        |> formatTimeSpan
+        "Longest build time: " + (longestBuildTime |> formatTimeSpan)
 
     let shortestBuildText =
-        builds
-        |> List.minBy (fun x -> x.TimeTaken.TotalMilliseconds)
-        |> fun x -> x.TimeTaken
-        |> formatTimeSpan
+        "Shortest build time: " + (BuildMetrics.shortestBuildTime builds |> formatTimeSpan)
 
     let averageBuildText =
-        builds
-        |> List.averageBy (fun x -> x.TimeTaken.TotalMilliseconds)
-        |> TimeSpan.FromMilliseconds
-        |> formatTimeSpan
+        "Average build time: " + (BuildMetrics.averageBuildTime builds |> formatTimeSpan)
 
     {        
-        TotalWidth = 0
-        TotalHeight = 0
+        TotalWidth = 200
+        TotalHeight = 200
         FontSize = fontSize
         FontFamily = "Helvetica,Arial,sans-serif"
         FontColour = "#777777"
@@ -107,21 +99,26 @@ let createBuildHistoryModel (builds : Build list) =
                 Y = fontSize * 4 + gap * 3
                 Text = averageBuildText
             }
-        BarWidth = 5
+        BarWidth = barWidth
         Builds =
             builds
             |> List.mapi (
 
                 fun index build ->
-                    let f = 
+                    let percent = 
                         build.TimeTaken.TotalMilliseconds /
                         longestBuildTime.TotalMilliseconds
-                    let height = 
-                        Math.Max(f * maxBarHeight, 3.0)
 
+                    let height = 
+                        int(Math.Floor(Math.Max(percent * float maxBarHeight, 3.0)))
+
+                    let multiplier =
+                        match showStats with
+                        | true  -> 5
+                        | false -> 2
                     {
-                        X = 0
-                        Y = 0
+                        X = index * (barWidth + gap)
+                        Y = maxBarHeight + fontSize * multiplier - height + 10
                         Height = height
                         Colour = 
                             match build.Status with

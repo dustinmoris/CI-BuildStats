@@ -6,6 +6,7 @@ open Suave.Successful
 open Suave.RequestErrors
 open Suave.DotLiquid
 open PackageServices
+open BuildHistoryCharts
 open Serializers
 open ViewModels
 
@@ -65,11 +66,21 @@ let mygetFunc (feedName, packageName) =
             return! MyGet.getPackageAsync feedName packageName includePreReleases 
         }
 
+let test (account, project) =
+    fun (ctx : HttpContext) ->
+        async {
+            let! builds = AppVeyor.getBuilds account project 25 None true
+            let model = createBuildHistoryModel builds true
+            return! SVG "BuildHistory.svg" model ctx
+        }
+    
+
 let app = 
     choose [
         GET >=> choose [
             pathScan "/nuget/%s"    (fun x -> nugetFunc x |> getPackage)
             pathScan "/myget/%s/%s" (fun x -> mygetFunc x |> getPackage)
+            pathScan "/appveyor/%s/%s" test
         ]
         NOT_FOUND "The requested resource could not be found. Please note that URLs are case sensitive."
     ]

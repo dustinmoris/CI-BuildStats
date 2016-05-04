@@ -58,7 +58,9 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="ViewModels.fs" />
     <Compile Include="App.fs" />
-    <None Include="BuildHistory.svg" />
+    <Content Include="BuildHistory.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="App.config" />
     <Content Include="packages.config" />
     <None Include="Package.liquid">

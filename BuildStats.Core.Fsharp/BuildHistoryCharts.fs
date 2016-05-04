@@ -22,6 +22,23 @@ type Build =
         FromPullRequest : bool
     }
 
+module BuildMetrics =
+    
+    let longestBuildTime (builds : Build list) =
+        builds
+        |> List.maxBy (fun x -> x.TimeTaken.TotalMilliseconds)
+        |> fun x -> x.TimeTaken
+
+    let shortestBuildTime (builds : Build list) =
+        builds
+        |> List.minBy (fun x -> x.TimeTaken.TotalMilliseconds)
+        |> fun x -> x.TimeTaken
+
+    let averageBuildTime (builds : Build list) =
+        builds
+        |> List.averageBy (fun x -> x.TimeTaken.TotalMilliseconds)
+        |> TimeSpan.FromMilliseconds
+
 module AppVeyor =
 
     let deserializeJson (json : string) =
@@ -45,14 +62,24 @@ module AppVeyor =
     let convertToBuilds (items : JArray) =
         items 
         |> Seq.map (fun x ->
+            let startedDate  = x.Value<Nullable<DateTime>> "started"
+            let finishedDate = x.Value<Nullable<DateTime>> "finished"
+            let timeTaken =
+                match startedDate.HasValue with
+                | true ->
+                    match finishedDate.HasValue with
+                    | true  -> finishedDate.Value - startedDate.Value
+                    | false -> TimeSpan.Zero
+                | false     -> TimeSpan.Zero
             { 
                 Id              = x.Value<int> "buildId"
                 BuildNumber     = x.Value<int> "buildNumber"
-                TimeTaken       = TimeSpan.FromDays(1.0)
+                TimeTaken       = timeTaken
                 Status          = x.Value<string> "status" |> parseStatus
                 Branch          = x.Value<string> "branch"
                 FromPullRequest = x.Value<string> "pullRequestId" |> isPullRequest
             })
+        |> Seq.toList
 
     let getBuilds   (account : string) 
                     (project : string) 
@@ -77,7 +104,8 @@ module AppVeyor =
             return json
                 |> deserializeJson
                 |> convertToBuilds
-                |> Seq.filter pullRequestFilter
-                |> Seq.truncate buildCount
+                |> List.filter pullRequestFilter
+                |> List.rev
+                |> List.truncate buildCount
         }
     
