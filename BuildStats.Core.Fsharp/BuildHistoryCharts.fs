@@ -53,8 +53,14 @@ module AppVeyor =
         | "queued" | "running"  -> Pending
         | _                     -> Unkown
 
-    let getTimeTaken started finished =
-        TimeSpan.FromSeconds(200.0)
+    let getTimeTaken (started   : Nullable<DateTime>)
+                     (finished  : Nullable<DateTime>) =
+        match started.HasValue with
+        | true ->
+            match finished.HasValue with
+            | true  -> finished.Value - started.Value
+            | false -> TimeSpan.Zero
+        | false     -> TimeSpan.Zero
 
     let isPullRequest pullRequestId =
         false
@@ -62,19 +68,12 @@ module AppVeyor =
     let convertToBuilds (items : JArray) =
         items 
         |> Seq.map (fun x ->
-            let startedDate  = x.Value<Nullable<DateTime>> "started"
-            let finishedDate = x.Value<Nullable<DateTime>> "finished"
-            let timeTaken =
-                match startedDate.HasValue with
-                | true ->
-                    match finishedDate.HasValue with
-                    | true  -> finishedDate.Value - startedDate.Value
-                    | false -> TimeSpan.Zero
-                | false     -> TimeSpan.Zero
-            { 
+            let started  = x.Value<Nullable<DateTime>> "started"
+            let finished = x.Value<Nullable<DateTime>> "finished"
+            {
                 Id              = x.Value<int> "buildId"
                 BuildNumber     = x.Value<int> "buildNumber"
-                TimeTaken       = timeTaken
+                TimeTaken       = getTimeTaken started finished
                 Status          = x.Value<string> "status" |> parseStatus
                 Branch          = x.Value<string> "branch"
                 FromPullRequest = x.Value<string> "pullRequestId" |> isPullRequest
@@ -105,7 +104,6 @@ module AppVeyor =
                 |> deserializeJson
                 |> convertToBuilds
                 |> List.filter pullRequestFilter
-                |> List.rev
                 |> List.truncate buildCount
         }
     

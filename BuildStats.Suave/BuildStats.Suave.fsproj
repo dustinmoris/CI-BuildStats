@@ -56,6 +56,7 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="QueryParameterHelper.fs" />
     <Compile Include="ViewModels.fs" />
     <Compile Include="App.fs" />
     <Content Include="BuildHistory.svg">

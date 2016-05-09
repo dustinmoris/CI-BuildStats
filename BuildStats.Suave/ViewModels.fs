@@ -33,6 +33,7 @@ type BuildHistoryViewModel =
         LongestBuildText    : TextModel
         ShortestBuildText   : TextModel
         AverageBuildText    : TextModel
+        ShowStats           : bool
         BarWidth            : int
         Builds              : BuildBarModel list
     }
@@ -99,9 +100,11 @@ let createBuildHistoryModel (builds     : Build list)
                 Y = fontSize * 4 + gap * 3
                 Text = averageBuildText
             }
+        ShowStats = showStats
         BarWidth = barWidth
         Builds =
             builds
+            |> List.rev
             |> List.mapi (
 
                 fun index build ->
