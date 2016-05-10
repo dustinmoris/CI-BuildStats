@@ -8,3 +8,5 @@ branches:
     - feature/Migration_to_Fsharp
 after_success:
   - docker build -t dustinmoris/buildstatsinfo ./BuildStats.Suave/bin/Release
+  - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  - docker push dustinmoris/buildstatsinfo
