@@ -55,7 +55,7 @@ let test (account, project) =
                     async {
                         let! builds = AppVeyor.getBuilds account project buildCount branch inclPullRequests
                         let model = createBuildHistoryModel builds showStats
-                        return!         SVG "BuildHistory.svg" model ctx
+                        return!         SVG "BuildHistory.liquid" model ctx
                     }
                 | ParsingError       -> BAD_REQUEST "Could not parse query parameter \"showStats\" into a Boolean value." ctx
             | ParsingError           -> BAD_REQUEST "Could not parse query parameter \"includeBuildsFromPullRequest\" into a Boolean value." ctx

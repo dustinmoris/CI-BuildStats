@@ -2,9 +2,11 @@
     This SVG badge is provided by Dustin Moris Gorski (https://dusted.codes/).
     All source code is open source and hosted on GitHub (https://github.com/dustinmoris/CI-BuildStats/).
 -->
-<svg xmlns="http://www.w3.org/2000/svg" style="shape-rendering: geometricPrecision; image-rendering: optimizeQuality; fill-rule: evenodd; clip-rule: evenodd" width="{{ model.total_width }}" height="{{ model.total_height }}">
+<svg xmlns="http://www.w3.org/2000/svg" style="shape-rendering: geometricPrecision; image-rendering: optimizeQuality; fill-rule: evenodd; clip-rule: evenodd;" width="{{ model.total_width }}" height="{{ model.total_height }}">
   <g font-family="{{ model.font_family }}" font-size="{{ model.font_size }}" fill="{{ model.font_colour }}">
 
+    <rect width="100%" height="100%" fill="Blue"/>
+    
     <text x="{{ model.branch_text.x }}" y="{{ model.branch_text.y }}" font-weight="bold"
           fill="{{ model.branch_text_colour }}">{{ model.branch_text.text }}</text>
 

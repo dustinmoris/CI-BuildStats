@@ -38,6 +38,14 @@ type BuildHistoryViewModel =
         Builds              : BuildBarModel list
     }
 
+let measureTextWidth (fontSize : int)
+                     (text : string) =
+    let bitmap = new Bitmap(1, 1)
+    let graphics = Graphics.FromImage(bitmap)
+    let font = new Font(FontFamily.GenericSansSerif, float32 (fontSize - 3))
+    let dimension = graphics.MeasureString(text, font)
+    int (Math.Ceiling(float dimension.Width))
+
 let createBuildHistoryModel (builds     : Build list)
                             (showStats  : bool) =
     let fontSize = 12
@@ -52,8 +60,8 @@ let createBuildHistoryModel (builds     : Build list)
     let branchText =
         match branches.Length with
         | 0 -> "No builds found"
-        | 1 -> sprintf "Build history for %s" branches.[0].Branch
-        | _ -> "Build history for all branches"
+        | 1 -> sprintf "Build history for %s (last %i builds)" branches.[0].Branch builds.Length
+        | _ -> sprintf "Build history for all branches (last %i builds)" builds.Length
     
     let formatTimeSpan (timeSpan : TimeSpan) = 
         timeSpan.ToString("hh\:mm\:ss\.ff")
@@ -69,9 +77,16 @@ let createBuildHistoryModel (builds     : Build list)
     let averageBuildText =
         "Average build time: " + (BuildMetrics.averageBuildTime builds |> formatTimeSpan)
 
+    let linesOfText =
+        match showStats with
+        | true  -> 4
+        | false -> 1
+
+    let totalHeight = maxBarHeight + fontSize * (linesOfText + 1) + gap * linesOfText
+    
     {        
         TotalWidth = 200
-        TotalHeight = 200
+        TotalHeight = totalHeight
         FontSize = fontSize
         FontFamily = "Helvetica,Arial,sans-serif"
         FontColour = "#777777"
@@ -112,16 +127,11 @@ let createBuildHistoryModel (builds     : Build list)
                         build.TimeTaken.TotalMilliseconds /
                         longestBuildTime.TotalMilliseconds
 
-                    let height = 
-                        int(Math.Floor(Math.Max(percent * float maxBarHeight, 3.0)))
+                    let height = int(Math.Floor(Math.Max(percent * float maxBarHeight, 3.0)))
 
-                    let multiplier =
-                        match showStats with
-                        | true  -> 5
-                        | false -> 2
                     {
                         X = index * (barWidth + gap)
-                        Y = maxBarHeight + fontSize * multiplier - height + 10
+                        Y = maxBarHeight + fontSize * (linesOfText + 1) - height + gap * linesOfText
                         Height = height
                         Colour = 
                             match build.Status with
@@ -174,18 +184,11 @@ let createPackageModel (package : Package)  =
     let fontSize = 12
     let padding = 5
 
-    let measureTextWidth (text : string) =
-        let bitmap = new Bitmap(1, 1)
-        let graphics = Graphics.FromImage(bitmap)
-        let font = new Font(FontFamily.GenericSansSerif, float32 (fontSize - 3))
-        let dimension = graphics.MeasureString(text, font)
-        int (Math.Ceiling(float dimension.Width))
-
     let addPadding width = width + padding * 2
 
-    let feedWidth       = package.Feed  |> measureTextWidth |> addPadding
-    let versionWidth    = version       |> measureTextWidth |> addPadding
-    let downloadsWidth  = downloads     |> measureTextWidth |> addPadding
+    let feedWidth       = package.Feed  |> measureTextWidth fontSize |> addPadding
+    let versionWidth    = version       |> measureTextWidth fontSize |> addPadding
+    let downloadsWidth  = downloads     |> measureTextWidth fontSize |> addPadding
 
     {
         Feed = package.Feed

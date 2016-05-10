@@ -59,14 +59,14 @@
     <Compile Include="QueryParameterHelper.fs" />
     <Compile Include="ViewModels.fs" />
     <Compile Include="App.fs" />
-    <Content Include="BuildHistory.svg">
+    <Content Include="BuildHistory.liquid">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Package.liquid">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="App.config" />
     <Content Include="packages.config" />
-    <None Include="Package.liquid">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="DotLiquid">

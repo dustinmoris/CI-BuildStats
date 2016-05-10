@@ -91,6 +91,7 @@ module AppVeyor =
                 | Some b -> sprintf "&branch=%s" b
                 | None   -> ""
 
+            // Pulling a bit more builds in case some get excluded by the pull request filter
             let recordsNumber = 5 * buildCount
 
             let url = sprintf "https://ci.appveyor.com/api/projects/%s/%s/history?recordsNumber=%d%s" account project recordsNumber additionalFilter
