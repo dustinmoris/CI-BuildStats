@@ -39,10 +39,11 @@ type BuildHistoryViewModel =
     }
 
 let measureTextWidth (fontSize : int)
+                     (fontStyle : FontStyle)
                      (text : string) =
     let bitmap = new Bitmap(1, 1)
     let graphics = Graphics.FromImage(bitmap)
-    let font = new Font(FontFamily.GenericSansSerif, float32 (fontSize - 3))
+    let font = new Font(FontFamily.GenericSansSerif, float32 (fontSize - 3), fontStyle)
     let dimension = graphics.MeasureString(text, font)
     int (Math.Ceiling(float dimension.Width))
 
@@ -84,9 +85,13 @@ let createBuildHistoryModel (builds     : Build list)
 
     let totalHeight = maxBarHeight + fontSize * (linesOfText + 1) + gap * linesOfText
     
+    let branchTextWidth = measureTextWidth fontSize FontStyle.Bold branchText
+    let chartsWidth = builds.Length * (barWidth + gap) - gap
+    let totalWidth = max branchTextWidth chartsWidth
+
     {        
-        TotalWidth = 200
-        TotalHeight = totalHeight
+        TotalWidth = totalWidth + 1
+        TotalHeight = totalHeight + 1
         FontSize = fontSize
         FontFamily = "Helvetica,Arial,sans-serif"
         FontColour = "#777777"
@@ -131,7 +136,7 @@ let createBuildHistoryModel (builds     : Build list)
 
                     {
                         X = index * (barWidth + gap)
-                        Y = maxBarHeight + fontSize * (linesOfText + 1) - height + gap * linesOfText
+                        Y = totalHeight - height
                         Height = height
                         Colour = 
                             match build.Status with
@@ -186,9 +191,9 @@ let createPackageModel (package : Package)  =
 
     let addPadding width = width + padding * 2
 
-    let feedWidth       = package.Feed  |> measureTextWidth fontSize |> addPadding
-    let versionWidth    = version       |> measureTextWidth fontSize |> addPadding
-    let downloadsWidth  = downloads     |> measureTextWidth fontSize |> addPadding
+    let feedWidth       = package.Feed  |> measureTextWidth fontSize FontStyle.Regular |> addPadding
+    let versionWidth    = version       |> measureTextWidth fontSize FontStyle.Regular |> addPadding
+    let downloadsWidth  = downloads     |> measureTextWidth fontSize FontStyle.Regular |> addPadding
 
     {
         Feed = package.Feed
