@@ -7,4 +7,4 @@ branches:
   only:
     - feature/Migration_to_Fsharp
 after_success:
-  - docker build -t dustinmoris/buildstatsinfo .
+  - docker build -t dustinmoris/buildstatsinfo ./BuildStats.Suave/bin/Release
