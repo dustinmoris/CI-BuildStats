@@ -67,6 +67,9 @@
     </Content>
     <None Include="App.config" />
     <Content Include="packages.config" />
+    <Content Include="Dockerfile">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="DotLiquid">

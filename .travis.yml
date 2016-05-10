@@ -1,0 +1,10 @@
+sudo: required
+language: csharp
+services:
+  - docker
+solution: BuildStats.sln
+branches:
+  only:
+    - feature/Migration_to_Fsharp
+after_success:
+  - docker build -t dustinmoris/buildstatsinfo .
