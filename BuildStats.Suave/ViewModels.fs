@@ -38,9 +38,9 @@ type BuildHistoryViewModel =
         Builds              : BuildBarModel list
     }
 
-let measureTextWidth (fontSize : int)
+let measureTextWidth (fontSize  : int)
                      (fontStyle : FontStyle)
-                     (text : string) =
+                     (text      : string) =
     let bitmap = new Bitmap(1, 1)
     let graphics = Graphics.FromImage(bitmap)
     let font = new Font(FontFamily.GenericSansSerif, float32 (fontSize - 3), fontStyle)
@@ -53,6 +53,8 @@ let createBuildHistoryModel (builds     : Build list)
     let barWidth = 5
     let gap = 3
     let maxBarHeight = 50
+    
+    let formatTimeSpan (timeSpan : TimeSpan) = timeSpan.ToString("hh\:mm\:ss\.ff")
 
     let branches =
         builds
@@ -63,9 +65,6 @@ let createBuildHistoryModel (builds     : Build list)
         | 0 -> "No builds found"
         | 1 -> sprintf "Build history for %s (last %i builds)" branches.[0].Branch builds.Length
         | _ -> sprintf "Build history for all branches (last %i builds)" builds.Length
-    
-    let formatTimeSpan (timeSpan : TimeSpan) = 
-        timeSpan.ToString("hh\:mm\:ss\.ff")
 
     let longestBuildTime = BuildMetrics.longestBuildTime builds
 
@@ -182,8 +181,8 @@ let createPackageModel (package : Package)  =
         let million  = 1000000
         let thousand = 1000
         match package.Downloads with
-        | dl when dl >= million  -> sprintf "▾ %fm" <| divideAndRound dl million
-        | dl when dl >= thousand -> sprintf "▾ %fk" <| divideAndRound dl thousand
+        | dl when dl >= million  -> sprintf "▾ %.2fm" <| divideAndRound dl million
+        | dl when dl >= thousand -> sprintf "▾ %.1fk" <| divideAndRound dl thousand
         | dl                     -> sprintf "▾ %i"  <| dl
 
     let fontSize = 12
