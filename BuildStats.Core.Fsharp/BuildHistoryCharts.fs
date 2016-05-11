@@ -169,34 +169,39 @@ module TravisCI =
                 })
             |> Seq.toList
 
-    let getBatchOfBuilds (account          : string) 
-                         (project          : string)
-                         (branch           : string)
-                         (inclPullRequest  : bool)
-                         (afterBuildNumber : int option) =
+    
+    let rec getBatchOfBuilds (account          : string) 
+                             (project          : string)
+                             (afterBuildNumber : int option)
+                             (maxRequests      : int)
+                             (requestCount     : int) : Async<Build list> =
+        
         async {
             let additionalQuery =
                 match afterBuildNumber with
                 | Some x -> sprintf "?after_number=%i" x
-                | None   -> "" 
+                | None   -> ""
+
             let url = sprintf "https://api.travis-ci.org/repos/%s/%s/builds%s" account project additionalQuery
             let! json = getAsync url Json
-            return
+            
+            let requestCount' = requestCount + 1
+
+            let batch =
                 json
                 |> parseToJArray
                 |> convertToBuilds
+            
+            // Travis API always returns fixed number of builds (25), hence pagination:
+            match batch with
+            | x when x.IsEmpty                   -> return []
+            | x when x.Length < 25               -> return x
+            | x when requestCount' = maxRequests -> return x
+            | _ ->
+                let lastBuild = batch |> Seq.last
+                let! nextBatch = getBatchOfBuilds account project (Some lastBuild.BuildNumber) maxRequests requestCount'
+                return batch @ nextBatch
         }
-
-//    let test (account          : string) 
-//             (project          : string)
-//             (branch           : string)
-//             (inclPullRequest  : bool)
-//             (afterBuildNumber : int option) =
-//        async {
-//            let! builds = getBatchOfBuilds account project branch inclPullRequest afterBuildNumber
-//
-//        }
-        
 
     let getBuilds   (account             : string) 
                     (project             : string) 
@@ -204,21 +209,16 @@ module TravisCI =
                     (branch              : string option) 
                     (inclFromPullRequest : bool) = 
         async {
-            let additionalFilter =
+            let maxRequests = 10
+            let! builds = getBatchOfBuilds account project None maxRequests 0
+
+            let branchFilter build = 
                 match branch with
-                | Some b -> sprintf "&branch=%s" b
-                | None   -> ""
+                | Some b -> build.Branch = b
+                | None   -> true
 
-            // Pulling a bit more builds in case some get excluded by the pull request filter
-            let recordsNumber = 5 * buildCount
-
-            let url = sprintf "https://ci.appveyor.com/api/projects/%s/%s/history?recordsNumber=%d%s" account project recordsNumber additionalFilter
-            
-            let! json = getAsync url Json
-
-            return json
-                |> parseToJArray
-                |> convertToBuilds
+            return builds
+                |> List.filter branchFilter
                 |> List.filter (pullRequestFilter inclFromPullRequest)
                 |> List.truncate buildCount
         }
