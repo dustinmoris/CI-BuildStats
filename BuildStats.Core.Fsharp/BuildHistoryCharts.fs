@@ -169,6 +169,7 @@ module TravisCI =
                 })
             |> Seq.toList
 
+    let numberOfBuildsPerPage = 25
     
     let rec getBatchOfBuilds (account          : string) 
                              (project          : string)
@@ -192,11 +193,10 @@ module TravisCI =
                 |> parseToJArray
                 |> convertToBuilds
             
-            // Travis API always returns fixed number of builds (25), hence pagination:
             match batch with
-            | x when x.IsEmpty                   -> return []
-            | x when x.Length < 25               -> return x
-            | x when requestCount' = maxRequests -> return x
+            | x when x.IsEmpty                          -> return []
+            | x when x.Length < numberOfBuildsPerPage   -> return x
+            | x when requestCount' = maxRequests        -> return x
             | _ ->
                 let lastBuild = batch |> Seq.last
                 let! nextBatch = getBatchOfBuilds account project (Some lastBuild.BuildNumber) maxRequests requestCount'
@@ -209,7 +209,7 @@ module TravisCI =
                     (branch              : string option) 
                     (inclFromPullRequest : bool) = 
         async {
-            let maxRequests = 10
+            let maxRequests = (buildCount / numberOfBuildsPerPage) * 5
             let! builds = getBatchOfBuilds account project None maxRequests 0
 
             let branchFilter build = 
