@@ -11,9 +11,17 @@ open Serializers
 open QueryParameterHelper
 open ViewModels
 
+// -------------------------------------------
+// Web Framework methods
+// -------------------------------------------
+
 let SVG template model =
     page template model
     >=> Writers.setMimeType "image/svg+xml"
+
+// -------------------------------------------
+// Package Endpoints
+// -------------------------------------------
 
 let getPackage (getPackageFunc : bool -> Async<Package option>) =
     fun (ctx : HttpContext) ->
@@ -24,7 +32,7 @@ let getPackage (getPackageFunc : bool -> Async<Package option>) =
                 return!
                     match package with
                     | None      -> NOT_FOUND <| sprintf "Package could not be found." <| ctx
-                    | Some pkg  -> SVG "Package.liquid" <| createPackageModel pkg <| ctx
+                    | Some pkg  -> SVG "Package.liquid" <| createPackageViewModel pkg <| ctx
             }
         | ParsingError          -> BAD_REQUEST "Could not parse query parameter \"includePreReleases\" into a Boolean value." ctx
 
@@ -40,6 +48,10 @@ let mygetFunc (feedName, packageName) =
             return! MyGet.getPackageAsync feedName packageName includePreReleases 
         }
 
+// -------------------------------------------
+// Build History Endpoints
+// -------------------------------------------
+
 let test (account, project) =
     fun (ctx : HttpContext) ->
         match getInt32FromUrlQuery ctx "buildCount" 25 with
@@ -54,13 +66,17 @@ let test (account, project) =
                         | _                 -> None
                     async {
                         let! builds = AppVeyor.getBuilds account project buildCount branch inclPullRequests
-                        let model = createBuildHistoryModel builds showStats
+                        let model = createBuildHistoryViewModel builds showStats
                         return!         SVG "BuildHistory.liquid" model ctx
                     }
                 | ParsingError       -> BAD_REQUEST "Could not parse query parameter \"showStats\" into a Boolean value." ctx
             | ParsingError           -> BAD_REQUEST "Could not parse query parameter \"includeBuildsFromPullRequest\" into a Boolean value." ctx
         | ParsingError               -> BAD_REQUEST "Could not parse query parameter \"buildCount\" into a Int32 value." ctx
-        
+
+// -------------------------------------------
+// Web Application
+// -------------------------------------------
+    
 let app = 
     choose [
         GET >=> choose [
