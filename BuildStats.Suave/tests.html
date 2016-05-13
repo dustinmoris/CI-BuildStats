@@ -1,0 +1,110 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="">
+    <meta name="author" content="Dustin Moris Gorski, https://dusted.codes/">
+    <title>Buildstats.info</title>
+    <style>
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: .9em;
+        }
+
+        main {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        h3 {
+            color: #800000;
+        }
+        
+        img {
+            display: block;
+            margin: 1em 0;
+        }
+
+        table th, table td {
+            padding: .3em;
+        }
+
+        table th {
+            text-align: left;
+        }
+
+        table tr:nth-child(odd) {
+             background-color: #efefef;
+        }
+
+        table tr:nth-child(even) {
+             background-color: #fafafa;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Buildstats.info</h1>
+
+        <h2>Build History Chart</h2>
+
+        <h3>AppVeyor</h3>
+
+        <table>
+            <tr>
+                <th>Basic</th>
+                <td><img src="/appveyor/chart/CharliePoole/nunit"/></td>
+            </tr>
+            <tr>
+                <th>Branch Filter</th>
+                <td><img src="/appveyor/chart/CharliePoole/nunit?branch=master" /></td>
+            </tr>
+            <tr>
+                <th>Reduced BuildCount</th>
+                <td><img src="/appveyor/chart/CharliePoole/nunit?buildCount=10" /></td>
+            </tr>
+            <tr>
+                <th>Increased BuildCount</th>
+                <td><img src="/appveyor/chart/CharliePoole/nunit?buildCount=40" /></td>
+            </tr>
+            <tr>
+                <th>Exclude PullRequests</th>
+                <td><img src="/appveyor/chart/CharliePoole/nunit?includeBuildsFromPullRequest=false" /></td>
+            </tr>
+            <tr>
+                <th>Hide Stats</th>
+                <td><img src="/appveyor/chart/CharliePoole/nunit?showStats=false" /></td>
+            </tr>
+        </table>
+
+        <h3>TravisCI</h3>
+
+        <table>
+            <tr>
+                <th>Basic</th>
+                <td><img src="/travisci/chart/nunit/nunit" /></td>
+            </tr>
+            <tr>
+                <th>Branch Filter</th>
+                <td><img src="/travisci/chart/nunit/nunit?branch=master" /></td>
+            </tr>
+            <tr>
+                <th>Reduced BuildCount</th>
+                <td><img src="/travisci/chart/nunit/nunit?buildCount=10" /></td>
+            </tr>
+            <tr>
+                <th>Increased BuildCount</th>
+                <td><img src="/travisci/chart/nunit/nunit?buildCount=40" /></td>
+            </tr>
+            <tr>
+                <th>Exclude PullRequests</th>
+                <td><img src="/travisci/chart/nunit/nunit?includeBuildsFromPullRequest=false" /></td>
+            </tr>
+            <tr>
+                <th>Hide Stats</th>
+                <td><img src="/travisci/chart/nunit/nunit?showStats=false" /></td>
+            </tr>
+        </table>
+    </main>
+</body>
+</html>

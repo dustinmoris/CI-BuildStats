@@ -1,9 +1,9 @@
 ﻿module BuildHistoryCharts
 
 open System
-open RestClient
+open Microsoft.FSharp.Core.Option
 open Newtonsoft.Json.Linq
-open Serializers
+open Common
 
 // -------------------------------------------
 // Common Types and Functions
@@ -67,11 +67,8 @@ module BuildMetrics =
 module AppVeyor =
 
     let parseToJArray (json : string) =
-        match json with
-        | null | "" -> None
-        | json ->
-            let obj = deserializeJson json :?> JObject
-            Some <| obj.Value<JArray> "builds"
+        let obj = Json.deserialize json :?> JObject
+        obj.Value<JArray> "builds"
 
     let parseStatus (status : string) =
         match status with
@@ -117,11 +114,12 @@ module AppVeyor =
                 sprintf "https://ci.appveyor.com/api/projects/%s/%s/history?recordsNumber=%d%s" 
                     account project (5 * buildCount) additionalFilter
 
-            let! json = getAsync url Json
+            let! json = RESTful.getAsync url RESTful.Json
 
             return json
-                |> parseToJArray
-                |> convertToBuilds
+                |> (Str.neutralize
+                >> map parseToJArray
+                >> convertToBuilds)
                 |> List.filter (pullRequestFilter inclFromPullRequest)
                 |> List.truncate buildCount
         }
@@ -132,18 +130,17 @@ module AppVeyor =
 
 module TravisCI =
 
-    let parseToJArray (json : string) =
-        match json with
-        | null | "" -> None
-        | json      -> Some (deserializeJson json :?> JArray)
+    let parseToJArray (json : string) = 
+        Json.deserialize json :?> JArray
 
     let parseStatus (state  : string)
                     (result : Nullable<int>) =
         match state with
         | "finished" -> 
-            match result.Value with
-            | 0     -> Success
-            | _     -> Failed
+            match result with
+            | x when not x.HasValue -> Failed
+            | x when x.Value = 0    -> Success
+            | _                     -> Failed
         | "started" -> Pending
         | _         -> Unkown
 
@@ -184,13 +181,14 @@ module TravisCI =
                 | None   -> ""
 
             let url = sprintf "https://api.travis-ci.org/repos/%s/%s/builds%s" account project additionalQuery
-            let! json = getAsync url Json
+            let! json = RESTful.getAsync url RESTful.Json
             
             let requestCount' = requestCount + 1
 
             let batch =
                 json
-                |> parseToJArray
+                |> (Str.neutralize 
+                >> map parseToJArray)
                 |> convertToBuilds
             
             match batch with

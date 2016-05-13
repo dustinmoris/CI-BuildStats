@@ -3,7 +3,6 @@
 open NUnit.Framework
 open FsUnit
 open PackageServices
-open RestClient
 
 [<Test>]
 let ``Lanem returns correct result``() =

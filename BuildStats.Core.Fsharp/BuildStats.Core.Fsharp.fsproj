@@ -52,8 +52,7 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="RestClient.fs" />
-    <Compile Include="Serializers.fs" />
+    <Compile Include="Common.fs" />
     <Compile Include="PackageServices.fs" />
     <Compile Include="BuildHistoryCharts.fs" />
     <Content Include="packages.config" />

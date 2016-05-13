@@ -1,5 +1,6 @@
 ﻿open System
 open Suave
+open Suave.Files
 open Suave.Filters
 open Suave.Operators
 open Suave.Successful
@@ -7,7 +8,6 @@ open Suave.RequestErrors
 open Suave.DotLiquid
 open PackageServices
 open BuildHistoryCharts
-open Serializers
 open QueryParameterHelper
 open ViewModels
 
@@ -23,12 +23,12 @@ let SVG template model =
 // Package Endpoints
 // -------------------------------------------
 
-let getPackage (getPackageFunc : bool -> Async<Package option>) =
+let getPackage getPackageFunc slug =
     fun (ctx : HttpContext) ->
         match getBoolFromUrlQuery ctx "includePreReleases" false with
         | Value includePreReleases ->
             async { 
-                let! package = getPackageFunc includePreReleases
+                let! package = getPackageFunc slug includePreReleases
                 return!
                     match package with
                     | None      -> NOT_FOUND <| sprintf "Package could not be found." <| ctx
@@ -36,23 +36,21 @@ let getPackage (getPackageFunc : bool -> Async<Package option>) =
             }
         | ParsingError          -> BAD_REQUEST "Could not parse query parameter \"includePreReleases\" into a Boolean value." ctx
 
-let nugetFunc packageName = 
-    fun includePreReleases -> 
-        async { 
-            return! NuGet.getPackageAsync packageName includePreReleases 
-        }
-
-let mygetFunc (feedName, packageName) =
-    fun includePreReleases -> 
-        async { 
-            return! MyGet.getPackageAsync feedName packageName includePreReleases 
-        }
-
 // -------------------------------------------
 // Build History Endpoints
 // -------------------------------------------
 
-let test (account, project) =
+//type Result<'TSuccess, 'TFailure> = 
+//    | Success of 'TSuccess
+//    | Failure of 'TFailure
+//
+//let bind switchFunction twoTrackInput = 
+//    match twoTrackInput with
+//    | Success s -> switchFunction s
+//    | Failure f -> Failure f
+
+let getBuildHistory (getBuildsFunc)
+                    (account, project) =
     fun (ctx : HttpContext) ->
         match getInt32FromUrlQuery ctx "buildCount" 25 with
         | Value buildCount  ->
@@ -65,7 +63,7 @@ let test (account, project) =
                         | Choice1Of2 value  -> Some value
                         | _                 -> None
                     async {
-                        let! builds = AppVeyor.getBuilds account project buildCount branch inclPullRequests
+                        let! builds = getBuildsFunc account project buildCount branch inclPullRequests
                         let model = createBuildHistoryViewModel builds showStats
                         return!         SVG "BuildHistory.liquid" model ctx
                     }
@@ -80,9 +78,12 @@ let test (account, project) =
 let app = 
     choose [
         GET >=> choose [
-            pathScan "/nuget/%s"    (fun x -> nugetFunc x |> getPackage)
-            pathScan "/myget/%s/%s" (fun x -> mygetFunc x |> getPackage)
-            pathScan "/appveyor/chart/%s/%s" test
+            path     "/"                     >=> file "index.html"
+            path     "/tests"                >=> file "tests.html"
+            pathScan "/nuget/%s"             (getPackage NuGet.getPackageAsync)
+            pathScan "/myget/%s/%s"          (getPackage MyGet.getPackageAsync)
+            pathScan "/appveyor/chart/%s/%s" (getBuildHistory AppVeyor.getBuilds)
+            pathScan "/travisci/chart/%s/%s" (getBuildHistory TravisCI.getBuilds)
         ]
         NOT_FOUND "The requested resource could not be found. Please note that URLs are case sensitive."
     ]
