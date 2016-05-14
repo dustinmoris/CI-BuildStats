@@ -1,6 +1,7 @@
 ﻿module BuildHistoryCharts
 
 open System
+open System.Net
 open Microsoft.FSharp.Core.Option
 open Newtonsoft.Json.Linq
 open Common
@@ -225,4 +226,61 @@ module TravisCI =
 // CircleCI
 // -------------------------------------------
 
-// ToDo
+module CircleCI =
+
+    let parseToJArray (json : string) = 
+        Json.deserialize json :?> JArray
+
+    let parseStatus (status : string) =
+        match status with
+        | "success"   | "fixed"                 | "no_tests"    -> Success
+        | "failed"    | "infrastructure_fail"   | "timedout"    -> Failed
+        | "cancelled" | "not_run"               | "not_running" -> Cancelled
+        | "scheduled" | "queued"                | "running"     -> Pending
+        | _                                                     -> Unkown
+
+    let isPullRequest (subject : string) =
+        subject <> null && subject.ToLowerInvariant().Contains("pull request")
+
+    let convertToBuilds (items : JArray option) =
+        match items with
+        | None       -> []
+        | Some items ->
+            items 
+            |> Seq.map (fun x ->
+                let started  = x.Value<Nullable<DateTime>> "start_time "
+                let finished = x.Value<Nullable<DateTime>> "stop_time "
+                {
+                    Id              = x.Value<int>    "build_num"
+                    BuildNumber     = x.Value<int>    "build_num"
+                    Status          = x.Value<string> "status"  |> parseStatus
+                    Branch          = x.Value<string> "branch"
+                    FromPullRequest = x.Value<string> "subject" |> isPullRequest
+                    TimeTaken       = getTimeTaken started finished
+                })
+            |> Seq.toList
+
+    let getBuilds   (account             : string) 
+                    (project             : string) 
+                    (buildCount          : int) 
+                    (branch              : string option) 
+                    (inclFromPullRequest : bool) = 
+        async {
+            let additionalFilter =
+                match branch with
+                | Some b -> sprintf "/tree/%s" <| WebUtility.UrlEncode b
+                | None   -> ""
+                
+            let url = 
+                sprintf "https://circleci.com/api/v1/project/%s/%s%s?limit=%i" 
+                    account project additionalFilter (5 * buildCount)
+
+            let! json = Http.getAsync url Json
+
+            return json
+                |> (Str.neutralize
+                >> map parseToJArray
+                >> convertToBuilds)
+                |> List.filter (pullRequestFilter inclFromPullRequest)
+                |> List.truncate buildCount
+        }

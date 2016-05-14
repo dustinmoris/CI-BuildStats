@@ -104,6 +104,7 @@ let app =
             pathScan "/myget/%s/%s"          <| getPackage MyGet.getPackageAsync
             pathScan "/appveyor/chart/%s/%s" <| getBuildHistory AppVeyor.getBuilds
             pathScan "/travisci/chart/%s/%s" <| getBuildHistory TravisCI.getBuilds
+            pathScan "/circleci/chart/%s/%s" <| getBuildHistory CircleCI.getBuilds
         ]
         NOT_FOUND "The requested resource could not be found. Please note that URLs are case sensitive."
     ]
