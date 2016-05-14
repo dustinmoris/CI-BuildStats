@@ -5,17 +5,18 @@ open System.Net
 open System.Net.Http
 open Newtonsoft.Json
 
-module RESTful =
+type AcceptType =
+    | Json
+    | Xml
+    member x.AsString =
+        match x with
+        | Json  -> "application/json"
+        | Xml   -> "application/xml"
 
-    type AcceptType =
-        | Json
-        | Xml
-        member x.AsString =
-            match x with
-            | Json  -> "application/json"
-            | Xml   -> "application/xml"
+module Http =
 
-    let getAsync (url : string) (acceptType : AcceptType) =
+    let getAsync (url        : string)
+                 (acceptType : AcceptType) =
         async {
             use httpClient = new HttpClient()
             httpClient.DefaultRequestHeaders.Add("accept", acceptType.AsString)
@@ -30,7 +31,7 @@ module Json =
     let serialize obj =
         JsonConvert.SerializeObject(obj)
 
-    let deserialize(json : string) =
+    let deserialize (json : string) =
         JsonConvert.DeserializeObject(json)
 
 module Str =

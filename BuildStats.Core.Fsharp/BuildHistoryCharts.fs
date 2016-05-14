@@ -114,7 +114,7 @@ module AppVeyor =
                 sprintf "https://ci.appveyor.com/api/projects/%s/%s/history?recordsNumber=%d%s" 
                     account project (5 * buildCount) additionalFilter
 
-            let! json = RESTful.getAsync url RESTful.Json
+            let! json = Http.getAsync url Json
 
             return json
                 |> (Str.neutralize
@@ -181,7 +181,7 @@ module TravisCI =
                 | None   -> ""
 
             let url = sprintf "https://api.travis-ci.org/repos/%s/%s/builds%s" account project additionalQuery
-            let! json = RESTful.getAsync url RESTful.Json
+            let! json = Http.getAsync url Json
             
             let requestCount' = requestCount + 1
 
@@ -207,7 +207,7 @@ module TravisCI =
                     (branch              : string option) 
                     (inclFromPullRequest : bool) = 
         async {
-            let maxRequests = (buildCount / numberOfBuildsPerPage) * 5
+            let maxRequests = int(Math.Ceiling((float buildCount / float numberOfBuildsPerPage) * 5.0))
             let! builds = getBatchOfBuilds account project None maxRequests 0
 
             let branchFilter build = 

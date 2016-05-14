@@ -35,7 +35,7 @@ module NuGet =
                         (includePreReleases : bool) =
         async {
             let url = sprintf "https://api-v3search-0.nuget.org/query?q=%s&skip=0&take=10&prerelease=%b" packageName includePreReleases
-            let! json = RESTful.getAsync url RESTful.Json
+            let! json = Http.getAsync url Json
             return
                 json
                 |> (Str.neutralize
@@ -67,7 +67,7 @@ module MyGet =
         async {
             let filter = sprintf "Id eq '%s'" packageName |> WebUtility.UrlEncode
             let url = sprintf "https://www.myget.org/F/%s/api/v2/Packages()?$filter=%s&$orderby=Published desc&$top=1" feedName filter
-            let! json = RESTful.getAsync url RESTful.Json
+            let! json = Http.getAsync url Json
             return
                 json
                 |> (Str.neutralize
