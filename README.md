@@ -1,9 +1,9 @@
-# [Buildstats.info](https://buildstats.info)
+# [BuildStats.info](https://buildstats.info)
 A little SVG widget to display build history charts and other badges for public repositories.
 
-[![Build status](https://ci.appveyor.com/api/projects/status/dchv355fwpsy85xb?svg=true)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats)
+[![Build Status](https://travis-ci.org/dustinmoris/CI-BuildStats.svg)](https://travis-ci.org/dustinmoris/CI-BuildStats)
 
-[![Build history](https://buildstats.info/appveyor/chart/dustinmoris/ci-buildstats)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats/history)
+[![Build History](https://buildstats.info/travisci/chart/dustinmoris/CI-BuildStats)](https://travis-ci.org/dustinmoris/CI-BuildStats/builds)
 
 ## Build History Chart
 
@@ -79,18 +79,6 @@ The full URL to the SVG widget is:
 ```
 https://buildstats.info/{buildSystem}/chart/{account}/{project}[?buildCount={buildCount}&branch={branch}&includeBuildsFromPullRequest={includeBuildsFromPullRequest}&showStats={true/false}]
 ```
-
-### Examples
-
-The SVG widget for [Buildstats.info](https://buildstats.info)
-
--   which is build with AppVeyor
--   for the last 40 builds
--   and only from the master branch
-
-is as following:
-
-[![Build history](https://buildstats.info/appveyor/chart/dustinmoris/ci-buildstats?branch=master&buildCount=40)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats/history?branch=master)
 
 ## NuGet Badge
 

@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="description" content="">
+    <meta name="description" content="Little SVG widget to display AppVeyor, TravisCI or CircleCI build history charts and other SVG badges">
     <meta name="author" content="Dustin Moris Gorski, https://dusted.codes/">
-    <title>Buildstats.info</title>
+    <title>BuildStats.info</title>
     <style>
         body {
             font-family: Helvetica, Arial, sans-serif;
@@ -14,7 +14,7 @@
 
         main {
             max-width: 600px;
-            margin: 0 auto;
+            margin: 3em auto;
         }
 
         h1, h2, h4, h5, h6, p {
@@ -23,68 +23,43 @@
         }
 
         h1 {
-            border-bottom: 1px solid #ddd;
+            margin-bottom: 0;
             font-size: 2.6em;
         }
 
         h2 {
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        h3 {
             font-size: 1.6em;
         }
 
-        h5 {
-            font-size: 1.2em;
-        }
-
-        h6 {
-            font-size: 1em;
-            color: #222;
-        }
-
-        code {
-            display: inline-block;
-            border: 1px solid #e1e1e1;
-            padding: .5em;
-            background: #fafafa;
-            -ms-border-radius: 3px;
-            border-radius: 3px;
-            font-size: 1.1em;
-            color: #222;
+        a {
+            color: #c30;
         }
     </style>
 </head>
 <body>
     <main>
-        <h1>Buildstats.info</h1>
+        <h1>BuildStats.info</h1>
+        <h2>SVG widget to display build history charts and other badges</h2>
 
-        <h2>Build History Chart</h2>
-
+        <h3>Build History Chart</h3>
+        <p>Add a build history widget to your public GitHub repository:</p>
         <img src="/appveyor/chart/dustinmoris/dustedcodes" />
 
-        <h5>Basic URL:</h5>
-        <code>https://buildstats.info/{buildSystem}/chart/{account}/{project}</code>
-        <p>Supported values for <code>{buildSystem}</code>:</p>
-        <ul>
-            <li>AppVeyor</li>
-            <li>TravisCI</li>
-            <li>CircleCI</li>
-        </ul>
-        <h5>Additional query parameters:</h5>
 
-        <h6>Branch</h6>
-        <p>Displays the build history chart for a specific branch only:</p>
-        <code>branch={branch}</code>
+        <h3>NuGet and MyGet Badges</h3>
+        <p>Display a badge for your NuGet or MyGet packages:</p>
+        <img src="/nuget/nunit" />
 
-        <h6>Build count</h6>
-        <p>Displays the last X number of builds in the chart:</p>
-        <code>buildCount={number}</code>
 
-        <h6>Exclude builds from a pull request</h6>
-        <p>Displays the build history chart for builds which have not been triggered by a pull request:</p>
-        <code>includeBuildsFromPullRequest=false</code>
-
-        <h6>Hide build time statistics</h6>
-        <p>Hides the build time metrics (longest-, shortest- and average build time):</p>
-        <code>showstats=false</code>
+        <h3>About</h3>
+        <p>For more information please visit the <a href="https://github.com/dustinmoris/CI-BuildStats">official GitHub repository</a>.
+        </p>
+        <p>BuildStats.info is provided by <a href="https://dusted.codes/">Dustin Moris Gorski</a>.</p>
     </main>
 </body>
 </html>
