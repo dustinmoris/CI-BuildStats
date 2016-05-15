@@ -47,19 +47,27 @@ let getTimeTaken (started   : Nullable<DateTime>)
 module BuildMetrics =
     
     let longestBuildTime (builds : Build list) =
-        builds
-        |> List.maxBy (fun x -> x.TimeTaken.TotalMilliseconds)
-        |> fun x -> x.TimeTaken
+        match builds.Length with
+        | 0 -> TimeSpan.Zero
+        | _ ->
+            builds
+            |> List.maxBy (fun x -> x.TimeTaken.TotalMilliseconds)
+            |> fun x -> x.TimeTaken
 
     let shortestBuildTime (builds : Build list) =
-        builds
-        |> List.minBy (fun x -> x.TimeTaken.TotalMilliseconds)
-        |> fun x -> x.TimeTaken
+        match builds.Length with
+        | 0 -> TimeSpan.Zero
+        | _ ->
+            builds
+            |> List.minBy (fun x -> x.TimeTaken.TotalMilliseconds)
+            |> fun x -> x.TimeTaken
 
-    let averageBuildTime (builds : Build list) =
-        builds
-        |> List.averageBy (fun x -> x.TimeTaken.TotalMilliseconds)
-        |> TimeSpan.FromMilliseconds
+    let averageBuildTime (builds : Build list) =match builds.Length with
+        | 0 -> TimeSpan.Zero
+        | _ ->
+            builds
+            |> List.averageBy (fun x -> x.TimeTaken.TotalMilliseconds)
+            |> TimeSpan.FromMilliseconds
 
 // -------------------------------------------
 // AppVeyor
@@ -173,7 +181,7 @@ module TravisCI =
                              (project          : string)
                              (afterBuildNumber : int option)
                              (maxRequests      : int)
-                             (requestCount     : int) : Async<Build list> =
+                             (requestCount     : int) =
         
         async {
             let additionalQuery =
@@ -235,7 +243,7 @@ module CircleCI =
         match status with
         | "success"   | "fixed"                 | "no_tests"    -> Success
         | "failed"    | "infrastructure_fail"   | "timedout"    -> Failed
-        | "cancelled" | "not_run"               | "not_running" -> Cancelled
+        | "canceled"  | "not_run" | "retried"   | "not_running" -> Cancelled
         | "scheduled" | "queued"                | "running"     -> Pending
         | _                                                     -> Unkown
 
@@ -248,8 +256,8 @@ module CircleCI =
         | Some items ->
             items 
             |> Seq.map (fun x ->
-                let started  = x.Value<Nullable<DateTime>> "start_time "
-                let finished = x.Value<Nullable<DateTime>> "stop_time "
+                let started  = x.Value<Nullable<DateTime>> "start_time"
+                let finished = x.Value<Nullable<DateTime>> "stop_time"
                 {
                     Id              = x.Value<int>    "build_num"
                     BuildNumber     = x.Value<int>    "build_num"
@@ -270,10 +278,14 @@ module CircleCI =
                 match branch with
                 | Some b -> sprintf "/tree/%s" <| WebUtility.UrlEncode b
                 | None   -> ""
-                
+
+            // CircleCI has a max limit of 100 items per request
+            // ToDo: Refactor to pull more items when buildCount is higher
+            let limit = min 100 (5 * buildCount)
+
             let url = 
                 sprintf "https://circleci.com/api/v1/project/%s/%s%s?limit=%i" 
-                    account project additionalFilter (5 * buildCount)
+                    account project additionalFilter limit
 
             let! json = Http.getAsync url Json
 

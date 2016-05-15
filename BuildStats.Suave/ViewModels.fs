@@ -56,7 +56,7 @@ type BuildHistoryViewModel =
     }
 
 let createBuildHistoryViewModel (builds     : Build list)
-                            (showStats  : bool) =
+                                (showStats  : bool) =
     let fontSize = 12
     let barWidth = 5
     let gap = 3
@@ -91,7 +91,7 @@ let createBuildHistoryViewModel (builds     : Build list)
     let totalHeight = maxBarHeight + fontSize * (linesOfText + 1) + gap * linesOfText    
     let branchTextWidth = measureTextWidth fontSize FontStyle.Bold branchText
     let chartsWidth = builds.Length * (barWidth + gap) - gap
-    let totalWidth = max branchTextWidth chartsWidth
+    let totalWidth = max 180 (max branchTextWidth chartsWidth)
 
     {        
         TotalWidth       = totalWidth + 1
@@ -132,8 +132,11 @@ let createBuildHistoryViewModel (builds     : Build list)
             |> List.mapi (
                 fun index build ->
                     let percent = 
-                        build.TimeTaken.TotalMilliseconds /
-                        longestBuildTime.TotalMilliseconds
+                        match longestBuildTime.TotalMilliseconds with
+                        | 0.0 -> 0.0
+                        | _ ->
+                            build.TimeTaken.TotalMilliseconds /
+                            longestBuildTime.TotalMilliseconds
 
                     let height = int(Math.Floor(Math.Max(percent * float maxBarHeight, 3.0)))
 
