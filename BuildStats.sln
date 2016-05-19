@@ -5,6 +5,7 @@ VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "project", "project", "{482C5242-29CA-4CE7-AB82-EDD1DC8350A7}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
@@ -12,7 +13,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{761C33B6-49F6-49DC-8085-7E5AB69C6E1C}"
 	ProjectSection(SolutionItems) = preProject
 		.travis.yml = .travis.yml
-		appveyor.yml = appveyor.yml
 	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BuildStats.Core.Fsharp", "BuildStats.Core.Fsharp\BuildStats.Core.Fsharp.fsproj", "{51806663-6F6C-456B-A633-1CADFC8CACA7}"
@@ -21,10 +21,9 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BuildStats.Suave", "BuildSt
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BuildStats.Core.Tests", "BuildStats.Core.Tests\BuildStats.Core.Tests.fsproj", "{54CA8B73-463A-4827-BB1C-E77459A021EA}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "git", "git", "{6713C540-E398-481D-87B7-F7AA072D8808}"
-	ProjectSection(SolutionItems) = preProject
-		.gitignore = .gitignore
-	EndProjectSection
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BA2447C4-1F32-471D-A013-841B0A5395F8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8BE5F834-A684-4BB4-9997-A85ED73828F0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,5 +46,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{51806663-6F6C-456B-A633-1CADFC8CACA7} = {BA2447C4-1F32-471D-A013-841B0A5395F8}
+		{773994EF-32A5-4A09-B38A-B5927DF8FE1E} = {BA2447C4-1F32-471D-A013-841B0A5395F8}
+		{54CA8B73-463A-4827-BB1C-E77459A021EA} = {8BE5F834-A684-4BB4-9997-A85ED73828F0}
 	EndGlobalSection
 EndGlobal
