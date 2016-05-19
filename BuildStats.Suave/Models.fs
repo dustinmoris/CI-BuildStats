@@ -2,43 +2,43 @@
 
 type BuildHistoryModel =
     {
-        Branch                  : string option
-        BuildCount              : int
-        IncludeFromPullRequests : bool
-        ShowStats               : bool
+        Branch              : string option
+        BuildCount          : int
+        IncludePullRequests : bool
+        ShowStats           : bool
     }
     static member SetBranch model branch =
         {
-            Branch                  = branch
-            BuildCount              = model.BuildCount
-            IncludeFromPullRequests = model.IncludeFromPullRequests
-            ShowStats               = model.ShowStats
+            Branch              = branch
+            BuildCount          = model.BuildCount
+            IncludePullRequests = model.IncludePullRequests
+            ShowStats           = model.ShowStats
         }
     static member SetBuildCount model buildCount =
         {
-            Branch                  = model.Branch
-            BuildCount              = buildCount
-            IncludeFromPullRequests = model.IncludeFromPullRequests
-            ShowStats               = model.ShowStats
+            Branch              = model.Branch
+            BuildCount          = buildCount
+            IncludePullRequests = model.IncludePullRequests
+            ShowStats           = model.ShowStats
         }
-    static member SetIncludeFromPullRequests model includeFromPullRequests =
+    static member SetIncludePullRequests model includePullRequests =
         {
-            Branch                  = model.Branch
-            BuildCount              = model.BuildCount
-            IncludeFromPullRequests = includeFromPullRequests
-            ShowStats               = model.ShowStats
+            Branch              = model.Branch
+            BuildCount          = model.BuildCount
+            IncludePullRequests = includePullRequests
+            ShowStats           = model.ShowStats
         }
     static member SetShowStats model showStats =
         {
-            Branch                  = model.Branch
-            BuildCount              = model.BuildCount
-            IncludeFromPullRequests = model.IncludeFromPullRequests
-            ShowStats               = showStats
+            Branch              = model.Branch
+            BuildCount          = model.BuildCount
+            IncludePullRequests = model.IncludePullRequests
+            ShowStats           = showStats
         }
     static member Default =
         {
-            Branch                  = None
-            BuildCount              = 25
-            IncludeFromPullRequests = true
-            ShowStats               = true
+            Branch              = None
+            BuildCount          = 25
+            IncludePullRequests = true
+            ShowStats           = true
         }

@@ -64,9 +64,9 @@ let queryResult<'T> queryParamFunc
     | Value value       -> Success (ctx, setValueFunc model value)
     | ParsingError msg  -> Failure msg
 
-let getBuildCount           = queryResult (getInt32 "buildCount")                  BuildHistoryModel.SetBuildCount
-let getInclFromPullRequests = queryResult (getBool "includeBuildsFromPullRequest") BuildHistoryModel.SetIncludeFromPullRequests
-let getShowStats            = queryResult (getBool "showStats")                    BuildHistoryModel.SetShowStats
+let getBuildCount       = queryResult (getInt32 "buildCount")                  BuildHistoryModel.SetBuildCount
+let getInclPullRequests = queryResult (getBool "includeBuildsFromPullRequest") BuildHistoryModel.SetIncludePullRequests
+let getShowStats        = queryResult (getBool "showStats")                    BuildHistoryModel.SetShowStats
 
 let getBranch (ctx   : HttpContext,
                model : BuildHistoryModel) =
@@ -79,17 +79,32 @@ let getBuildHistory (getBuildsFunc) (account, project) =
         let result =
             (ctx, BuildHistoryModel.Default)
             |> (getBuildCount
-            >> bind getInclFromPullRequests
+            >> bind getInclPullRequests
             >> bind getShowStats
             >> bind getBranch)
         match result with
         | Failure msg   -> BAD_REQUEST msg ctx
         | Success model ->
             async {
-                let! builds = getBuildsFunc account project model.BuildCount model.Branch model.IncludeFromPullRequests
+                let! builds = getBuildsFunc account project model.BuildCount model.Branch model.IncludePullRequests
                 let  viewModel  = createBuildHistoryViewModel builds model.ShowStats
                 return! SVG "BuildHistory.liquid" viewModel ctx
             }
+
+// -------------------------------------------
+// Error Handler
+// -------------------------------------------
+
+type Error =
+    {
+        Type       : string
+        Message    : string
+        StackTrace : string
+    }
+
+let svgErrorHandler (ex : Exception) (msg : string) (ctx : HttpContext) =
+    let viewModel = { Type = ex.GetType().ToString(); Message = ex.Message; StackTrace = ex.StackTrace }
+    SVG "Error.liquid" viewModel ctx
 
 // -------------------------------------------
 // Web Application
@@ -98,6 +113,7 @@ let getBuildHistory (getBuildsFunc) (account, project) =
 let app = 
     choose [
         GET >=> choose [
+            path     "/error"                >=> (fun _ -> async { return failwith "test" })
             path     "/"                     >=> file "index.html"
             path     "/tests"                >=> file "tests.html"
             pathScan "/nuget/%s"             <| getPackage NuGet.getPackageAsync
@@ -109,7 +125,11 @@ let app =
         NOT_FOUND "The requested resource could not be found. Please note that URLs are case sensitive."
     ]
 
+let config =
+    { defaultConfig with
+        errorHandler = svgErrorHandler }
+
 [<EntryPoint>]
 let main argv = 
-    startWebServer defaultConfig app
+    startWebServer config app
     0
