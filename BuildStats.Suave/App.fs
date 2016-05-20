@@ -113,9 +113,9 @@ let svgErrorHandler (ex : Exception) (msg : string) (ctx : HttpContext) =
 let app = 
     choose [
         GET >=> choose [
-            path     "/error"                >=> (fun _ -> async { return failwith "test" })
             path     "/"                     >=> file "index.html"
             path     "/tests"                >=> file "tests.html"
+            path     "/ping"                 >=> OK "pong"
             pathScan "/nuget/%s"             <| getPackage NuGet.getPackageAsync
             pathScan "/myget/%s/%s"          <| getPackage MyGet.getPackageAsync
             pathScan "/appveyor/chart/%s/%s" <| getBuildHistory AppVeyor.getBuilds
