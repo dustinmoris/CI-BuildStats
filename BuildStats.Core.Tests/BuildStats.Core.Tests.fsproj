@@ -80,8 +80,8 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BuildStats.Core.Fsharp\BuildStats.Core.Fsharp.fsproj">
-      <Name>BuildStats.Core.Fsharp</Name>
+    <ProjectReference Include="..\BuildStats.Core\BuildStats.Core.fsproj">
+      <Name>BuildStats.Core</Name>
       <Project>{51806663-6f6c-456b-a633-1cadfc8caca7}</Project>
       <Private>True</Private>
     </ProjectReference>

@@ -89,7 +89,7 @@ let ``Paket returns correct result``() =
     let package = NuGet.getPackageAsync "Paket" false |> Async.RunSynchronously
         
     package.Value.Name        |> should equal "Paket"
-    package.Value.Version     |> should equal "2.63.2"
+    package.Value.Version     |> should equal "2.65.2"
     package.Value.Downloads   |> should be (greaterThan 127890)
 
 [<Test>]

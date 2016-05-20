@@ -7,11 +7,11 @@ open System.Runtime.InteropServices
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[<assembly: AssemblyTitle("BuildStats.Core.Fsharp")>]
+[<assembly: AssemblyTitle("BuildStats.Core")>]
 [<assembly: AssemblyDescription("")>]
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("")>]
-[<assembly: AssemblyProduct("BuildStats.Core.Fsharp")>]
+[<assembly: AssemblyProduct("BuildStats.Core")>]
 [<assembly: AssemblyCopyright("Copyright © Dustin Moris Gorski 2016")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyCulture("")>]

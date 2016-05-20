@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{761C33B6
 		.travis.yml = .travis.yml
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BuildStats.Core.Fsharp", "BuildStats.Core.Fsharp\BuildStats.Core.Fsharp.fsproj", "{51806663-6F6C-456B-A633-1CADFC8CACA7}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BuildStats.Core", "BuildStats.Core\BuildStats.Core.fsproj", "{51806663-6F6C-456B-A633-1CADFC8CACA7}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BuildStats.Suave", "BuildStats.Suave\BuildStats.Suave.fsproj", "{773994EF-32A5-4A09-B38A-B5927DF8FE1E}"
 EndProject

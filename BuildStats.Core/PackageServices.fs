@@ -57,7 +57,7 @@ module MyGet =
         }
 
     let validatePackage packageName package =
-        if packageName = package.Name 
+        if packageName |> Str.matches package.Name 
         then Some package
         else None
 
