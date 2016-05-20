@@ -1,4 +1,5 @@
 ﻿open System
+open System.Net
 open Suave
 open Suave.Files
 open Suave.Filters
@@ -127,6 +128,7 @@ let app =
 
 let config =
     { defaultConfig with
+        bindings = [ HttpBinding.mk HTTP (IPAddress.Parse "0.0.0.0") 8083us ]
         errorHandler = svgErrorHandler }
 
 [<EntryPoint>]
