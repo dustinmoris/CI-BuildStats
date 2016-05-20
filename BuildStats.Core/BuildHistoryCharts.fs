@@ -62,7 +62,8 @@ module BuildMetrics =
             |> List.minBy (fun x -> x.TimeTaken.TotalMilliseconds)
             |> fun x -> x.TimeTaken
 
-    let averageBuildTime (builds : Build list) =match builds.Length with
+    let averageBuildTime (builds : Build list) =
+        match builds.Length with
         | 0 -> TimeSpan.Zero
         | _ ->
             builds
