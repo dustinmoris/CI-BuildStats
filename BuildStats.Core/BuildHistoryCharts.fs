@@ -152,7 +152,7 @@ module TravisCI =
             | x when x.Value = 0    -> Success
             | x when x.Value = 1    -> Failed
             | _                     -> Unkown
-        | "started"     -> Pending
+        | "started" | "created"     -> Pending
         | _                         -> Unkown
 
     let isPullRequest eventType = eventType = "pull_request"
