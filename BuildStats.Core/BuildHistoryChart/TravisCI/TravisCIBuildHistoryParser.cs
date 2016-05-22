@@ -38,7 +38,14 @@ namespace BuildStats.Core.BuildHistoryChart.TravisCI
         {
             switch (state)
             {
-                case "finished": return result != null && result == 0 ? BuildStatus.Success : BuildStatus.Failed;
+                case "finished":
+                    switch (result)
+                    {
+                        case null: return BuildStatus.Cancelled;
+                        case 0: return BuildStatus.Success;
+                        case 1: return BuildStatus.Failed;
+                    }
+                    return BuildStatus.Unknown;
                 case "started": return BuildStatus.Pending;
                 default: return BuildStatus.Unknown;
             }
