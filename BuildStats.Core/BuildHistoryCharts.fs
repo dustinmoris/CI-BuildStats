@@ -148,9 +148,10 @@ module TravisCI =
         match state with
         | "finished" -> 
             match result with
-            | x when not x.HasValue -> Failed
+            | x when not x.HasValue -> Cancelled
             | x when x.Value = 0    -> Success
-            | _                     -> Failed
+            | x when x.Value = 1    -> Failed
+            | _                     -> Unkown
         | "started" -> Pending
         | _         -> Unkown
 
