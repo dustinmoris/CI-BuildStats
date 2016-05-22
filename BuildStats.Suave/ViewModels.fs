@@ -9,12 +9,19 @@ open BuildHistoryCharts
 // Common ViewModel functions
 // -------------------------------------------
 
+let isRunningOnMono() =
+    Type.GetType("Mono.Runtime") = null |> not
+
 let measureTextWidth (fontSize  : int)
                      (fontStyle : FontStyle)
                      (text      : string) =
     let bitmap = new Bitmap(1, 1)
     let graphics = Graphics.FromImage(bitmap)
-    let font = new Font(FontFamily.GenericSansSerif, float32 (fontSize - 3), fontStyle)
+    let fontSizeCorrection =
+        match isRunningOnMono() with
+        | true  -> 3.5f
+        | false -> 3.0f
+    let font = new Font(FontFamily.GenericSansSerif, float32 fontSize - fontSizeCorrection, fontStyle)
     let dimension = graphics.MeasureString(text, font)
     int (Math.Ceiling(float dimension.Width))
 
@@ -184,7 +191,10 @@ type PackageViewModel =
 let createPackageViewModel (package : Package)  =
 
     let fontSize = 12
-    let padding = 5
+    let padding =
+        match isRunningOnMono() with
+        | true  -> 7
+        | false -> 5
     let version = sprintf "v%s" package.Version
 
     let downloads =

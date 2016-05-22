@@ -7,6 +7,7 @@ open Suave.Operators
 open Suave.Successful
 open Suave.RequestErrors
 open Suave.DotLiquid
+open Suave.Logging.Loggers
 open PackageServices
 open BuildHistoryCharts
 open QueryParameterParser
@@ -114,8 +115,8 @@ let svgErrorHandler (ex : Exception) (msg : string) (ctx : HttpContext) =
 let app = 
     choose [
         GET >=> choose [
-            path     "/"                     >=> file "index.html"
-            path     "/tests"                >=> file "tests.html"
+            path     "/"                     >=> browseFileHome "index.html"
+            path     "/tests"                >=> browseFileHome "tests.html"
             path     "/ping"                 >=> OK "pong"
             pathScan "/nuget/%s"             <| getPackage NuGet.getPackageAsync
             pathScan "/myget/%s/%s"          <| getPackage MyGet.getPackageAsync
@@ -130,7 +131,9 @@ let app =
 let config =
     { defaultConfig with
         bindings = [ HttpBinding.mk HTTP (IPAddress.Parse "0.0.0.0") 8083us ]
-        errorHandler = svgErrorHandler }
+        errorHandler = svgErrorHandler
+        logger = new ConsoleWindowLogger(Logging.LogLevel.Warn) }
+        // ToDo: Provide different logger to log to Elasticsearch or similar
 
 [<EntryPoint>]
 let main argv = 
