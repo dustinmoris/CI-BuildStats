@@ -131,8 +131,7 @@ let app =
 let config =
     { defaultConfig with
         bindings = [ HttpBinding.mk HTTP (IPAddress.Parse "0.0.0.0") 8083us ]
-        errorHandler = svgErrorHandler
-        logger = new ConsoleWindowLogger(Logging.LogLevel.Warn) }
+        errorHandler = svgErrorHandler }
         // ToDo: Provide different logger to log to Elasticsearch or similar
 
 [<EntryPoint>]

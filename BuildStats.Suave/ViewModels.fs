@@ -191,10 +191,7 @@ type PackageViewModel =
 let createPackageViewModel (package : Package)  =
 
     let fontSize = 12
-    let padding =
-        match isRunningOnMono() with
-        | true  -> 7
-        | false -> 5
+    let padding = 5
     let version = sprintf "v%s" package.Version
 
     let downloads =
