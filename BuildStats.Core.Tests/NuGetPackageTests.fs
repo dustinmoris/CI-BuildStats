@@ -25,7 +25,7 @@ let ``Moq returns correct result``() =
     let package = NuGet.getPackageAsync "Moq" false |> Async.RunSynchronously
         
     package.Value.Name        |> should equal "Moq"
-    package.Value.Version     |> should equal "4.2.1510.2205"
+    package.Value.Version     |> should equal "4.5.8"
     package.Value.Downloads   |> should be (greaterThan 1874730)
 
 [<Test>]
@@ -89,7 +89,7 @@ let ``Paket returns correct result``() =
     let package = NuGet.getPackageAsync "Paket" false |> Async.RunSynchronously
         
     package.Value.Name        |> should equal "Paket"
-    package.Value.Version     |> should equal "2.65.2"
+    package.Value.Version     |> should equal "2.66.6"
     package.Value.Downloads   |> should be (greaterThan 127890)
 
 [<Test>]
