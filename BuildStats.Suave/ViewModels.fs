@@ -21,10 +21,10 @@ let measureTextWidth (fontSize  : int)
         match isRunningOnMono() with
         | true  -> 3.5f
         | false -> 3.0f
-    let font = new Font(FontFamily.GenericSansSerif, float32 fontSize - fontSizeCorrection, fontStyle)
+    let font = new Font("Arial", float32 fontSize - fontSizeCorrection, fontStyle)
     let dimension = graphics.MeasureString(text, font)
     int (Math.Ceiling(float dimension.Width))
-
+    
 // -------------------------------------------
 // Build History Chart ViewModel
 // -------------------------------------------
@@ -191,7 +191,10 @@ type PackageViewModel =
 let createPackageViewModel (package : Package)  =
 
     let fontSize = 12
-    let padding = 5
+    let padding =
+        match isRunningOnMono() with
+        | true  -> 7
+        | false -> 5
     let version = sprintf "v%s" package.Version
 
     let downloads =

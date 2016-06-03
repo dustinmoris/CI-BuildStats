@@ -105,6 +105,7 @@ type Error =
     }
 
 let svgErrorHandler (ex : Exception) (msg : string) (ctx : HttpContext) =
+    Log.log ctx.runtime.logger "App" Suave.Logging.LogLevel.Error ex.Message
     let viewModel = { Type = ex.GetType().ToString(); Message = ex.Message; StackTrace = ex.StackTrace }
     SVG "Error.liquid" viewModel ctx
 

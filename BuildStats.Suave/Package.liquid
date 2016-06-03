@@ -23,8 +23,8 @@
         <rect x="{{ model.x | plus: model.feed_width | plus: model.version_width }}" y="{{ model.y }}" height="{{ model.total_height }}" width="{{ model.downloads_width }}" rx="{{ model.corner_radius }}" ry="{{ model.corner_radius }}" stroke-width="0" fill="{{ model.downloads_bg_colour }}" />
         <rect x="0" y="{{ model.y }}" height="{{ model.total_height }}" width="{{ model.total_width }}" rx="{{ model.corner_radius }}" ry="{{ model.corner_radius }}" stroke-width="0" fill="url(#grad1)" />
 
-        <text x="{{ model.x | plus: model.padding | plus: 2 }}" y="{{ model.y | plus: 14 }}" fill="#ffffff">{{ model.feed }}</text>
-        <text x="{{ model.x | plus: model.feed_width | plus: model.padding | plus: 2 }}" y="{{ model.y | plus: 14 }}" fill="#ffffff">{{ model.version }}</text>
+        <text x="{{ model.x | plus: model.padding | plus: 1 }}" y="{{ model.y | plus: 14 }}" fill="#ffffff">{{ model.feed }}</text>
+        <text x="{{ model.x | plus: model.feed_width | plus: model.padding | plus: 1 }}" y="{{ model.y | plus: 14 }}" fill="#ffffff">{{ model.version }}</text>
         <text x="{{ model.x | plus: model.feed_width | plus: model.version_width | plus: model.padding }}" y="{{ model.y | plus: 14 }}" fill="#ffffff">{{ model.downloads }}</text>
     </g>
 </svg>
