@@ -1,11 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "project", "project", "{482C5242-29CA-4CE7-AB82-EDD1DC8350A7}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		api.raml = api.raml
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection

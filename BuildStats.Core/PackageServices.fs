@@ -46,6 +46,11 @@ module NuGet =
 
 module MyGet =
 
+    let skipIfNoPackageFound (json : string) =
+        match json with
+        | "{\"d\":[]}"  -> None
+        | _             -> Some json
+
     let deserialize (json : string) =
         let obj = Json.deserialize json :?> JObject
         let data = obj.Value<JArray> "d"
@@ -71,6 +76,7 @@ module MyGet =
             return
                 json
                 |> (Str.neutralize
+                >> bind skipIfNoPackageFound
                 >> map deserialize
                 >> bind (validatePackage packageName))
         }
