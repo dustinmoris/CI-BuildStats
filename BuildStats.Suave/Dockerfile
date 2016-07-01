@@ -5,4 +5,7 @@ COPY . /app
 
 EXPOSE 8083
 
-CMD ["mono", "/app/BuildStats.Suave.exe", "-d"]
+ENV MONO_THREADS_PER_CPU=2000
+
+ENTRYPOINT ["mono", "/app/BuildStats.Suave.exe", "-d"]
+CMD ["--server"]
