@@ -3,6 +3,7 @@
 open System
 open System.Net
 open System.Net.Http
+open System.Threading.Tasks
 open Newtonsoft.Json
 
 type AcceptType =
@@ -15,14 +16,22 @@ type AcceptType =
 
 module Http =
 
+    let runTaskAsync<'T> (task : Task<'T>) =
+        async {
+            let! token = task |> Async.AwaitTask |> Async.StartChild            
+            return! token
+        }
+
     let getAsync (url        : string)
                  (acceptType : AcceptType) =
         async {
             use httpClient = new HttpClient()
             httpClient.DefaultRequestHeaders.Add("accept", acceptType.AsString)
-            let! response = httpClient.GetAsync(url) |> Async.AwaitTask                
+            
+            let! response = httpClient.GetAsync(url) |> runTaskAsync
+
             match response.StatusCode with
-            | HttpStatusCode.OK -> return! response.Content.ReadAsStringAsync() |> Async.AwaitTask
+            | HttpStatusCode.OK -> return! response.Content.ReadAsStringAsync() |> runTaskAsync
             | _                 -> return ""
         }
 
