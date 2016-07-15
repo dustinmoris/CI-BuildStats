@@ -14,7 +14,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{761C33B6-49F6-49DC-8085-7E5AB69C6E1C}"
 	ProjectSection(SolutionItems) = preProject
 		.travis.yml = .travis.yml
-		appveyor.yml = appveyor.yml
 	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BuildStats.Core", "BuildStats.Core\BuildStats.Core.fsproj", "{51806663-6F6C-456B-A633-1CADFC8CACA7}"
