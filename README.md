@@ -11,7 +11,7 @@ A little SVG widget to display build history charts and other badges for public 
 
 The SVG widget currently works for public repositories built with:
 
-<a href="https://www.appveyor.com/" title="AppVeyor"><img src="https://www.appveyor.com/site/apple-touch-icon.png" width="80" height="80" style="margin-right: 10px;" alt="AppVeyor" title="AppVeyor"/></a><a href="https://travis-ci.org/" title="TravisCI"><img src="https://cdn.travis-ci.com/images/logos/TravisCI-Mascot-1-61693e8ade8a553878c2307f0c08749d.svg" width="80" height="80" style="margin-right: 10px;" alt="TravisCI" title="TravisCI"/></a><a href="https://circleci.com/" title="CircleCI"><img src="https://d3r49iyjzglexf.cloudfront.net/logo-circleci-9a5afe10588065ad315b972de5ed572c25fb39a973e4b9cd28a35f88694f1fa0.svg" width="80" height="80" style="margin-right: 10px;" alt="CircleCI" title="CircleCI"/></a>
+<a href="https://www.appveyor.com/" title="AppVeyor"><img src="https://www.appveyor.com/site/apple-touch-icon.png" width="80" height="80" style="margin-right: 30px;" alt="AppVeyor" title="AppVeyor"/></a><a href="https://travis-ci.org/" title="TravisCI"><img src="https://cdn.travis-ci.com/images/logos/TravisCI-Mascot-1-61693e8ade8a553878c2307f0c08749d.svg" width="80" height="80" style="margin-right: 30px;" alt="TravisCI" title="TravisCI"/></a><a href="https://circleci.com/" title="CircleCI"><img src="https://d3r49iyjzglexf.cloudfront.net/logo-circleci-9a5afe10588065ad315b972de5ed572c25fb39a973e4b9cd28a35f88694f1fa0.svg" width="80" height="80" style="margin-right: 10px;" alt="CircleCI" title="CircleCI"/></a>
 
 ### How it works
 
