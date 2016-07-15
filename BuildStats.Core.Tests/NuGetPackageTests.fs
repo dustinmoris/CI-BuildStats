@@ -25,7 +25,7 @@ let ``Moq returns correct result``() =
     let package = NuGet.getPackageAsync "Moq" false |> Async.RunSynchronously
         
     package.Value.Name        |> should equal "Moq"
-    package.Value.Version     |> should equal "4.5.8"
+    package.Value.Version     |> should equal "4.5.13"
     package.Value.Downloads   |> should be (greaterThan 1874730)
 
 [<Test>]
@@ -33,7 +33,7 @@ let ``NUnit returns correct result``() =
     let package = NuGet.getPackageAsync "NUnit" false |> Async.RunSynchronously
         
     package.Value.Name        |> should equal "NUnit"
-    package.Value.Version     |> should equal "3.2.1"
+    package.Value.Version     |> should equal "3.4.1"
     package.Value.Downloads   |> should be (greaterThan 1283920)
 
 [<Test>]
@@ -49,7 +49,7 @@ let ``jQuery returns correct result``() =
     let package = NuGet.getPackageAsync "jQuery" false |> Async.RunSynchronously
         
     package.Value.Name        |> should equal "jQuery"
-    package.Value.Version     |> should equal "2.2.3"
+    package.Value.Version     |> should equal "3.0.0.1"
     package.Value.Downloads   |> should be (greaterThan 4233340)
 
 [<Test>]
@@ -81,7 +81,7 @@ let ``Newtonsoft.Json returns correct result``() =
     let package = NuGet.getPackageAsync "Newtonsoft.Json" false |> Async.RunSynchronously
         
     package.Value.Name        |> should equal "Newtonsoft.Json"
-    package.Value.Version     |> should equal "8.0.3"
+    package.Value.Version     |> should equal "9.0.1"
     package.Value.Downloads   |> should be (greaterThan 4998550)
 
 [<Test>]
@@ -89,7 +89,7 @@ let ``Paket returns correct result``() =
     let package = NuGet.getPackageAsync "Paket" false |> Async.RunSynchronously
         
     package.Value.Name        |> should equal "Paket"
-    package.Value.Version     |> should equal "2.66.6"
+    package.Value.Version     |> should equal "3.5.0"
     package.Value.Downloads   |> should be (greaterThan 127890)
 
 [<Test>]
@@ -97,7 +97,7 @@ let ``Package written in lowercase returns correct result``() =
     let package = NuGet.getPackageAsync "newtonsoft.json" false |> Async.RunSynchronously
         
     package.Value.Name        |> should equal "Newtonsoft.Json"
-    package.Value.Version     |> should equal "8.0.3"
+    package.Value.Version     |> should equal "9.0.1"
     package.Value.Downloads   |> should be (greaterThan 4998550)
 
 [<Test>]
