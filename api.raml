@@ -1,0 +1,86 @@
+#%RAML 1.0
+title: CI-BuildStats
+version: v4
+baseUri: https://buildstats.info/
+protocols: HTTPS
+
+/{buildSystem}/chart/{account}/{project}:
+  displayName: Build History Chart
+  description: Renders a build history bar chart for the selected project.
+  uriParameters:
+    buildSystem:
+      enum: [ appveyor, travisci, circleci ]
+    account:
+      type: string
+      example: dustinmoris
+    project:
+      type: string
+      example: CI-BuildStats
+  get:
+    queryParameters:
+      branch:
+        description: Filter builds by branch.
+        type: string
+        example: master
+      buildCount:
+        description: Specify the number of builds to be displayed.
+        type: integer
+        example: 30
+      includeBuildsFromPullRequest:
+        description: Specify if builds from a pull request should get included.
+        type: boolean
+        example: false
+      showstats:
+        description: Turn on/off additional build statistics.
+        type: boolean
+        example: true
+    responses:
+      200:
+        description:
+          Renders an SVG image to display the requested build history chart.
+
+/nuget/{packageName}:
+  displayName: NuGet Package Info
+  description: Renders a NuGet package badge.
+  uriParameters:
+    packageName:
+      type: string
+      example: NUnit
+  get:
+    queryParameters:
+      includePreReleases:
+        description: Specify if pre-release packages should be included when determining the latest version of a package.
+        type: boolean
+        example: true
+    responses:
+      200:
+        description:
+          Renders an SVG image to display the the latest version of the requested NuGet package.
+      404:
+        description:
+          The specified package could not be found.
+        body:
+          text/html:
+            example: Package could not be found.
+            
+/myget/{feedName}/{packageName}:
+  displayName: MyGet Package Info
+  description: Renders a MyGet package badge.
+  uriParameters:
+    feedName:
+      type: string
+      example: neventsocket-prerelease
+    packageName:
+      type: string
+      example: NEventSocket
+  get:
+    responses:
+      200:
+        description:
+          Renders an SVG image to display the the latest version of the requested MyGet package.
+      404:
+        description:
+          The specified feed and/or package could not be found.
+        body:
+          text/html:
+            example: Package could not be found.

@@ -1,9 +1,9 @@
-# [Buildstats.info](https://buildstats.info)
+# [BuildStats.info](https://buildstats.info)
 A little SVG widget to display build history charts and other badges for public repositories.
 
-[![Build status](https://ci.appveyor.com/api/projects/status/dchv355fwpsy85xb/branch/master?svg=true)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats/branch/master)
+[![Build Status](https://travis-ci.org/dustinmoris/CI-BuildStats.svg)](https://travis-ci.org/dustinmoris/CI-BuildStats)
 
-[![Build history](https://buildstats.info/appveyor/chart/dustinmoris/ci-buildstats?branch=master)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats/history/branch/master)
+[![Build History](https://buildstats.info/travisci/chart/dustinmoris/CI-BuildStats)](https://travis-ci.org/dustinmoris/CI-BuildStats/builds)
 
 ## Build History Chart
 
@@ -80,18 +80,6 @@ The full URL to the SVG widget is:
 https://buildstats.info/{buildSystem}/chart/{account}/{project}[?buildCount={buildCount}&branch={branch}&includeBuildsFromPullRequest={includeBuildsFromPullRequest}&showStats={true/false}]
 ```
 
-### Examples
-
-The SVG widget for [Buildstats.info](https://buildstats.info)
-
--   which is build with AppVeyor
--   for the last 40 builds
--   and only from the master branch
-
-is as following:
-
-[![Build history](https://buildstats.info/appveyor/chart/dustinmoris/ci-buildstats?branch=master&buildCount=40)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats/history?branch=master)
-
 ## NuGet Badge
 
 NuGet badges are in beta state at the moment.
@@ -137,6 +125,14 @@ For example the badge and Markdown for the [NEventSocket](https://github.com/dan
 ```
 [![MyGet Badge](https://buildstats.info/myget/neventsocket-prerelease/NEventSocket)](https://www.myget.org/feed/neventsocket-prerelease/package/nuget/NEventSocket)
 ```
+
+## API Documentation
+
+For a complete API documentation please check out the attached [api.raml](https://github.com/dustinmoris/CI-BuildStats/blob/master/api.raml) or visit the public [API Portal](https://anypoint.mulesoft.com/apiplatform/dustinmoris/#/portals/organizations/1c966d9b-793c-46bc-a87a-427b9a4a9b4a/apis/76973/versions/79960).
+
+## Docker image
+
+You can also self host the application by running [CI-BuildStats from a Docker container](https://hub.docker.com/r/dustinmoris/ci-buildstats/).
 
 ## Contribution
 
