@@ -30,6 +30,7 @@ let bind switchFunc result =
 let SVG template viewModel =
     page template viewModel
     >=> Writers.setMimeType "image/svg+xml"
+    >=> Writers.setHeader "Cache-Control" "no-cache"
 
 // -------------------------------------------
 // Package Endpoints
