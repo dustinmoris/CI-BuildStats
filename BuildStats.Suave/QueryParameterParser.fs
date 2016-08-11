@@ -26,7 +26,7 @@ let getBool (key : string)
         | _         -> ParsingError <| sprintf "Could not parse query parameter \"%s\" into a Boolean value." key
     | _             -> NotSet
 
-let getInt32 (key : string)
+let getInt32    (key : string)
                 (ctx : HttpContext) =
     match ctx.request.queryParam key with
     | Choice1Of2 value  ->
@@ -35,7 +35,7 @@ let getInt32 (key : string)
         | _         -> ParsingError <| sprintf "Could not parse query parameter \"%s\" into an Int32 value." key
     | _             -> NotSet
 
-let getString (key : string)
+let getString   (key : string)
                 (ctx : HttpContext) =
     match ctx.request.queryParam key with
     | Choice1Of2 value  -> Some value
