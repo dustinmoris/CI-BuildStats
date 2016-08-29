@@ -42,12 +42,7 @@ module Http =
 
     let createHttpPostRequest (url : string) =
         let request = HttpWebRequest.CreateHttp(url)
-        // Setting HTTP header "Connection: Close" to free up
-        // the underlying TCP connection after a successful request
         request.KeepAlive                       <- false
-        // Disabling the automatic addition of the "Expect: 100-continue"
-        // HTTP header to save an additional round trip
-        // See: http://haacked.com/archive/2004/05/15/http-web-request-expect-100-continue.aspx/
         request.ServicePoint.Expect100Continue  <- false
         request
 
@@ -91,12 +86,12 @@ module Http =
                 else return ""
         }
 
-module Json =
+module Serializer =
 
-    let serialize obj =
+    let toJson obj =
         JsonConvert.SerializeObject(obj)
 
-    let deserialize (json : string) =
+    let fromJson (json : string) =
         JsonConvert.DeserializeObject(json)
 
 module Str =

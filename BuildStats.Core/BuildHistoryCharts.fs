@@ -77,7 +77,7 @@ module BuildMetrics =
 module AppVeyor =
 
     let parseToJArray (json : string) =
-        let obj = Json.deserialize json :?> JObject
+        let obj = Serializer.fromJson json :?> JObject
         obj.Value<JArray> "builds"
 
     let parseStatus (status : string) =
@@ -141,7 +141,7 @@ module AppVeyor =
 module TravisCI =
 
     let parseToJArray (json : string) = 
-        Json.deserialize json :?> JArray
+        Serializer.fromJson json :?> JArray
 
     let parseStatus (state  : string)
                     (result : Nullable<int>) =
@@ -239,7 +239,7 @@ module TravisCI =
 module CircleCI =
 
     let parseToJArray (json : string) = 
-        Json.deserialize json :?> JArray
+        Serializer.fromJson json :?> JArray
 
     let parseStatus (status : string) =
         match status with

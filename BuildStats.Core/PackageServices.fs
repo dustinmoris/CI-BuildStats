@@ -16,7 +16,7 @@ type Package =
 module NuGet =
     
     let deserialize (json : string) =
-        let obj = Json.deserialize json :?> JObject
+        let obj = Serializer.fromJson json :?> JObject
         obj.Value<JArray> "data"            
 
     let tryFindByName  (packageName : string)
@@ -52,7 +52,7 @@ module MyGet =
         | _             -> Some json
 
     let deserialize (json : string) =
-        let obj = Json.deserialize json :?> JObject
+        let obj = Serializer.fromJson json :?> JObject
         let data = obj.Value<JArray> "d"
         {
             Feed = "myget"

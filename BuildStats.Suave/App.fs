@@ -27,10 +27,26 @@ let bind switchFunc result =
     | Success s -> switchFunc s
     | Failure f -> Failure f
 
+let md5 (text : string) =
+    text
+    |> System.Text.Encoding.UTF8.GetBytes
+    |> System.Security.Cryptography.MD5.Create().ComputeHash
+    |> Array.map (fun x -> x.ToString("x2"))
+    |> String.concat ""
+
+let calculateETag viewModel =
+    Common.Serializer.toJson viewModel
+    |> md5
+
+let setETag viewModel =
+    let eTag = viewModel |> calculateETag
+    Writers.setHeader "ETag" eTag
+
 let SVG template viewModel =
     page template viewModel
     >=> Writers.setMimeType "image/svg+xml"
     >=> Writers.setHeader "Cache-Control" "no-cache"
+    >=> setETag viewModel
 
 // -------------------------------------------
 // Package Endpoints
