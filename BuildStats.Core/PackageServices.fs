@@ -38,7 +38,7 @@ module NuGet =
             let! json = Http.getAsync url Json
             return
                 json
-                |> (Str.neutralize
+                |> (Str.toOption
                 >> map deserialize
                 >> bind (tryFindByName packageName)
                 >> map convertIntoPackage)
@@ -75,7 +75,7 @@ module MyGet =
             let! json = Http.getAsync url Json
             return
                 json
-                |> (Str.neutralize
+                |> (Str.toOption
                 >> bind skipIfNoPackageFound
                 >> map deserialize
                 >> bind (validatePackage packageName))

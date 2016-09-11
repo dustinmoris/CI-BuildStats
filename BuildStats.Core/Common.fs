@@ -42,7 +42,6 @@ module Http =
 
     let createHttpPostRequest (url : string) =
         let request = HttpWebRequest.CreateHttp(url)
-        request.KeepAlive                       <- false
         request.ServicePoint.Expect100Continue  <- false
         request
 
@@ -100,7 +99,7 @@ module Str =
                 (name2 : string) =
         name1.Equals(name2, StringComparison.InvariantCultureIgnoreCase)
 
-    let neutralize str =
+    let toOption str =
         match str with
         | null | "" -> None
         | _         -> Some str

@@ -127,7 +127,7 @@ module AppVeyor =
             let! json = Http.getAsync url Json
 
             return json
-                |> (Str.neutralize
+                |> (Str.toOption
                 >> map parseToJArray
                 >> convertToBuilds)
                 |> List.filter (pullRequestFilter inclFromPullRequest)
@@ -198,7 +198,7 @@ module TravisCI =
 
             let batch =
                 json
-                |> (Str.neutralize 
+                |> (Str.toOption 
                 >> map parseToJArray)
                 |> convertToBuilds
             
@@ -292,7 +292,7 @@ module CircleCI =
             let! json = Http.getAsync url Json
 
             return json
-                |> (Str.neutralize
+                |> (Str.toOption
                 >> map parseToJArray
                 >> convertToBuilds)
                 |> List.filter (pullRequestFilter inclFromPullRequest)

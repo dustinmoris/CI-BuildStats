@@ -9,21 +9,24 @@ open BuildHistoryCharts
 // Common ViewModel functions
 // -------------------------------------------
 
-let isRunningOnMono() =
-    Type.GetType("Mono.Runtime") = null |> not
+let isRunningOnMono = Type.GetType("Mono.Runtime") = null |> not
+let strFormat       = new StringFormat(StringFormat.GenericTypographic)
+let bitmap          = new Bitmap(1, 1)
+let graphics        = Graphics.FromImage(bitmap)
+let rect            = new RectangleF(0.0f, 0.0f, 1000.0f, 1000.0f)
+
+graphics.TextRenderingHint <- Text.TextRenderingHint.AntiAlias
 
 let measureTextWidth (fontSize  : int)
                      (fontStyle : FontStyle)
                      (text      : string) =
-    let bitmap = new Bitmap(1, 1)
-    let graphics = Graphics.FromImage(bitmap)
-    let fontSizeCorrection =
-        match isRunningOnMono() with
-        | true  -> 3.5f
-        | false -> 3.0f
-    let font = new Font("Arial", float32 fontSize - fontSizeCorrection, fontStyle)
-    let dimension = graphics.MeasureString(text, font)
-    int (Math.Ceiling(float dimension.Width))
+    [| new System.Drawing.CharacterRange(0, text.Length) |]
+    |> strFormat.SetMeasurableCharacterRanges   
+    let fSize       = if isRunningOnMono then float32 fontSize - 1.5f else float32 fontSize
+    let font        = new Font("Arial", fSize, fontStyle, GraphicsUnit.Pixel)
+    let regions     = graphics.MeasureCharacterRanges(text, font, rect, strFormat)
+    let dimensions  = regions.[0].GetBounds(graphics)
+    dimensions.Right + 1.0f |> int
     
 // -------------------------------------------
 // Build History Chart ViewModel
@@ -192,29 +195,30 @@ let createPackageViewModel (package : Package)  =
 
     let fontSize = 12
     let padding =
-        match isRunningOnMono() with
+        match isRunningOnMono with
         | true  -> 7
-        | false -> 5
+        | false -> 7
     let version = sprintf "v%s" package.Version
-
+    let sign = "▾ "
     let downloads =
         let million  = 1000000
         let thousand = 1000
         match package.Downloads with
-        | dl when dl >= million  -> sprintf "▾ %.2fm" <| float dl / float million
-        | dl when dl >= thousand -> sprintf "▾ %.1fk" <| float dl / float thousand
-        | dl                     -> sprintf "▾ %i"    <| dl
+        | dl when dl >= million  -> float dl / float million    |> sprintf "%.2fm"
+        | dl when dl >= thousand -> float dl / float thousand   |> sprintf "%.1fk"
+        | dl                     -> dl                          |> sprintf "%i"
     
-    let addPadding width = width + padding * 2
+    let addPadding   width  = width + padding * 2
+    let addSignWidth width  = width + 15
 
     let feedWidth       = package.Feed  |> measureTextWidth fontSize FontStyle.Regular |> addPadding
     let versionWidth    = version       |> measureTextWidth fontSize FontStyle.Regular |> addPadding
-    let downloadsWidth  = downloads     |> measureTextWidth fontSize FontStyle.Regular |> addPadding
+    let downloadsWidth  = downloads     |> measureTextWidth fontSize FontStyle.Regular |> addPadding |> addSignWidth
 
     {
         Feed                = package.Feed
         Version             = version
-        Downloads           = downloads
+        Downloads           = sign + downloads
         X                   = 0
         Y                   = 0
         Padding             = padding
