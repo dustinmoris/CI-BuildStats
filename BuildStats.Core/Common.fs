@@ -34,13 +34,7 @@ module MemoryCache =
 
 module Http =
 
-    let runTaskAsyncAsChild<'T> (task : Task<'T>) =
-        async {
-            let! token = task |> Async.AwaitTask |> Async.StartChild            
-            return! token
-        }
-
-    let createHttpPostRequest (url : string) =
+    let createHttpRequest (url : string) =
         let request = HttpWebRequest.CreateHttp(url)
         request.ServicePoint.Expect100Continue  <- false
         request
@@ -57,10 +51,11 @@ module Http =
 
     let sendRequestAsyc (request : HttpWebRequest) =
         async {
-            use! response = request.GetResponseAsync() |> runTaskAsyncAsChild
-            let statusCode = (response :?> HttpWebResponse).StatusCode
-            use reader = new StreamReader(response.GetResponseStream())
-            let! body = reader.ReadToEndAsync() |> runTaskAsyncAsChild
+            use! response   = request.GetResponseAsync() |> Async.AwaitTask
+            let statusCode  = (response :?> HttpWebResponse).StatusCode
+            use stream      = response.GetResponseStream()
+            use reader      = new StreamReader(stream)
+            let! body       = reader.ReadToEndAsync() |> Async.AwaitTask
             return statusCode, body
         }
 
@@ -74,7 +69,7 @@ module Http =
             | None ->
                 let! statusCode, body =
                     url
-                    |> createHttpPostRequest
+                    |> createHttpRequest
                     |> setHttpVerb "GET"
                     |> setAcceptHeader acceptType
                     |> sendRequestAsyc
