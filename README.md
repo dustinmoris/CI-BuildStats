@@ -67,9 +67,9 @@ https://buildstats.info/{buildSystem}/chart/{account}/{project}?includeBuildsFro
 
 #### Hiding the text
 
-You can hide the build stats by appending the `showstats` parameter to the URL (optional):
+You can hide the build stats by appending the `showStats` parameter to the URL (optional):
 ```
-https://buildstats.info/{buildSystem}/chart/{account}/{project}?showstats={true/false}
+https://buildstats.info/{buildSystem}/chart/{account}/{project}?showStats={true/false}
 ```
 
 #### Full URL
