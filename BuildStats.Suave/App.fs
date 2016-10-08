@@ -1,5 +1,8 @@
 ﻿open System
+open System.Configuration
+open System.Diagnostics
 open System.Net
+open System.Reflection
 open Suave
 open Suave.Files
 open Suave.Filters
@@ -13,6 +16,17 @@ open BuildHistoryCharts
 open QueryParameterParser
 open Models
 open ViewModels
+
+// -------------------------------------------
+// Config
+// -------------------------------------------
+
+let fallback backup value = if value = null then backup else value
+
+let getConfigValue key =
+    Environment.GetEnvironmentVariable key
+    |> fallback ConfigurationManager.AppSettings.[key]
+    |> fallback ""
 
 // -------------------------------------------
 // Common methods
@@ -121,8 +135,16 @@ type Error =
         StackTrace : string
     }
 
-let svgErrorHandler (ex : Exception) (msg : string) (ctx : HttpContext) =
+let sentryDsn   = getConfigValue "SENTRY_DSN"
+let ravenClient = new SharpRaven.RavenClient(sentryDsn)
+ravenClient.Release <- FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion
+
+let logInSentry (ex : Exception) =
+    ravenClient.Capture(new SharpRaven.Data.SentryEvent(ex))
+
+let svgErrorHandler (ex : Exception) (msg : string) (ctx : HttpContext) =    
     Log.log ctx.runtime.logger "App" Suave.Logging.LogLevel.Error ex.Message
+    logInSentry ex |> ignore
     let viewModel = { Type = ex.GetType().ToString(); Message = ex.Message; StackTrace = ex.StackTrace }
     SVG "Error.liquid" viewModel ctx
 
