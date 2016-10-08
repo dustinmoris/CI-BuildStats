@@ -1,9 +1,8 @@
-sudo: required
 language: csharp
-services:
-  - docker
-solution: BuildStats.sln
-after_success:
-  - docker build -t dustinmoris/ci-buildstats ./BuildStats.Suave/bin/Release
-  - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-  - docker push dustinmoris/ci-buildstats
+sudo: required
+dist: trusty
+mono: latest
+before_script:
+  - chmod a+x ./build.sh
+script:
+  - ./build.sh

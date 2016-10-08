@@ -1,8 +1,6 @@
 ﻿open System
 open System.Configuration
-open System.Diagnostics
 open System.Net
-open System.Reflection
 open Suave
 open Suave.Files
 open Suave.Filters
@@ -137,9 +135,9 @@ type Error =
 
 let sentryDsn   = getConfigValue "SENTRY_DSN"
 let ravenClient = new SharpRaven.RavenClient(sentryDsn)
-ravenClient.Release <- FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion
 
-let logInSentry (ex : Exception) =
+let logInSentry (ex : Exception) (ctx : HttpContext) =
+    ex.Data.Add("request-url", ctx.request.url.AbsoluteUri)
     ravenClient.Capture(new SharpRaven.Data.SentryEvent(ex))
 
 let svgErrorHandler (ex : Exception) (msg : string) (ctx : HttpContext) =    
@@ -172,7 +170,6 @@ let config =
     { defaultConfig with
         bindings = [ HttpBinding.mk HTTP (IPAddress.Parse "0.0.0.0") 8083us ]
         errorHandler = svgErrorHandler }
-        // ToDo: Provide different logger to log to Elasticsearch or similar
 
 [<EntryPoint>]
 let main argv = 
