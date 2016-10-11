@@ -58,6 +58,8 @@ let SVG template viewModel =
     page template viewModel
     >=> Writers.setMimeType "image/svg+xml"
     >=> Writers.setHeader "Cache-Control" "no-cache"
+    >=> Writers.setHeader "Pragma" "no-cache"
+    >=> Writers.setHeader "Expires" "-1"
     >=> setETag viewModel
 
 // -------------------------------------------
