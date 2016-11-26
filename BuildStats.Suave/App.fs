@@ -136,11 +136,15 @@ type Error =
     }
 
 let sentryDsn   = getConfigValue "SENTRY_DSN"
-let ravenClient = new SharpRaven.RavenClient(sentryDsn)
 
 let logInSentry (ex : Exception) (ctx : HttpContext) =
+#if DEBUG
+    ()
+#else
     ex.Data.Add("request-url", ctx.request.url.AbsoluteUri)
+    let ravenClient = new SharpRaven.RavenClient(sentryDsn)
     ravenClient.Capture(new SharpRaven.Data.SentryEvent(ex))
+#endif
 
 let svgErrorHandler (ex : Exception) (msg : string) (ctx : HttpContext) =    
     Log.log ctx.runtime.logger "App" Suave.Logging.LogLevel.Error ex.Message
