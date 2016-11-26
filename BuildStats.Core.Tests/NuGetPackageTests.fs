@@ -17,7 +17,7 @@ let ``Guardo returns correct result``() =
     let package = NuGet.getPackageAsync "Guardo" false |> Async.RunSynchronously
         
     package.Value.Name        |> should equal "Guardo"
-    package.Value.Version     |> should equal "0.0.1"
+    package.Value.Version     |> should equal "1.0.0"
     package.Value.Downloads   |> should be (greaterThan 49)
 
 [<Test>]
@@ -25,7 +25,7 @@ let ``Moq returns correct result``() =
     let package = NuGet.getPackageAsync "Moq" false |> Async.RunSynchronously
         
     package.Value.Name        |> should equal "Moq"
-    package.Value.Version     |> should equal "4.5.13"
+    package.Value.Version     |> should equal "4.5.28"
     package.Value.Downloads   |> should be (greaterThan 1874730)
 
 [<Test>]
@@ -33,7 +33,7 @@ let ``NUnit returns correct result``() =
     let package = NuGet.getPackageAsync "NUnit" false |> Async.RunSynchronously
         
     package.Value.Name        |> should equal "NUnit"
-    package.Value.Version     |> should equal "3.4.1"
+    package.Value.Version     |> should equal "3.5.0"
     package.Value.Downloads   |> should be (greaterThan 1283920)
 
 [<Test>]
@@ -49,7 +49,7 @@ let ``jQuery returns correct result``() =
     let package = NuGet.getPackageAsync "jQuery" false |> Async.RunSynchronously
         
     package.Value.Name        |> should equal "jQuery"
-    package.Value.Version     |> should equal "3.0.0.1"
+    package.Value.Version     |> should equal "3.1.1"
     package.Value.Downloads   |> should be (greaterThan 4233340)
 
 [<Test>]
@@ -89,7 +89,7 @@ let ``Paket returns correct result``() =
     let package = NuGet.getPackageAsync "Paket" false |> Async.RunSynchronously
         
     package.Value.Name        |> should equal "Paket"
-    package.Value.Version     |> should equal "3.5.0"
+    package.Value.Version     |> should equal "3.30.2"
     package.Value.Downloads   |> should be (greaterThan 127890)
 
 [<Test>]

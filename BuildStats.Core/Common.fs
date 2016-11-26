@@ -49,14 +49,25 @@ module Http =
             request.Method <- verb
             request
 
-    let sendRequestAsyc (request : HttpWebRequest) =
+    let getStatusCodeAndBodyFromResponseAsync (response : WebResponse) =
         async {
-            use! response   = request.GetResponseAsync() |> Async.AwaitTask
             let statusCode  = (response :?> HttpWebResponse).StatusCode
             use stream      = response.GetResponseStream()
             use reader      = new StreamReader(stream)
             let! body       = reader.ReadToEndAsync() |> Async.AwaitTask
             return statusCode, body
+        }
+
+    let sendRequestAsync (request : HttpWebRequest) =
+        async {
+            try
+                use! response   = request.GetResponseAsync() |> Async.AwaitTask
+                return! getStatusCodeAndBodyFromResponseAsync response
+            with
+                | :? AggregateException as ex ->
+                    match ex.InnerException with
+                    | :? WebException as wex -> return! getStatusCodeAndBodyFromResponseAsync wex.Response
+                    | _                      -> return raise ex
         }
 
     let getAsync (url        : string)
@@ -72,7 +83,7 @@ module Http =
                     |> createHttpRequest
                     |> setHttpVerb "GET"
                     |> setAcceptHeader acceptType
-                    |> sendRequestAsyc
+                    |> sendRequestAsync
 
                 if statusCode = HttpStatusCode.OK then
                     MemoryCache.set key body
