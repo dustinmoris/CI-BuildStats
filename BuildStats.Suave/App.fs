@@ -68,7 +68,7 @@ let SVG template viewModel =
 
 let getIncludePreReleases (ctx : HttpContext) =
     match getBool "includePreReleases" ctx with
-    | NotSet            -> Success true
+    | NotSet            -> Success false
     | Value value       -> Success value
     | ParsingError msg  -> Failure msg
 
