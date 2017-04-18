@@ -92,7 +92,7 @@ https://buildstats.info/nuget/{packageName}
 
 For example the badge and Markdown for the [NUnit](https://github.com/nunit/nunit) NuGet badge would be:
 
-[![NuGet Badge](https://buildstats.info/nuget/nunit)](https://www.nuget.org/packages/NUnit/)
+[![NuGet Badge](https://buildstats.info/nuget/NUnit)](https://www.nuget.org/packages/NUnit/)
 
 ```
 [![NuGet Badge](https://buildstats.info/nuget/nunit)](https://www.nuget.org/packages/NUnit/)
