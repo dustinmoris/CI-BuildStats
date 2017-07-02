@@ -1,4 +1,4 @@
-module BuildStats.Core.Common
+module BuildStats.Common
 
 open System
 open System.Net
@@ -6,12 +6,6 @@ open System.Net.Http
 open System.IO
 open System.Threading.Tasks
 open Newtonsoft.Json
-
-/// -------------------------------------
-/// Common functions
-/// -------------------------------------
-
-let inline isNotNull x = isNull x |> not
 
 /// -------------------------------------
 /// String helper functions
@@ -50,6 +44,7 @@ module Http =
 
     let getJson (url : string) =
         async {
+            httpClient.DefaultRequestHeaders.Accept.Add(Headers.MediaTypeWithQualityHeaderValue("application/json"))
             let! result = httpClient.GetAsync url |> Async.AwaitTask
             match result.StatusCode with
             | HttpStatusCode.OK ->

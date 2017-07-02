@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\BuildStats.Core\BuildStats.Core.fsproj" />
+    <ProjectReference Include="..\..\src\BuildStats\BuildStats.fsproj" />
   </ItemGroup>
 
 </Project>

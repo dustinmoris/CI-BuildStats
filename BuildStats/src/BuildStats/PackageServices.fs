@@ -1,9 +1,9 @@
-module BuildStats.Core.PackageServices
+module BuildStats.PackageServices
 
 open System.Net
 open Microsoft.FSharp.Core.Option
 open Newtonsoft.Json.Linq
-open BuildStats.Core.Common
+open BuildStats.Common
 
 type Package =
     {

@@ -1,10 +1,11 @@
-module BuildStats.Core.BuildHistoryCharts
+module BuildStats.BuildHistoryCharts
 
 open System
 open System.Net
 open Microsoft.FSharp.Core.Option
 open Newtonsoft.Json.Linq
-open BuildStats.Core.Common
+open Giraffe.Common
+open BuildStats.Common
 
 // -------------------------------------------
 // Common Types and Functions
