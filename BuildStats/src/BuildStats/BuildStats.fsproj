@@ -29,6 +29,7 @@
     <Compile Include="Common.fs" />
     <Compile Include="BuildHistoryCharts.fs" />
     <Compile Include="PackageServices.fs" />
+    <Compile Include="TextSize.fs" />
     <Compile Include="Models.fs" />
     <Compile Include="Views.fs" />
     <Compile Include="Program.fs" />

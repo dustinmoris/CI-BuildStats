@@ -5,7 +5,8 @@
 param
 (
     [switch] $Release,
-    [switch] $Run
+    [switch] $Run,
+    [switch] $ExcludeTests
 )
 
 $ErrorActionPreference = "Stop"
@@ -97,16 +98,19 @@ Test-Version $app
 Write-DotnetVersion
 Remove-OldBuildArtifacts
 
-$configuration = if ($Release.IsPresent) { "Release" } else { "Debug" }
+$configuration = if ($Release.IsPresent -or $env:APPVEYOR -eq $true) { "Release" } else { "Debug" }
 
-Write-Host "Building BuildStats.Core..." -ForegroundColor Magenta
+Write-Host "Building application..." -ForegroundColor Magenta
 dotnet-restore $app
 dotnet-build   $app "-c $configuration"
 
-Write-Host "Building and running BuildStats.Tests..." -ForegroundColor Magenta
-dotnet-restore $tests
-dotnet-build   $tests
-dotnet-test    $tests
+if (!$ExcludeTests.IsPresent)
+{
+    Write-Host "Building and running tests..." -ForegroundColor Magenta
+    dotnet-restore $tests
+    dotnet-build   $tests
+    dotnet-test    $tests
+}
 
 if ($Run.IsPresent)
 {

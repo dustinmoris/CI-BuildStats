@@ -14,10 +14,10 @@ type Package =
     }
 
 module NuGet =
-    
+
     let deserialize (json : string) =
         let obj = Json.deserialize json :?> JObject
-        obj.Value<JArray> "data"            
+        obj.Value<JArray> "data"
 
     let tryFindByName  (packageName : string)
                        (data        : JArray)  =
@@ -31,7 +31,7 @@ module NuGet =
             Downloads = item.Value<int> "totalDownloads"
         }
 
-    let getPackageAsync (packageName        : string) 
+    let getPackageAsync (packageName        : string)
                         (includePreReleases : bool) =
         async {
             let url = sprintf "https://api-v2v3search-0.nuget.org/query?q=%s&skip=0&take=10&prerelease=%b" packageName includePreReleases
@@ -62,11 +62,11 @@ module MyGet =
         }
 
     let validatePackage packageName package =
-        if packageName |> Str.matches package.Name 
+        if packageName |> Str.matches package.Name
         then Some package
         else None
 
-    let getPackageAsync (feedName           : string, 
+    let getPackageAsync (feedName           : string,
                          packageName        : string)
                         (includePreReleases : bool) =
         async {

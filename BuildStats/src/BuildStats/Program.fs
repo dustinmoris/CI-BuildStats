@@ -16,7 +16,9 @@ open Giraffe.HttpHandlers
 open Giraffe.Middleware
 open Giraffe.XmlViewEngine
 open Giraffe.HttpContextExtensions
+open Giraffe.ComputationExpressions
 open BuildStats.PackageServices
+open BuildStats.BuildHistoryCharts
 open BuildStats.Models
 
 // ---------------------------------
@@ -29,11 +31,6 @@ let md5 (str : string) =
     |> MD5.Create().ComputeHash
     |> Array.map (fun b -> b.ToString "x2")
     |> String.concat ""
-
-let renderXmlNodes (nodes : XmlNode list) =
-    nodes
-    |> List.map renderXmlString
-    |> String.Concat
 
 let svg (body : string) =
     setHttpHeader "Content-Type" "image/svg+xml"
@@ -50,7 +47,7 @@ let packageHandler getPackageFunc slug =
         async {
             let preRelease =
                 match ctx.TryGetQueryStringValue "includePreReleases" with
-                | Some value -> bool.Parse value                
+                | Some value -> bool.Parse value
                 | None       -> false
             let! package = getPackageFunc slug preRelease
             return!
@@ -68,15 +65,49 @@ let packageHandler getPackageFunc slug =
 let nugetHandler = packageHandler NuGet.getPackageAsync
 let mygetHandler = packageHandler MyGet.getPackageAsync
 
-let webApp = 
+let getBuildHistory (getBuildsFunc) (account, project) =
+    fun (ctx : HttpContext) ->
+        async {
+            let includePullRequests =
+                match ctx.TryGetQueryStringValue "includeBuildsFromPullRequest" with
+                | Some x -> bool.Parse x
+                | None   -> true
+            let buildCount =
+                match ctx.TryGetQueryStringValue "buildCount" with
+                | Some x -> int x
+                | None   -> 25
+            let showStats =
+                match ctx.TryGetQueryStringValue "showStats" with
+                | Some x -> bool.Parse x
+                | None   -> true
+            let branch = ctx.TryGetQueryStringValue "branch"
+            let! builds = getBuildsFunc account project buildCount branch includePullRequests
+            return!
+                builds
+                |> BuildHistoryModel.FromBuilds showStats
+                |> Views.buildHistoryView
+                |> renderXmlNode
+                |> svg
+                <| ctx
+        }
+
+let appVeyorHandler = getBuildHistory AppVeyor.getBuilds
+let travisCiHandler = getBuildHistory TravisCI.getBuilds
+let circleCiHandler = getBuildHistory CircleCI.getBuilds
+
+let webApp =
     choose [
         GET >=>
             choose [
                 route "/"             >=> htmlFile "/pages/index.html"
                 route "/tests"        >=> htmlFile "/pages/tests.html"
+                route "/chars"        >=> (Views.measureCharsView |> renderXmlNode |> svg)
                 route "/ping"         >=> text "pong"
                 routef "/nuget/%s"    nugetHandler
                 routef "/myget/%s/%s" mygetHandler
+                routef "/appveyor/chart/%s/%s" appVeyorHandler
+                routef "/travisci/chart/%s/%s" travisCiHandler
+                routef "/circleci/chart/%s/%s" circleCiHandler
             ]
         notFound "Not Found" ]
 
@@ -92,7 +123,7 @@ let errorHandler (ex : Exception) (logger : ILogger) (ctx : HttpContext) =
 // Config and Main
 // ---------------------------------
 
-let configureApp (app : IApplicationBuilder) = 
+let configureApp (app : IApplicationBuilder) =
     app.UseGiraffeErrorHandler(errorHandler)
     app.UseGiraffe(webApp)
 

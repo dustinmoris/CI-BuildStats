@@ -13,7 +13,7 @@ open Newtonsoft.Json
 
 module Str =
 
-    let matches (name1 : string) 
+    let matches (name1 : string)
                 (name2 : string) =
         name1.Equals(name2, StringComparison.CurrentCultureIgnoreCase)
 
@@ -41,10 +41,10 @@ module Json =
 module Http =
 
     let httpClient = new HttpClient()
+    httpClient.DefaultRequestHeaders.Accept.Add(Headers.MediaTypeWithQualityHeaderValue("application/json"))
 
     let getJson (url : string) =
         async {
-            httpClient.DefaultRequestHeaders.Accept.Add(Headers.MediaTypeWithQualityHeaderValue("application/json"))
             let! result = httpClient.GetAsync url |> Async.AwaitTask
             match result.StatusCode with
             | HttpStatusCode.OK ->

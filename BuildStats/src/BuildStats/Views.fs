@@ -3,6 +3,7 @@ module BuildStats.Views
 open System
 open Giraffe.XmlViewEngine
 open BuildStats.Models
+open BuildStats.TextSize
 
 let svg      = tag     "svg"
 let g        = tag     "g"
@@ -70,7 +71,7 @@ let whiteText (x : int) (y : int) (value : string) =
         "x", x.ToString()
         "y", y.ToString()
         "fill", "#ffffff"
-    ] (rawText value)
+    ] [ rawText value ]
 
 let packageView (model : PackageModel) = [
     defaultComment
@@ -97,24 +98,50 @@ let packageView (model : PackageModel) = [
                 0 0
                 model.Width 20
                 "url(#grad1)"
-            whiteText 7 14 model.FeedName
-            whiteText (model.FeedWidth + 7) 14 model.Version
-            whiteText (model.FeedWidth + model.VersionWidth + 7) 14 model.Downloads ] ] ]
+            whiteText model.Padding 14 model.FeedName
+            whiteText (model.FeedWidth + model.Padding) 14 model.Version
+            whiteText (model.FeedWidth + model.VersionWidth + model.Padding) 14 model.Downloads ] ] ]
 
 let buildHistoryView (model : BuildHistoryModel) =
     defaultSvg model.Width model.Height [
         defaultG "#777777" [
             yield text [
                 "x", "0"; "y", "12"; "font-weight", "bold"; "fill", "#000000"
-            ] (rawText model.Branch)
+            ] [ rawText model.Branch ]
 
             if model.ShowStats then
-                yield text [ "x", "0"; "y", "27" ] (rawText model.MaxBuild)
-                yield text [ "x", "0"; "y", "42" ] (rawText model.MinBuild)
-                yield text [ "x", "0"; "y", "57" ] (rawText model.AvgBuild)
+                yield text [ "x", "0"; "y", "27" ] [ rawText model.MaxBuild ]
+                yield text [ "x", "0"; "y", "42" ] [ rawText model.MinBuild ]
+                yield text [ "x", "0"; "y", "57" ] [ rawText model.AvgBuild ]
 
             yield!
-                model.Builds
+                model.BuildBars
                 |> List.map (fun b -> squareRect b.X b.Y 5 b.Height b.Colour)
         ]
-    ]          
+    ]
+
+let measureCharsView =
+    let isEven x = (x % 2) = 0
+    defaultSvg 800 800 [
+        defaultG "#000000" [
+            yield!
+                chars
+                |> Seq.map (fun kv -> kv.Key, kv.Value)
+                |> Seq.mapFold (fun (x, i) (c, w) ->
+                    match isEven i with
+                    | true  -> squareRect x 0 w 300 "#ff0000", (x + w, i + 1)
+                    | false -> squareRect x 0 w 300 "#00ff00", (x + w, i + 1)) (0, 0)
+                |> fst
+
+            yield!
+                chars
+                |> Seq.map (fun kv -> kv.Key, kv.Value)
+                |> Seq.mapFold (fun x (c, w) ->
+                    text [
+                        "x", x.ToString()
+                        "y", "100"
+                        "fill", "#000000"
+                    ] [ encodedText (c.ToString()) ], x + w ) 0
+                |> fst
+        ]
+    ]

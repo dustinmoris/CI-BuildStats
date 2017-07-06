@@ -46,7 +46,7 @@ let getTimeTaken (started   : Nullable<DateTime>)
 // -------------------------------------------
 
 module BuildMetrics =
-    
+
     let longestBuildTime (builds : Build list) =
         match builds.Length with
         | 0 -> TimeSpan.Zero
@@ -96,7 +96,7 @@ module AppVeyor =
         match items with
         | None       -> []
         | Some items ->
-            items 
+            items
             |> Seq.map (fun x ->
                 let started  = x.Value<Nullable<DateTime>> "started"
                 let finished = x.Value<Nullable<DateTime>> "finished"
@@ -110,19 +110,19 @@ module AppVeyor =
                 })
             |> Seq.toList
 
-    let getBuilds   (account             : string) 
-                    (project             : string) 
-                    (buildCount          : int) 
-                    (branch              : string option) 
-                    (inclFromPullRequest : bool) = 
+    let getBuilds   (account             : string)
+                    (project             : string)
+                    (buildCount          : int)
+                    (branch              : string option)
+                    (inclFromPullRequest : bool) =
         async {
             let additionalFilter =
                 match branch with
                 | Some b -> sprintf "&branch=%s" b
                 | None   -> ""
-                
-            let url = 
-                sprintf "https://ci.appveyor.com/api/projects/%s/%s/history?recordsNumber=%d%s" 
+
+            let url =
+                sprintf "https://ci.appveyor.com/api/projects/%s/%s/history?recordsNumber=%d%s"
                     account project (5 * buildCount) additionalFilter
 
             let! json = Http.getJson url
@@ -141,13 +141,13 @@ module AppVeyor =
 
 module TravisCI =
 
-    let parseToJArray (json : string) = 
+    let parseToJArray (json : string) =
         Json.deserialize json :?> JArray
 
     let parseStatus (state  : string)
                     (result : Nullable<int>) =
         match state with
-        | "finished" -> 
+        | "finished" ->
             match result with
             | x when not x.HasValue -> Cancelled
             | x when x.Value = 0    -> Success
@@ -162,7 +162,7 @@ module TravisCI =
         match items with
         | None -> []
         | Some items ->
-            items 
+            items
             |> Seq.map (fun x ->
                 let started  = x.Value<Nullable<DateTime>> "started_at"
                 let finished = x.Value<Nullable<DateTime>> "finished_at"
@@ -179,13 +179,13 @@ module TravisCI =
             |> Seq.toList
 
     let numberOfBuildsPerPage = 25
-    
-    let rec getBatchOfBuilds (account          : string) 
+
+    let rec getBatchOfBuilds (account          : string)
                              (project          : string)
                              (afterBuildNumber : int option)
                              (maxRequests      : int)
                              (requestCount     : int) =
-        
+
         async {
             let additionalQuery =
                 match afterBuildNumber with
@@ -194,15 +194,15 @@ module TravisCI =
 
             let url = sprintf "https://api.travis-ci.org/repos/%s/%s/builds%s" account project additionalQuery
             let! json = Http.getJson url
-            
+
             let requestCount' = requestCount + 1
 
             let batch =
                 json
-                |> (Str.toOption 
+                |> (Str.toOption
                 >> map parseToJArray)
                 |> convertToBuilds
-            
+
             match batch with
             | x when x.IsEmpty                          -> return []
             | x when x.Length < numberOfBuildsPerPage   -> return x
@@ -213,16 +213,16 @@ module TravisCI =
                 return batch @ nextBatch
         }
 
-    let getBuilds   (account             : string) 
-                    (project             : string) 
-                    (buildCount          : int) 
-                    (branch              : string option) 
-                    (inclFromPullRequest : bool) = 
+    let getBuilds   (account             : string)
+                    (project             : string)
+                    (buildCount          : int)
+                    (branch              : string option)
+                    (inclFromPullRequest : bool) =
         async {
             let maxRequests = int(Math.Ceiling((float buildCount / float numberOfBuildsPerPage) * 5.0))
             let! builds = getBatchOfBuilds account project None maxRequests 0
 
-            let branchFilter build = 
+            let branchFilter build =
                 match branch with
                 | Some b -> build.Branch = b
                 | None   -> true
@@ -239,7 +239,7 @@ module TravisCI =
 
 module CircleCI =
 
-    let parseToJArray (json : string) = 
+    let parseToJArray (json : string) =
         Json.deserialize json :?> JArray
 
     let parseStatus (status : string) =
@@ -257,7 +257,7 @@ module CircleCI =
         match items with
         | None       -> []
         | Some items ->
-            items 
+            items
             |> Seq.map (fun x ->
                 let started  = x.Value<Nullable<DateTime>> "start_time"
                 let finished = x.Value<Nullable<DateTime>> "stop_time"
@@ -271,11 +271,11 @@ module CircleCI =
                 })
             |> Seq.toList
 
-    let getBuilds   (account             : string) 
-                    (project             : string) 
-                    (buildCount          : int) 
-                    (branch              : string option) 
-                    (inclFromPullRequest : bool) = 
+    let getBuilds   (account             : string)
+                    (project             : string)
+                    (buildCount          : int)
+                    (branch              : string option)
+                    (inclFromPullRequest : bool) =
         async {
             let additionalFilter =
                 match branch with
@@ -286,8 +286,8 @@ module CircleCI =
             // ToDo: Refactor to pull more items when buildCount is higher
             let limit = min 100 (5 * buildCount)
 
-            let url = 
-                sprintf "https://circleci.com/api/v1/project/%s/%s%s?limit=%i" 
+            let url =
+                sprintf "https://circleci.com/api/v1/project/%s/%s%s?limit=%i"
                     account project additionalFilter limit
 
             let! json = Http.getJson url
