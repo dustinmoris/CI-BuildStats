@@ -45,6 +45,13 @@ function dotnet-test    ($project, $argv) { Invoke-Cmd "dotnet test $project $ar
 function dotnet-pack    ($project, $argv) { Invoke-Cmd "dotnet pack $project $argv" }
 function dotnet-publish ($project, $argv) { Invoke-Cmd "dotnet publish $project $argv" }
 
+function Get-Version ($project)
+{
+    [xml] $xml = Get-Content $project
+    [string] $version = $xml.Project.PropertyGroup.Version
+    return $version
+}
+
 function Test-Version ($project)
 {
     if ($env:APPVEYOR_REPO_TAG -eq $true)
