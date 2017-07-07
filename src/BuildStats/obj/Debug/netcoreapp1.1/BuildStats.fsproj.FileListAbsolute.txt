@@ -1,0 +1,9 @@
+C:\GitHub\CI-BuildStats\BuildStats\src\BuildStats\bin\Debug\netcoreapp1.1\pages\index.html
+C:\GitHub\CI-BuildStats\BuildStats\src\BuildStats\bin\Debug\netcoreapp1.1\pages\tests.html
+C:\GitHub\CI-BuildStats\BuildStats\src\BuildStats\bin\Debug\netcoreapp1.1\BuildStats.deps.json
+C:\GitHub\CI-BuildStats\BuildStats\src\BuildStats\bin\Debug\netcoreapp1.1\BuildStats.runtimeconfig.json
+C:\GitHub\CI-BuildStats\BuildStats\src\BuildStats\bin\Debug\netcoreapp1.1\BuildStats.runtimeconfig.dev.json
+C:\GitHub\CI-BuildStats\BuildStats\src\BuildStats\bin\Debug\netcoreapp1.1\BuildStats.dll
+C:\GitHub\CI-BuildStats\BuildStats\src\BuildStats\bin\Debug\netcoreapp1.1\BuildStats.pdb
+C:\GitHub\CI-BuildStats\BuildStats\src\BuildStats\obj\Debug\netcoreapp1.1\BuildStats.dll
+C:\GitHub\CI-BuildStats\BuildStats\src\BuildStats\obj\Debug\netcoreapp1.1\BuildStats.pdb

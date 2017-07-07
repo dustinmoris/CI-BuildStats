@@ -1,8 +1,0 @@
-language: csharp
-sudo: required
-dist: trusty
-mono: latest
-before_script:
-  - chmod a+x ./build.sh
-script:
-  - ./build.sh
