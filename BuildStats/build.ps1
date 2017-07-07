@@ -6,7 +6,9 @@ param
 (
     [switch] $Release,
     [switch] $Run,
-    [switch] $ExcludeTests
+    [switch] $ExcludeTests,
+    [switch] $Docker,
+    [switch] $Deploy
 )
 
 $ErrorActionPreference = "Stop"
@@ -81,7 +83,7 @@ function Remove-OldBuildArtifacts
     Write-Host "Deleting old build artifacts..." -ForegroundColor Magenta
 
     Get-ChildItem -Include "bin", "obj" -Recurse -Directory `
-    | ForEach-Object { 
+    | ForEach-Object {
         Write-Host "Removing folder $_" -ForegroundColor DarkGray
         Remove-Item $_ -Recurse -Force }
 }
@@ -98,7 +100,7 @@ Test-Version $app
 Write-DotnetVersion
 Remove-OldBuildArtifacts
 
-$configuration = if ($Release.IsPresent -or $env:APPVEYOR -eq $true) { "Release" } else { "Debug" }
+$configuration = if ($Release.IsPresent -or $Docker.IsPresent -or $Deploy.IsPresent -or $env:APPVEYOR -eq $true) { "Release" } else { "Debug" }
 
 Write-Host "Building application..." -ForegroundColor Magenta
 dotnet-restore $app
@@ -112,8 +114,35 @@ if (!$ExcludeTests.IsPresent)
     dotnet-test    $tests
 }
 
+if ($Docker.IsPresent -or $Deploy.IsPresent -or $env:APPVEYOR_REPO_TAG -eq $true)
+{
+    Write-Host "Publishing web application..." -ForegroundColor Magenta
+    dotnet-publish $app "-c $configuration"
+
+    Write-Host "Building Docker image..." -ForegroundColor Magenta
+    $version = Get-Version $app
+    $publishFolder = ".\src\BuildStats\bin\Release\netcoreapp1.1\publish"
+    Invoke-Cmd "docker build -t dustinmoris/ci-buildstats:$version $publishFolder"
+}
+
 if ($Run.IsPresent)
 {
-    Write-Host "Launching sample application..." -ForegroundColor Magenta
-    dotnet-run $app
+    Write-Host "Launching application..." -ForegroundColor Magenta
+
+    if ($Docker.IsPresent)
+    {
+        Invoke-Cmd "docker run -p 8080:8080 ci-buildstats:$version"
+    }
+    else
+    {
+        dotnet-run $app
+    }
+}
+elseif ($Deploy.IsPresent -or $env:APPVEYOR_REPO_TAG -eq $true)
+{
+    Write-Host "Deploying Docker image..." -ForegroundColor Magenta
+    Invoke-Cmd "docker tag dustinmoris/ci-buildstats:$version dustinmoris/ci-buildstats:latest"
+    Invoke-Cmd "docker login -u='$env:DOCKER_USERNAME' -p='$env:DOCKER_PASSWORD'"
+    Invoke-Cmd "docker push dustinmoris/ci-buildstats:$version"
+    Invoke-Cmd "docker push dustinmoris/ci-buildstats:latest"
 }
