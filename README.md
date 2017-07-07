@@ -1,9 +1,9 @@
 # [BuildStats.info](https://buildstats.info)
 A little SVG widget to display build history charts and other badges for public repositories.
 
-[![Build Status](https://travis-ci.org/dustinmoris/CI-BuildStats.svg)](https://travis-ci.org/dustinmoris/CI-BuildStats)
+[![Build status](https://ci.appveyor.com/api/projects/status/7g3sppml9ewumr9i/branch/master?svg=true)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats/branch/develop)
 
-[![Build History](https://buildstats.info/travisci/chart/dustinmoris/CI-BuildStats)](https://travis-ci.org/dustinmoris/CI-BuildStats/builds)
+[![Build History](https://buildstats.info/appveyor/chart/dustinmoris/CI-BuildStats?branch=develop)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats/history?branch=develop)
 
 ## Build History Chart
 
