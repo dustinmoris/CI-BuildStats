@@ -43,6 +43,7 @@ function dotnet-build   ($project, $argv) { Invoke-Cmd "dotnet build $project $a
 function dotnet-run     ($project, $argv) { Invoke-Cmd "dotnet run --project $project $argv" }
 function dotnet-test    ($project, $argv) { Invoke-Cmd "dotnet test $project $argv" }
 function dotnet-pack    ($project, $argv) { Invoke-Cmd "dotnet pack $project $argv" }
+function dotnet-publish ($project, $argv) { Invoke-Cmd "dotnet publish $project $argv" }
 
 function Test-Version ($project)
 {
