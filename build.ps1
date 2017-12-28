@@ -8,7 +8,9 @@ param
     [switch] $Run,
     [switch] $ExcludeTests,
     [switch] $Docker,
-    [switch] $Deploy
+    [switch] $Deploy,
+    [string] $DockerUsername,
+    [SecureString] $DockerPassword
 )
 
 $ErrorActionPreference = "Stop"
@@ -127,7 +129,7 @@ if ($Docker.IsPresent -or $Deploy.IsPresent -or $env:APPVEYOR_REPO_TAG -eq $true
 
     Write-Host "Building Docker image..." -ForegroundColor Magenta
     $version = Get-Version $app
-    $publishFolder = ".\src\BuildStats\bin\Release\netcoreapp2.0\publish"
+    $publishFolder = "./src/BuildStats/bin/Release/netcoreapp2.0/publish"
     Invoke-Cmd "docker build -t dustinmoris/ci-buildstats:$version $publishFolder"
 }
 
@@ -144,11 +146,20 @@ if ($Run.IsPresent)
         dotnet-run $app
     }
 }
-elseif ($Deploy.IsPresent -or $env:APPVEYOR_REPO_TAG -eq $true)
+elseif ($Deploy.IsPresent) # -or $env:APPVEYOR_REPO_TAG -eq $true) AppVeyor doesn't support Linux containers yet
 {
+    if ([string]::IsNullOrEmpty($DockerUsername) -or [string]::IsNullOrEmpty($DockerPassword))
+    {
+        Write-Error "Cannot deploy because Docker Hub credentials are missing."
+        return
+    }
+
     Write-Host "Deploying Docker image..." -ForegroundColor Magenta
     Invoke-Cmd "docker tag dustinmoris/ci-buildstats:$version dustinmoris/ci-buildstats:latest"
-    Invoke-Cmd "docker login -u='$env:DOCKER_USERNAME' -p='$env:DOCKER_PASSWORD'"
+    Invoke-Cmd "docker login -u='$DockerUsername' -p='$DockerPassword'"
     Invoke-Cmd "docker push dustinmoris/ci-buildstats:$version"
     Invoke-Cmd "docker push dustinmoris/ci-buildstats:latest"
+
+    Write-Host "Updating Kubernetes deployment..." -ForegroundColor Magenta
+    Invoke-Cmd "kubectl set image deployment/ci-buildstats ci-buildstats=docker.io/dustinmoris/ci-buildstats:$version"
 }

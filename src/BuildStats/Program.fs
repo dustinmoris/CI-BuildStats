@@ -92,8 +92,8 @@ let webApp =
     choose [
         GET >=>
             choose [
-                route "/"             >=> htmlFile "/pages/index.html"
-                route "/tests"        >=> htmlFile "/pages/tests.html"
+                route "/"             >=> htmlFile "pages/index.html"
+                route "/tests"        >=> htmlFile "pages/tests.html"
                 route "/chars"        >=> (Views.measureCharsView |> renderXmlNode |> svg)
                 route "/ping"         >=> text "pong"
                 routef "/nuget/%s"    nugetHandler
