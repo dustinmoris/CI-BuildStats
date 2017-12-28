@@ -127,7 +127,7 @@ if ($Docker.IsPresent -or $Deploy.IsPresent -or $env:APPVEYOR_REPO_TAG -eq $true
 
     Write-Host "Building Docker image..." -ForegroundColor Magenta
     $version = Get-Version $app
-    $publishFolder = ".\src\BuildStats\bin\Release\netcoreapp1.1\publish"
+    $publishFolder = ".\src\BuildStats\bin\Release\netcoreapp2.0\publish"
     Invoke-Cmd "docker build -t dustinmoris/ci-buildstats:$version $publishFolder"
 }
 
