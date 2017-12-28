@@ -4,6 +4,7 @@ open System
 open System.Net
 open Microsoft.FSharp.Core.Option
 open Newtonsoft.Json.Linq
+open Giraffe
 open Giraffe.Common
 open BuildStats.Common
 
@@ -115,7 +116,7 @@ module AppVeyor =
                     (buildCount          : int)
                     (branch              : string option)
                     (inclFromPullRequest : bool) =
-        async {
+        task {
             let additionalFilter =
                 match branch with
                 | Some b -> sprintf "&branch=%s" b
@@ -186,7 +187,7 @@ module TravisCI =
                              (maxRequests      : int)
                              (requestCount     : int) =
 
-        async {
+        task {
             let additionalQuery =
                 match afterBuildNumber with
                 | Some x -> sprintf "?after_number=%i" x
@@ -218,7 +219,7 @@ module TravisCI =
                     (buildCount          : int)
                     (branch              : string option)
                     (inclFromPullRequest : bool) =
-        async {
+        task {
             let maxRequests = int(Math.Ceiling((float buildCount / float numberOfBuildsPerPage) * 5.0))
             let! builds = getBatchOfBuilds account project None maxRequests 0
 
@@ -276,7 +277,7 @@ module CircleCI =
                     (buildCount          : int)
                     (branch              : string option)
                     (inclFromPullRequest : bool) =
-        async {
+        task {
             let additionalFilter =
                 match branch with
                 | Some b -> sprintf "/tree/%s" <| WebUtility.UrlEncode b

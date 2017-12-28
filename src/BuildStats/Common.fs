@@ -3,9 +3,8 @@ module BuildStats.Common
 open System
 open System.Net
 open System.Net.Http
-open System.IO
-open System.Threading.Tasks
 open Newtonsoft.Json
+open Giraffe
 
 /// -------------------------------------
 /// String helper functions
@@ -44,12 +43,9 @@ module Http =
     httpClient.DefaultRequestHeaders.Accept.Add(Headers.MediaTypeWithQualityHeaderValue("application/json"))
 
     let getJson (url : string) =
-        async {
-            let! result = httpClient.GetAsync url |> Async.AwaitTask
+        task {
+            let! result = httpClient.GetAsync url
             match result.StatusCode with
-            | HttpStatusCode.OK ->
-                return!
-                    result.Content.ReadAsStringAsync()
-                    |> Async.AwaitTask
+            | HttpStatusCode.OK -> return! result.Content.ReadAsStringAsync()
             | _ -> return ""
         }

@@ -4,19 +4,12 @@ open System
 open System.IO
 open System.Text
 open System.Security.Cryptography
-open System.Collections.Generic
-open System.Reflection
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.Logging
-open Microsoft.Extensions.DependencyInjection
-open Giraffe.Common
-open Giraffe.HttpHandlers
-open Giraffe.Middleware
-open Giraffe.XmlViewEngine
-open Giraffe.HttpContextExtensions
-open Giraffe.ComputationExpressions
+open Giraffe
+open Giraffe.GiraffeViewEngine
 open BuildStats.PackageServices
 open BuildStats.BuildHistoryCharts
 open BuildStats.Models
@@ -43,8 +36,8 @@ let svg (body : string) =
 let notFound msg = setStatusCode 404 >=> text msg
 
 let packageHandler getPackageFunc slug =
-    fun (ctx : HttpContext) ->
-        async {
+    fun (next : HttpFunc) (ctx : HttpContext) ->
+        task {
             let preRelease =
                 match ctx.TryGetQueryStringValue "includePreReleases" with
                 | Some value -> bool.Parse value
@@ -59,15 +52,15 @@ let packageHandler getPackageFunc slug =
                     |> renderXmlNodes
                     |> svg
                 | None -> notFound "Package not found"
-                <| ctx
+                <|| (next, ctx)
         }
 
 let nugetHandler = packageHandler NuGet.getPackageAsync
 let mygetHandler = packageHandler MyGet.getPackageAsync
 
 let getBuildHistory (getBuildsFunc) (account, project) =
-    fun (ctx : HttpContext) ->
-        async {
+    fun (next : HttpFunc) (ctx : HttpContext) ->
+        task {
             let includePullRequests =
                 match ctx.TryGetQueryStringValue "includeBuildsFromPullRequest" with
                 | Some x -> bool.Parse x
@@ -88,7 +81,7 @@ let getBuildHistory (getBuildsFunc) (account, project) =
                 |> Views.buildHistoryView
                 |> renderXmlNode
                 |> svg
-                <| ctx
+                <|| (next, ctx)
         }
 
 let appVeyorHandler = getBuildHistory AppVeyor.getBuilds
@@ -115,9 +108,9 @@ let webApp =
 // Error handler
 // ---------------------------------
 
-let errorHandler (ex : Exception) (logger : ILogger) (ctx : HttpContext) =
+let errorHandler (ex : Exception) (logger : ILogger) =
     logger.LogError(EventId(0), ex, "An unhandled exception has occurred while executing the request.")
-    ctx |> (clearResponse >=> setStatusCode 500 >=> text ex.Message)
+    clearResponse >=> setStatusCode 500 >=> text ex.Message
 
 // ---------------------------------
 // Config and Main
@@ -125,18 +118,19 @@ let errorHandler (ex : Exception) (logger : ILogger) (ctx : HttpContext) =
 
 let configureApp (app : IApplicationBuilder) =
     app.UseGiraffeErrorHandler(errorHandler)
-    app.UseGiraffe(webApp)
+       .UseGiraffe(webApp)
 
-let configureLogging (loggerFactory : ILoggerFactory) =
-    loggerFactory.AddConsole(LogLevel.Error).AddDebug() |> ignore
+let configureLogging (builder : ILoggingBuilder) =
+    let filter (l : LogLevel) = l.Equals LogLevel.Error
+    builder.AddFilter(filter).AddConsole().AddDebug() |> ignore
 
 [<EntryPoint>]
-let main argv =
+let main _ =
     WebHostBuilder()
         .UseKestrel()
         .UseContentRoot(Directory.GetCurrentDirectory())
         .Configure(Action<IApplicationBuilder> configureApp)
-        .ConfigureLogging(Action<ILoggerFactory> configureLogging)
+        .ConfigureLogging(configureLogging)
         .Build()
         .Run()
     0

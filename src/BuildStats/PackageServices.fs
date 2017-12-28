@@ -4,6 +4,7 @@ open System.Net
 open Microsoft.FSharp.Core.Option
 open Newtonsoft.Json.Linq
 open BuildStats.Common
+open Giraffe
 
 type Package =
     {
@@ -33,7 +34,7 @@ module NuGet =
 
     let getPackageAsync (packageName        : string)
                         (includePreReleases : bool) =
-        async {
+        task {
             let url = sprintf "https://api-v2v3search-0.nuget.org/query?q=%s&skip=0&take=10&prerelease=%b" packageName includePreReleases
             let! json = Http.getJson url
             return
@@ -69,7 +70,7 @@ module MyGet =
     let getPackageAsync (feedName           : string,
                          packageName        : string)
                         (includePreReleases : bool) =
-        async {
+        task {
             let filter = sprintf "Id eq '%s'" packageName |> WebUtility.UrlEncode
             let url = sprintf "https://www.myget.org/F/%s/api/v2/Packages()?$filter=%s&$orderby=Published desc&$top=1" feedName filter
             let! json = Http.getJson url

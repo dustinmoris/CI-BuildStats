@@ -17,19 +17,17 @@ $ErrorActionPreference = "Stop"
 # Helper functions
 # ----------------------------------------------
 
+function Test-IsWindows
+{
+    [environment]::OSVersion.Platform -ne "Unix"
+}
+
 function Invoke-Cmd ($cmd)
 {
     Write-Host $cmd -ForegroundColor DarkCyan
-    if ([environment]::OSVersion.Platform -eq "Unix")
-    {
-        Invoke-Expression -Command $cmd
-    }
-    else
-    {
-        $command = "cmd.exe /C $cmd"
-        Invoke-Expression -Command $command
-        if ($LastExitCode -ne 0) { Write-Error "An error occured when executing '$cmd'."; return }
-    }
+    if (Test-IsWindows) { $cmd = "cmd.exe /C $cmd" }
+    Invoke-Expression -Command $cmd
+    if ($LastExitCode -ne 0) { Write-Error "An error occured when executing '$cmd'."; return }
 }
 
 function Write-DotnetVersion
@@ -43,7 +41,6 @@ function dotnet-build   ($project, $argv) { Invoke-Cmd "dotnet build $project $a
 function dotnet-run     ($project, $argv) { Invoke-Cmd "dotnet run --project $project $argv" }
 function dotnet-test    ($project, $argv) { Invoke-Cmd "dotnet test $project $argv" }
 function dotnet-pack    ($project, $argv) { Invoke-Cmd "dotnet pack $project $argv" }
-function dotnet-publish ($project, $argv) { Invoke-Cmd "dotnet publish $project $argv" }
 
 function Get-Version ($project)
 {

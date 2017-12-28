@@ -1,7 +1,7 @@
 module BuildStats.Views
 
 open System
-open Giraffe.XmlViewEngine
+open Giraffe.GiraffeViewEngine
 open BuildStats.Models
 open BuildStats.TextSize
 
@@ -18,59 +18,59 @@ let defaultComment =
     sprintf "%sThis SVG badge is provided by Dustin Moris Gorski (https://dusted.codes/).%sAll source code is open source and hosted on GitHub (https://github.com/dustinmoris/CI-BuildStats/).%s%s" nl nl nl nl |> comment
 
 let defaultSvg (width : int) (height : int) =
-    tag "svg" [ "xmlns", "http://www.w3.org/2000/svg"
-                "style", "shape-rendering: geometricPrecision; image-rendering: optimizeQuality; fill-rule: evenodd; clip-rule: evenodd"
-                "width", width.ToString()
-                "height", height.ToString()
-                "fill", "None" ]
+    tag "svg" [ attr "xmlns" "http://www.w3.org/2000/svg"
+                attr "style" "shape-rendering: geometricPrecision; image-rendering: optimizeQuality; fill-rule: evenodd; clip-rule: evenodd"
+                attr "width" (width.ToString())
+                attr "height" (height.ToString())
+                attr "fill" "None" ]
 
 let defaultG (fill : string) =
-    g [ "font-family", "Helvetica,Arial,sans-serif"
-        "font-size", "12"
-        "fill", fill ]
+    g [ attr "font-family" "Helvetica,Arial,sans-serif"
+        attr "font-size" "12"
+        attr "fill" fill ]
 
 let whiteStop (offset : int) (opacity : float) =
-    stop [ "offset", (sprintf "%i%%" offset)
-           "style", (sprintf "stop-color: rgb(255, 255, 255); stop-opacity: %.1f" opacity)]
+    stop [ attr "offset" (sprintf "%i%%" offset)
+           attr "style" (sprintf "stop-color: rgb(255, 255, 255); stop-opacity: %.1f" opacity)]
 
 let packageGradient =
     gradient [
-        "id", "grad1"
-        "x1", "0%"
-        "y1", "0%"
-        "x2", "0%"
-        "y2", "100%" ]
+        attr "id" "grad1"
+        attr "x1" "0%"
+        attr "y1" "0%"
+        attr "x2" "0%"
+        attr "y2" "100%" ]
         [
             whiteStop 0 0.3
             whiteStop 100 0.0 ]
 
 let squareRect (x : int) (y : int) (width : int) (height : int) (fill : string) =
     rect [
-        "x", x.ToString()
-        "y", y.ToString()
-        "height", height.ToString()
-        "width", width.ToString()
-        "stroke-width", "0"
-        "fill", fill
+        attr "x" (x.ToString())
+        attr "y" (y.ToString())
+        attr "height" (height.ToString())
+        attr "width" (width.ToString())
+        attr "stroke-width" "0"
+        attr "fill" fill
     ]
 
 let roundedRect (x : int) (y : int) (width : int)  (height : int)(fill : string) =
     rect [
-        "x", x.ToString()
-        "y", y.ToString()
-        "height", height.ToString()
-        "width", width.ToString()
-        "rx", "2"
-        "ry", "2"
-        "stroke-width", "0"
-        "fill", fill
+        attr "x" (x.ToString())
+        attr "y" (y.ToString())
+        attr "height" (height.ToString())
+        attr "width" (width.ToString())
+        attr "rx" "2"
+        attr "ry" "2"
+        attr "stroke-width" "0"
+        attr "fill" fill
     ]
 
 let whiteText (x : int) (y : int) (value : string) =
     text [
-        "x", x.ToString()
-        "y", y.ToString()
-        "fill", "#ffffff"
+        attr "x" (x.ToString())
+        attr "y" (y.ToString())
+        attr "fill" "#ffffff"
     ] [ rawText value ]
 
 let packageView (model : PackageModel) = [
@@ -106,13 +106,13 @@ let buildHistoryView (model : BuildHistoryModel) =
     defaultSvg model.Width model.Height [
         defaultG "#777777" [
             yield text [
-                "x", "0"; "y", "12"; "font-weight", "bold"; "fill", "#000000"
+                attr "x" "0"; attr "y" "12"; attr "font-weight" "bold"; attr "fill" "#000000"
             ] [ rawText model.Branch ]
 
             if model.ShowStats then
-                yield text [ "x", "0"; "y", "27" ] [ rawText model.MaxBuild ]
-                yield text [ "x", "0"; "y", "42" ] [ rawText model.MinBuild ]
-                yield text [ "x", "0"; "y", "57" ] [ rawText model.AvgBuild ]
+                yield text [ attr "x" "0"; attr "y" "27" ] [ rawText model.MaxBuild ]
+                yield text [ attr "x" "0"; attr "y" "42" ] [ rawText model.MinBuild ]
+                yield text [ attr "x" "0"; attr "y" "57" ] [ rawText model.AvgBuild ]
 
             yield!
                 model.BuildBars
@@ -138,9 +138,9 @@ let measureCharsView =
                 |> Seq.map (fun kv -> kv.Key, kv.Value)
                 |> Seq.mapFold (fun x (c, w) ->
                     text [
-                        "x", x.ToString()
-                        "y", "100"
-                        "fill", "#000000"
+                        attr "x" (x.ToString())
+                        attr "y" "100"
+                        attr "fill" "#000000"
                     ] [ encodedText (c.ToString()) ], x + w ) 0
                 |> fst
         ]
