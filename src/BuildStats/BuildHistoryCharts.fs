@@ -193,13 +193,23 @@ module TravisCI =
                 | Some x -> sprintf "?after_number=%i" x
                 | None   -> ""
 
-            let url = sprintf "https://api.travis-ci.org/repos/%s/%s/builds%s" account project additionalQuery
-            let! json = Http.getJson url
+            let url  = sprintf "https://api.travis-ci.com/repos/%s/%s/builds%s" account project additionalQuery
+            let url2 = sprintf "https://api.travis-ci.org/repos/%s/%s/builds%s" account project additionalQuery
+
+            let travisFallback (json : string) =
+                task {
+                    match json |> Str.toOption with
+                    | Some _ -> return json
+                    | None   -> return! Http.getJson url2
+                }
+
+            let! json  = Http.getJson url
+            let! json' = travisFallback json
 
             let requestCount' = requestCount + 1
 
             let batch =
-                json
+                json'
                 |> (Str.toOption
                 >> map parseToJArray)
                 |> convertToBuilds
