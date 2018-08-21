@@ -5,7 +5,7 @@ open System.Net
 open Microsoft.FSharp.Core.Option
 open Newtonsoft.Json.Linq
 open Giraffe
-open Giraffe.Common
+open FSharp.Control.Tasks.V2.ContextInsensitive
 open BuildStats.Common
 
 // -------------------------------------------

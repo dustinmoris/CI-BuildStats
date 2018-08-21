@@ -4,6 +4,7 @@ open System.Net
 open Microsoft.FSharp.Core.Option
 open Newtonsoft.Json.Linq
 open BuildStats.Common
+open FSharp.Control.Tasks.V2.ContextInsensitive
 open Giraffe
 
 type Package =

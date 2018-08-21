@@ -10,6 +10,7 @@ open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.Logging
 open Giraffe
 open Giraffe.GiraffeViewEngine
+open FSharp.Control.Tasks.V2.ContextInsensitive
 open BuildStats.PackageServices
 open BuildStats.BuildHistoryCharts
 open BuildStats.Models
@@ -31,7 +32,7 @@ let svg (body : string) =
     >=> setHttpHeader "Pragma" "no-cache"
     >=> setHttpHeader "Expires" "-1"
     >=> setHttpHeader "ETag" (md5 body)
-    >=> setBodyAsString body
+    >=> setBodyFromString body
 
 let notFound msg = setStatusCode 404 >=> text msg
 

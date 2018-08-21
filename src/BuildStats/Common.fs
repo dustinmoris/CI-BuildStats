@@ -4,7 +4,7 @@ open System
 open System.Net
 open System.Net.Http
 open Newtonsoft.Json
-open Giraffe
+open FSharp.Control.Tasks.V2.ContextInsensitive
 
 /// -------------------------------------
 /// String helper functions

@@ -1,14 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="**/*.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.*" />
-    <PackageReference Include="xunit" Version="2.3.*" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.*" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.*" />
+    <PackageReference Include="xunit" Version="2.4.*" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.*" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\BuildStats\BuildStats.fsproj" />
