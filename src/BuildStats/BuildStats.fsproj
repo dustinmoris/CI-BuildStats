@@ -6,6 +6,7 @@
     <DebugType>portable</DebugType>
     <AssemblyName>BuildStats</AssemblyName>
     <OutputType>Exe</OutputType>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
     <RunWorkingDirectory>$(MSBuildThisFileDirectory)</RunWorkingDirectory>
   </PropertyGroup>
