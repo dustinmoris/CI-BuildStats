@@ -75,9 +75,11 @@ let getBuildHistory (getBuildsFunc) (account, project) =
                 match ctx.TryGetQueryStringValue "showStats" with
                 | Some x -> bool.Parse x
                 | None   -> true
-            let branch = ctx.TryGetQueryStringValue "branch"
 
-            let! builds = getBuildsFunc account project buildCount branch includePullRequests
+            let branch    = ctx.TryGetQueryStringValue "branch"
+            let authToken = ctx.TryGetQueryStringValue "authToken"
+
+            let! builds = getBuildsFunc authToken account project buildCount branch includePullRequests
             return!
                 builds
                 |> BuildHistoryModel.FromBuilds showStats
@@ -88,8 +90,8 @@ let getBuildHistory (getBuildsFunc) (account, project) =
         }
 
 let appVeyorHandler = getBuildHistory AppVeyor.getBuilds
-let travisCiHandler = getBuildHistory (TravisCI.getBuilds None)
 let circleCiHandler = getBuildHistory CircleCI.getBuilds
+let travisCiHandler = getBuildHistory (TravisCI.getBuilds false)
 
 let createHandler : HttpHandler =
     fun (next : HttpFunc) (ctx : HttpContext) ->

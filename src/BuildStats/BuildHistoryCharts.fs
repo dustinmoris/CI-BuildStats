@@ -114,7 +114,8 @@ module AppVeyor =
                 })
             |> Seq.toList
 
-    let getBuilds   (account             : string)
+    let getBuilds   (authToken           : string option) // ToDo
+                    (account             : string)
                     (project             : string)
                     (buildCount          : int)
                     (branch              : string option)
@@ -180,23 +181,24 @@ module TravisCI =
                 })
             |> Seq.toList
 
-    let getBuilds   (authToken           : string option)
-                    (account             : string)
-                    (project             : string)
-                    (buildCount          : int)
-                    (branch              : string option)
-                    (inclFromPullRequest : bool) =
+    let rec getBuilds   (forceFallback       : bool)
+                        (authToken           : string option)
+                        (account             : string)
+                        (project             : string)
+                        (buildCount          : int)
+                        (branch              : string option)
+                        (inclFromPullRequest : bool) =
         task {
-
             let request = new HttpRequestMessage()
             request.Method <- HttpMethod.Get
             request.Headers.Add("Travis-API-Version", "3")
             request.Headers.TryAddWithoutValidation("User-Agent", "https://buildstats.info") |> ignore
 
             let topLevelDomain =
-                match authToken with
-                | None -> "org"
-                | Some token ->
+                match forceFallback, authToken with
+                | true, _     -> "org"
+                | false, None -> "com"
+                | false, Some token ->
                     request.Headers.Authorization <- AuthenticationHeaderValue("token", token)
                     "com"
 
@@ -222,10 +224,22 @@ module TravisCI =
 
             let! json = Http.sendRequest request
 
-            return json
-                |> (Str.toOption
-                >> map parseToJArray
-                >> convertToBuilds)
+            if (Str.toOption json).IsNone && authToken.IsNone
+            then
+                return!
+                    getBuilds
+                        true
+                        authToken
+                        account
+                        project
+                        buildCount
+                        branch
+                        inclFromPullRequest
+            else
+                return json
+                    |> (Str.toOption
+                    >> map parseToJArray
+                    >> convertToBuilds)
         }
 
 // -------------------------------------------
@@ -267,7 +281,8 @@ module CircleCI =
                 })
             |> Seq.toList
 
-    let getBuilds   (account             : string)
+    let getBuilds   (authToken           : string option)
+                    (account             : string)
                     (project             : string)
                     (buildCount          : int)
                     (branch              : string option)
