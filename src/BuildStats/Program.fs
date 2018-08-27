@@ -97,19 +97,8 @@ let createHandler : HttpHandler =
     fun (next : HttpFunc) (ctx : HttpContext) ->
         task {
             let plainText = (ctx.Request.Form.["plaintext"]).ToString()
-            let key = "kljsdkkdlo4454GG"
-            let cipherText = AES.encryptToUrlEncodedString key plainText
-            let plainText' = AES.decryptUrlEncodedString key cipherText
-
-            let output =
-                [
-                    (sprintf "Original:  %s" plainText)
-                    (sprintf "Encrypted: %s" cipherText)
-                    (sprintf "Decrypted: %s" plainText')
-                ]
-                |> String.concat Environment.NewLine
-
-            return! ctx.WriteTextAsync output
+            let cipherText = AES.encryptToUrlEncodedString AES.key plainText
+            return! ctx.WriteTextAsync (sprintf "Encrypted auth token: %s" cipherText)
         }
 
 let webApp =

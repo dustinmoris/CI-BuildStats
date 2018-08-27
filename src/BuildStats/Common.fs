@@ -71,7 +71,15 @@ module Http =
 [<RequireQualifiedAccess>]
 module AES =
 
+    let private devKey = Guid.NewGuid().ToString()
     let private ivLength = 16
+
+    let key =
+        Environment.GetEnvironmentVariable "CRYPTO_KEY"
+        |> Str.toOption
+        |> function
+            | Some k -> k
+            | None   -> devKey
 
     let private mergeIVandCipher (iv : byte array) (cipher : byte array) =
         let result = Array.init (iv.Length + cipher.Length) (fun _ -> Byte.MinValue)

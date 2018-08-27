@@ -121,16 +121,22 @@ module AppVeyor =
                     (branch              : string option)
                     (inclFromPullRequest : bool) =
         task {
-            let additionalFilter =
+            let branchFilter =
                 match branch with
                 | Some b -> sprintf "&branch=%s" b
                 | None   -> ""
 
             let url =
                 sprintf "https://ci.appveyor.com/api/projects/%s/%s/history?recordsNumber=%d%s"
-                    account project (5 * buildCount) additionalFilter
+                    account project (5 * buildCount) branchFilter
 
-            let! json = Http.getJson url
+            let request = new HttpRequestMessage(HttpMethod.Get, url)
+
+            if (authToken.IsSome) then
+                let token = AES.decryptUrlEncodedString AES.key authToken.Value
+                request.Headers.Authorization <- AuthenticationHeaderValue("Bearer", token)
+
+            let! json = Http.sendRequest request
 
             return json
                 |> (Str.toOption
@@ -196,9 +202,10 @@ module TravisCI =
 
             let topLevelDomain =
                 match forceFallback, authToken with
-                | true, _     -> "org"
-                | false, None -> "com"
-                | false, Some token ->
+                | true, _       -> "org"
+                | false, None   -> "com"
+                | false, Some t ->
+                    let token = AES.decryptUrlEncodedString AES.key t
                     request.Headers.Authorization <- AuthenticationHeaderValue("token", token)
                     "com"
 
@@ -288,7 +295,7 @@ module CircleCI =
                     (branch              : string option)
                     (inclFromPullRequest : bool) =
         task {
-            let additionalFilter =
+            let branchFilter =
                 match branch with
                 | Some b -> sprintf "/tree/%s" <| WebUtility.UrlEncode b
                 | None   -> ""
@@ -299,7 +306,7 @@ module CircleCI =
 
             let url =
                 sprintf "https://circleci.com/api/v1/project/%s/%s%s?limit=%i"
-                    account project additionalFilter limit
+                    account project branchFilter limit
 
             let! json = Http.getJson url
 
