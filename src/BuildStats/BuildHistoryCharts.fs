@@ -2,6 +2,8 @@ module BuildStats.BuildHistoryCharts
 
 open System
 open System.Net
+open System.Net.Http
+open System.Net.Http.Headers
 open Microsoft.FSharp.Core.Option
 open Newtonsoft.Json.Linq
 open Giraffe
@@ -33,8 +35,8 @@ let pullRequestFilter   (inclFromPullRequest : bool)
                         (build  : Build) =
     inclFromPullRequest || not build.FromPullRequest
 
-let getTimeTaken (started   : Nullable<DateTime>)
-                 (finished  : Nullable<DateTime>) =
+let calculateTimeTaken (started   : Nullable<DateTime>)
+                       (finished  : Nullable<DateTime>) =
     match started.HasValue with
     | true ->
         match finished.HasValue with
@@ -76,6 +78,7 @@ module BuildMetrics =
 // AppVeyor
 // -------------------------------------------
 
+[<RequireQualifiedAccess>]
 module AppVeyor =
 
     let parseToJArray (json : string) =
@@ -107,7 +110,7 @@ module AppVeyor =
                     Status          = x.Value<string> "status"        |> parseStatus
                     Branch          = x.Value<string> "branch"
                     FromPullRequest = x.Value<string> "pullRequestId" |> isPullRequest
-                    TimeTaken       = getTimeTaken started finished
+                    TimeTaken       = calculateTimeTaken started finished
                 })
             |> Seq.toList
 
@@ -140,22 +143,21 @@ module AppVeyor =
 // TravisCI
 // -------------------------------------------
 
+[<RequireQualifiedAccess>]
 module TravisCI =
 
     let parseToJArray (json : string) =
-        Json.deserialize json :?> JArray
+        let obj = Json.deserialize json :?> JObject
+        obj.Value<JArray> "builds"
 
-    let parseStatus (state  : string)
-                    (result : Nullable<int>) =
-        match state with
-        | "finished" ->
-            match result with
-            | x when not x.HasValue -> Cancelled
-            | x when x.Value = 0    -> Success
-            | x when x.Value = 1    -> Failed
-            | _                     -> Unkown
-        | "started" | "created"     -> Pending
-        | _                         -> Unkown
+    let parseStatus (status : string) =
+        match status with
+        | "failed"  | "broken"
+        | "failing" | "errored" -> Failed
+        | "passed"  | "fixed"   -> Success
+        | "canceled"            -> Cancelled
+        | "pending"             -> Pending
+        | _                     -> Unkown
 
     let isPullRequest eventType = eventType = "pull_request"
 
@@ -168,86 +170,69 @@ module TravisCI =
                 let started  = x.Value<Nullable<DateTime>> "started_at"
                 let finished = x.Value<Nullable<DateTime>> "finished_at"
                 let state    = x.Value<string>             "state"
-                let result   = x.Value<Nullable<int>>      "result"
                 {
                     Id              = x.Value<int>    "id"
                     BuildNumber     = x.Value<int>    "number"
-                    Branch          = x.Value<string> "branch"
+                    Branch          = (x.Value<JObject> "branch").Value<string> "name"
                     FromPullRequest = x.Value<string> "event_type" |> isPullRequest
-                    TimeTaken       = getTimeTaken  started finished
-                    Status          = parseStatus   state   result
+                    TimeTaken       = calculateTimeTaken started finished
+                    Status          = parseStatus state
                 })
             |> Seq.toList
 
-    let numberOfBuildsPerPage = 25
-
-    let rec getBatchOfBuilds (account          : string)
-                             (project          : string)
-                             (afterBuildNumber : int option)
-                             (maxRequests      : int)
-                             (requestCount     : int) =
-
-        task {
-            let additionalQuery =
-                match afterBuildNumber with
-                | Some x -> sprintf "?after_number=%i" x
-                | None   -> ""
-
-            let url  = sprintf "https://api.travis-ci.com/repos/%s/%s/builds%s" account project additionalQuery
-            let url2 = sprintf "https://api.travis-ci.org/repos/%s/%s/builds%s" account project additionalQuery
-
-            let travisFallback (json : string) =
-                task {
-                    match json |> Str.toOption with
-                    | Some _ -> return json
-                    | None   -> return! Http.getJson url2
-                }
-
-            let! json  = Http.getJson url
-            let! json' = travisFallback json
-
-            let requestCount' = requestCount + 1
-
-            let batch =
-                json'
-                |> (Str.toOption
-                >> map parseToJArray)
-                |> convertToBuilds
-
-            match batch with
-            | x when x.IsEmpty                          -> return []
-            | x when x.Length < numberOfBuildsPerPage   -> return x
-            | x when requestCount' = maxRequests        -> return x
-            | _ ->
-                let lastBuild = batch |> Seq.last
-                let! nextBatch = getBatchOfBuilds account project (Some lastBuild.BuildNumber) maxRequests requestCount'
-                return batch @ nextBatch
-        }
-
-    let getBuilds   (account             : string)
+    let getBuilds   (authToken           : string option)
+                    (account             : string)
                     (project             : string)
                     (buildCount          : int)
                     (branch              : string option)
                     (inclFromPullRequest : bool) =
         task {
-            let maxRequests = int(Math.Ceiling((float buildCount / float numberOfBuildsPerPage) * 5.0))
-            let! builds = getBatchOfBuilds account project None maxRequests 0
 
-            let branchFilter build =
+            let request = new HttpRequestMessage()
+            request.Method <- HttpMethod.Get
+            request.Headers.Add("Travis-API-Version", "3")
+            request.Headers.TryAddWithoutValidation("User-Agent", "https://buildstats.info") |> ignore
+
+            let topLevelDomain =
+                match authToken with
+                | None -> "org"
+                | Some token ->
+                    request.Headers.Authorization <- AuthenticationHeaderValue("token", token)
+                    "com"
+
+            let branchFilter =
                 match branch with
-                | Some b -> build.Branch = b
-                | None   -> true
+                | Some b -> sprintf "&branch.name=%s" b
+                | None   -> ""
 
-            return builds
-                |> List.filter branchFilter
-                |> List.filter (pullRequestFilter inclFromPullRequest)
-                |> List.truncate buildCount
+            let eventFilter =
+                match inclFromPullRequest with
+                | true -> ""
+                | false -> "&build.event_type[]=push&build.event_type[]=cron&build.event_type[]=api"
+
+            let url =
+                sprintf "https://api.travis-ci.%s/repo/%s/builds?limit=%d%s%s"
+                    topLevelDomain
+                    (WebUtility.UrlEncode (sprintf "%s/%s" account project))
+                    buildCount
+                    branchFilter
+                    eventFilter
+
+            request.RequestUri <- new Uri(url)
+
+            let! json = Http.sendRequest request
+
+            return json
+                |> (Str.toOption
+                >> map parseToJArray
+                >> convertToBuilds)
         }
 
 // -------------------------------------------
 // CircleCI
 // -------------------------------------------
 
+[<RequireQualifiedAccess>]
 module CircleCI =
 
     let parseToJArray (json : string) =
@@ -278,7 +263,7 @@ module CircleCI =
                     Status          = x.Value<string> "status"  |> parseStatus
                     Branch          = x.Value<string> "branch"
                     FromPullRequest = x.Value<string> "subject" |> isPullRequest
-                    TimeTaken       = getTimeTaken started finished
+                    TimeTaken       = calculateTimeTaken started finished
                 })
             |> Seq.toList
 

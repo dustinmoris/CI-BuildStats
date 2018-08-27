@@ -11,6 +11,7 @@ open Microsoft.Extensions.Logging
 open Giraffe
 open Giraffe.GiraffeViewEngine
 open FSharp.Control.Tasks.V2.ContextInsensitive
+open BuildStats.Common
 open BuildStats.PackageServices
 open BuildStats.BuildHistoryCharts
 open BuildStats.Models
@@ -75,6 +76,7 @@ let getBuildHistory (getBuildsFunc) (account, project) =
                 | Some x -> bool.Parse x
                 | None   -> true
             let branch = ctx.TryGetQueryStringValue "branch"
+
             let! builds = getBuildsFunc account project buildCount branch includePullRequests
             return!
                 builds
@@ -86,8 +88,27 @@ let getBuildHistory (getBuildsFunc) (account, project) =
         }
 
 let appVeyorHandler = getBuildHistory AppVeyor.getBuilds
-let travisCiHandler = getBuildHistory TravisCI.getBuilds
+let travisCiHandler = getBuildHistory (TravisCI.getBuilds None)
 let circleCiHandler = getBuildHistory CircleCI.getBuilds
+
+let createHandler : HttpHandler =
+    fun (next : HttpFunc) (ctx : HttpContext) ->
+        task {
+            let plainText = (ctx.Request.Form.["plaintext"]).ToString()
+            let key = "kljsdkkdlo4454GG"
+            let cipherText = AES.encryptToUrlEncodedString key plainText
+            let plainText' = AES.decryptUrlEncodedString key cipherText
+
+            let output =
+                [
+                    (sprintf "Original:  %s" plainText)
+                    (sprintf "Encrypted: %s" cipherText)
+                    (sprintf "Decrypted: %s" plainText')
+                ]
+                |> String.concat Environment.NewLine
+
+            return! ctx.WriteTextAsync output
+        }
 
 let webApp =
     choose [
@@ -95,6 +116,7 @@ let webApp =
             choose [
                 route "/"             >=> htmlFile "pages/index.html"
                 route "/tests"        >=> htmlFile "pages/tests.html"
+                route "/create"       >=> htmlFile "pages/create.html"
                 route "/chars"        >=> (Views.measureCharsView |> renderXmlNode |> svg)
                 route "/ping"         >=> text "pong"
                 routef "/nuget/%s"    nugetHandler
@@ -103,6 +125,7 @@ let webApp =
                 routef "/travisci/chart/%s/%s" travisCiHandler
                 routef "/circleci/chart/%s/%s" circleCiHandler
             ]
+        POST >=> route "/create" >=> createHandler
         notFound "Not Found" ]
 
 // ---------------------------------
