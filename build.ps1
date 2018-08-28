@@ -10,7 +10,7 @@ param
     [switch] $Docker,
     [switch] $Deploy,
     [string] $DockerUsername,
-    [SecureString] $DockerPassword
+    [string] $DockerPassword
 )
 
 $ErrorActionPreference = "Stop"
@@ -52,7 +52,8 @@ if ($Docker.IsPresent -or $Deploy.IsPresent -or $env:APPVEYOR_REPO_TAG -eq $true
     dotnet-publish $app "-c $configuration"
 
     Write-Host "Building Docker image..." -ForegroundColor Magenta
-    $publishFolder = "./src/BuildStats/bin/Release/netcoreapp2.0/publish"
+    $targetFramework = Get-NetCoreTargetFramework $app
+    $publishFolder = "./src/BuildStats/bin/$configuration/$targetFramework/publish"
     Invoke-Cmd "docker build -t dustinmoris/ci-buildstats:$version $publishFolder"
 }
 
