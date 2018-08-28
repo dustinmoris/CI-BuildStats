@@ -4,6 +4,7 @@ open System.Net
 open Microsoft.FSharp.Core.Option
 open Newtonsoft.Json.Linq
 open BuildStats.Common
+open FSharp.Control.Tasks.V2.ContextInsensitive
 open Giraffe
 
 type Package =
@@ -22,7 +23,7 @@ module NuGet =
 
     let tryFindByName  (packageName : string)
                        (data        : JArray)  =
-        data |> Seq.tryFind(fun item -> item.Value<string> "id" |> Str.matches packageName)
+        data |> Seq.tryFind(fun item -> item.Value<string> "id" |> Str.equals packageName)
 
     let convertIntoPackage (item : JToken) =
         {
@@ -63,7 +64,7 @@ module MyGet =
         }
 
     let validatePackage packageName package =
-        if packageName |> Str.matches package.Name
+        if packageName |> Str.equals package.Name
         then Some package
         else None
 
