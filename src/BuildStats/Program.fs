@@ -2,15 +2,16 @@ module BuildStats.App
 
 open System
 open System.IO
-open System.Text
-open System.Security.Cryptography
+open System.Net.Http
+open System.Threading.Tasks
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.AspNetCore.Http
+open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
+open FSharp.Control.Tasks.V2.ContextInsensitive
 open Giraffe
 open Giraffe.GiraffeViewEngine
-open FSharp.Control.Tasks.V2.ContextInsensitive
 open BuildStats.Common
 open BuildStats.PackageServices
 open BuildStats.BuildHistoryCharts
@@ -20,19 +21,41 @@ open BuildStats.Models
 // Web app
 // ---------------------------------
 
-let md5 (str : string) =
-    str
-    |> Encoding.UTF8.GetBytes
-    |> MD5.Create().ComputeHash
-    |> Array.map (fun b -> b.ToString "x2")
-    |> String.concat ""
+let devApiSecret = Guid.NewGuid().ToString("n").Substring(0, 10)
+
+let apiSecret =
+        Environment.GetEnvironmentVariable "API_SECRET"
+        |> Str.toOption
+        |> function
+            | Some v -> v
+            | None   -> devApiSecret
+
+let accessForbidden =
+    RequestErrors.FORBIDDEN
+        "Access forbidden. Please provide a valid API secret in order to access this resource."
+
+let finish = Some >> Task.FromResult
+
+let requiresApiSecret =
+    fun (next : HttpFunc) (ctx : HttpContext) ->
+        (match ctx.TryGetQueryStringValue "apiSecret" with
+        | Some secretFromQuery ->
+            match apiSecret.Equals secretFromQuery with
+            | true  -> next
+            | false -> accessForbidden finish
+        | None      -> accessForbidden finish) ctx
+
+
+let cssHandler (bundle : string) =
+    setHttpHeader "Content-Type" "text/css"
+    >=> setHttpHeader "Cache-Control" "public, max-age=31536000"
+    >=> setHttpHeader "ETag" Views.cssHash
+    >=> setBodyFromString bundle
 
 let svg (body : string) =
     setHttpHeader "Content-Type" "image/svg+xml"
-    >=> setHttpHeader "Cache-Control" "no-cache"
-    >=> setHttpHeader "Pragma" "no-cache"
-    >=> setHttpHeader "Expires" "-1"
-    >=> setHttpHeader "ETag" (md5 body)
+    >=> setHttpHeader "Cache-Control" "public, max-age=30"
+    >=> setHttpHeader "ETag" (Hash.sha1 body)
     >=> setBodyFromString body
 
 let notFound msg = setStatusCode 404 >=> text msg
@@ -40,17 +63,20 @@ let notFound msg = setStatusCode 404 >=> text msg
 let packageHandler getPackageFunc slug =
     fun (next : HttpFunc) (ctx : HttpContext) ->
         task {
+            let httpClientFactory = ctx.GetService<IHttpClientFactory>()
+            let httpClient = httpClientFactory.CreateClient(HttpClientConfig.defaultClientName)
+
             let preRelease =
                 match ctx.TryGetQueryStringValue "includePreReleases" with
                 | Some value -> bool.Parse value
                 | None       -> false
-            let! package = getPackageFunc slug preRelease
+            let! package = getPackageFunc httpClient slug preRelease
             return!
                 match package with
                 | Some pkg ->
                     pkg
                     |> PackageModel.FromPackage
-                    |> Views.packageView
+                    |> SVGs.packageSVG
                     |> renderXmlNodes
                     |> svg
                 | None -> notFound "Package not found"
@@ -79,11 +105,14 @@ let getBuildHistory (getBuildsFunc) (account, project) =
             let branch    = ctx.TryGetQueryStringValue "branch"
             let authToken = ctx.TryGetQueryStringValue "authToken"
 
-            let! builds = getBuildsFunc authToken account project buildCount branch includePullRequests
+            let httpClientFactory = ctx.GetService<IHttpClientFactory>()
+            let httpClient = httpClientFactory.CreateClient(HttpClientConfig.defaultClientName)
+
+            let! builds = getBuildsFunc httpClient authToken account project buildCount branch includePullRequests
             return!
                 builds
                 |> BuildHistoryModel.FromBuilds showStats
-                |> Views.buildHistoryView
+                |> SVGs.buildHistorySVG
                 |> renderXmlNode
                 |> svg
                 <|| (next, ctx)
@@ -105,10 +134,11 @@ let webApp =
     choose [
         GET >=>
             choose [
-                route "/"             >=> htmlFile "pages/index.html"
-                route "/tests"        >=> htmlFile "pages/tests.html"
+                route "/site.css"     >=> cssHandler Views.minifiedCss
+                route "/"             >=> htmlView Views.indexView
+                route "/tests"        >=> requiresApiSecret >=> htmlFile "pages/tests.html"
                 route "/create"       >=> htmlFile "pages/create.html"
-                route "/chars"        >=> (Views.measureCharsView |> renderXmlNode |> svg)
+                route "/chars"        >=> requiresApiSecret >=> (SVGs.measureCharsSVG |> renderXmlNode |> svg)
                 route "/ping"         >=> text "pong"
                 routef "/nuget/%s"    nugetHandler
                 routef "/myget/%s/%s" mygetHandler
@@ -139,13 +169,28 @@ let configureLogging (builder : ILoggingBuilder) =
     let filter (l : LogLevel) = l.Equals LogLevel.Error
     builder.AddFilter(filter).AddConsole().AddDebug() |> ignore
 
+let configureServices (services : IServiceCollection) =
+    services
+        .AddGiraffe()
+        .AddHttpClient(
+            HttpClientConfig.defaultClientName,
+            fun client ->
+                client.DefaultRequestHeaders.Accept.Add(Headers.MediaTypeWithQualityHeaderValue("application/json"))
+            )
+            .SetHandlerLifetime(TimeSpan.FromHours 1.0)
+            .AddPolicyHandler(HttpClientConfig.transientHttpErrorPolicy)
+            .AddPolicyHandler(HttpClientConfig.tooManyRequestsPolicy)
+            |> ignore
+
 [<EntryPoint>]
 let main _ =
+    sprintf "Secret key (development): %s" devApiSecret |> Console.WriteLine
     WebHostBuilder()
         .UseKestrel()
         .UseContentRoot(Directory.GetCurrentDirectory())
         .Configure(Action<IApplicationBuilder> configureApp)
         .ConfigureLogging(configureLogging)
+        .ConfigureServices(configureServices)
         .Build()
         .Run()
     0

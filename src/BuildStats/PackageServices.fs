@@ -1,6 +1,7 @@
 module BuildStats.PackageServices
 
 open System.Net
+open System.Net.Http
 open Microsoft.FSharp.Core.Option
 open Newtonsoft.Json.Linq
 open BuildStats.Common
@@ -33,11 +34,12 @@ module NuGet =
             Downloads = item.Value<int> "totalDownloads"
         }
 
-    let getPackageAsync (packageName        : string)
+    let getPackageAsync (httpClient         : HttpClient)
+                        (packageName        : string)
                         (includePreReleases : bool) =
         task {
             let url = sprintf "https://api-v2v3search-0.nuget.org/query?q=%s&skip=0&take=10&prerelease=%b" packageName includePreReleases
-            let! json = Http.getJson url
+            let! json = Http.getJson httpClient url
             return
                 json
                 |> (Str.toOption
@@ -68,13 +70,14 @@ module MyGet =
         then Some package
         else None
 
-    let getPackageAsync (feedName           : string,
+    let getPackageAsync (httpClient         : HttpClient)
+                        (feedName           : string,
                          packageName        : string)
                         (includePreReleases : bool) =
         task {
             let filter = sprintf "Id eq '%s'" packageName |> WebUtility.UrlEncode
             let url = sprintf "https://www.myget.org/F/%s/api/v2/Packages()?$filter=%s&$orderby=Published desc&$top=1" feedName filter
-            let! json = Http.getJson url
+            let! json = Http.getJson httpClient url
             return
                 json
                 |> (Str.toOption
