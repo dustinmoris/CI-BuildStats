@@ -114,7 +114,8 @@ module AppVeyor =
                 })
             |> Seq.toList
 
-    let getBuilds   (authToken           : string option) // ToDo
+    let getBuilds   (httpClient          : HttpClient)
+                    (authToken           : string option) // ToDo
                     (account             : string)
                     (project             : string)
                     (buildCount          : int)
@@ -136,7 +137,7 @@ module AppVeyor =
                 let token = AES.decryptUrlEncodedString AES.key authToken.Value
                 request.Headers.Authorization <- AuthenticationHeaderValue("Bearer", token)
 
-            let! json = Http.sendRequest request
+            let! json = Http.sendRequest httpClient request
 
             return json
                 |> (Str.toOption
@@ -188,6 +189,7 @@ module TravisCI =
             |> Seq.toList
 
     let rec getBuilds   (forceFallback       : bool)
+                        (httpClient          : HttpClient)
                         (authToken           : string option)
                         (account             : string)
                         (project             : string)
@@ -229,13 +231,14 @@ module TravisCI =
 
             request.RequestUri <- new Uri(url)
 
-            let! json = Http.sendRequest request
+            let! json = Http.sendRequest httpClient request
 
             if (Str.toOption json).IsNone && authToken.IsNone
             then
                 return!
                     getBuilds
                         true
+                        httpClient
                         authToken
                         account
                         project
@@ -288,7 +291,8 @@ module CircleCI =
                 })
             |> Seq.toList
 
-    let getBuilds   (authToken           : string option)
+    let getBuilds   (httpClient          : HttpClient)
+                    (authToken           : string option)
                     (account             : string)
                     (project             : string)
                     (buildCount          : int)
@@ -308,7 +312,7 @@ module CircleCI =
                 sprintf "https://circleci.com/api/v1/project/%s/%s%s?limit=%i"
                     account project branchFilter limit
 
-            let! json = Http.getJson url
+            let! json = Http.getJson httpClient url
 
             return json
                 |> (Str.toOption

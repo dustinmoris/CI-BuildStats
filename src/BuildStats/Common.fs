@@ -1,13 +1,19 @@
 module BuildStats.Common
 
 open System
+open System.IO
 open System.Text
+open System.Text.RegularExpressions
 open System.Net
 open System.Net.Http
 open System.Security.Cryptography
 open Newtonsoft.Json
+open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.Authentication
 open FSharp.Control.Tasks.V2.ContextInsensitive
+open Polly
+open Polly.Extensions.Http
+open Giraffe
 
 // -------------------------------------
 // String helper functions
@@ -45,10 +51,7 @@ module Json =
 [<RequireQualifiedAccess>]
 module Http =
 
-    let httpClient = new HttpClient()
-    httpClient.DefaultRequestHeaders.Accept.Add(Headers.MediaTypeWithQualityHeaderValue("application/json"))
-
-    let getJson (url : string) =
+    let getJson (httpClient : HttpClient) (url : string) =
         task {
             let! response = httpClient.GetAsync url
             match response.StatusCode with
@@ -56,7 +59,7 @@ module Http =
             | _ -> return ""
         }
 
-    let sendRequest (request : HttpRequestMessage) =
+    let sendRequest (httpClient : HttpClient) (request : HttpRequestMessage) =
         task {
             let! response = httpClient.SendAsync request
             match response.StatusCode with
@@ -120,3 +123,80 @@ module AES =
         |> splitIntoIVandCipher
         ||> decrypt (Encoding.UTF8.GetBytes key)
         |> Encoding.UTF8.GetString
+
+[<RequireQualifiedAccess>]
+module Hash =
+
+    let md5 (str : string) =
+        str
+        |> Encoding.UTF8.GetBytes
+        |> MD5.Create().ComputeHash
+        |> Array.map (fun b -> b.ToString "x2")
+        |> String.concat ""
+
+    let sha1 (str : string) =
+        str
+        |> Encoding.UTF8.GetBytes
+        |> SHA1.Create().ComputeHash
+        |> Array.map (fun b -> b.ToString "x2")
+        |> String.concat ""
+
+// -------------------------------------
+// CSS
+// -------------------------------------
+
+[<RequireQualifiedAccess>]
+module StaticAssets =
+
+    let minifyCss (css : string) =
+        let css = css.Replace(Environment.NewLine, "")
+        let css = (Regex("\\s*{\\s*")).Replace(css, "{")
+        let css = (Regex("\\s*}\\s*")).Replace(css, "}")
+        let css = (Regex("\\s*:\\s*")).Replace(css, ":")
+        let css = (Regex("\\s*,\\s*")).Replace(css, ",")
+        let css = (Regex("\\s*;\\s*")).Replace(css, ";")
+        let css = (Regex("\\s*>\\s*")).Replace(css, ">")
+        let css = (Regex(";}")).Replace(css, "}")
+        css
+
+    let minifyCssFile (fileName : string) =
+        fileName
+        |> File.ReadAllText
+        |> minifyCss
+
+    let bundleCssFiles (fileNames : string list) =
+        let result =
+            fileNames
+            |> List.fold(
+                fun (sb : StringBuilder) fileName ->
+                    fileName
+                    |> minifyCssFile
+                    |> sb.AppendLine
+            ) (new StringBuilder())
+        result.ToString()
+
+// -------------------------------------
+// HTTP Client
+// -------------------------------------
+
+[<RequireQualifiedAccess>]
+module HttpClientConfig =
+    let defaultClientName = "DefaultHttpClient"
+
+    let transientHttpErrorPolicy =
+        HttpPolicyExtensions
+            .HandleTransientHttpError()
+            .WaitAndRetryAsync(
+                [
+                    TimeSpan.FromSeconds(1.0)
+                    TimeSpan.FromSeconds(3.0)
+                    TimeSpan.FromSeconds(5.0)
+                ])
+
+    let tooManyRequestsPolicy =
+        Policy
+            .Handle<HttpRequestException>()
+            .OrResult(
+                fun (msg : HttpResponseMessage) ->
+                    msg.StatusCode.Equals StatusCodes.Status429TooManyRequests)
+            .CircuitBreakerAsync(2, TimeSpan.FromSeconds 30.0)
