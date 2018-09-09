@@ -233,8 +233,15 @@ module TravisCI =
 
             let! json = Http.sendRequest httpClient request
 
-            if (Str.toOption json).IsNone && authToken.IsNone
-            then
+            let builds =
+                json
+                |> (Str.toOption
+                >> map parseToJArray
+                >> convertToBuilds)
+
+            if not builds.IsEmpty then
+                return builds
+            else
                 return!
                     getBuilds
                         true
@@ -245,11 +252,6 @@ module TravisCI =
                         buildCount
                         branch
                         inclFromPullRequest
-            else
-                return json
-                    |> (Str.toOption
-                    >> map parseToJArray
-                    >> convertToBuilds)
         }
 
 // -------------------------------------------
