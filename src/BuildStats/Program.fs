@@ -13,6 +13,7 @@ open FSharp.Control.Tasks.V2.ContextInsensitive
 open Giraffe
 open Giraffe.GiraffeViewEngine
 open BuildStats.Common
+open BuildStats.IpAddressWhitelisting
 open BuildStats.PackageServices
 open BuildStats.BuildHistoryCharts
 open BuildStats.Models
@@ -162,7 +163,8 @@ let errorHandler (ex : Exception) (logger : ILogger) =
 // ---------------------------------
 
 let configureApp (app : IApplicationBuilder) =
-    app.UseGiraffeErrorHandler(errorHandler)
+    app //.UseCloudflareIpAddressWhitelist(None)
+       .UseGiraffeErrorHandler(errorHandler)
        .UseGiraffe(webApp)
 
 let configureLogging (builder : ILoggingBuilder) =
