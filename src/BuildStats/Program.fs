@@ -163,7 +163,7 @@ let errorHandler (ex : Exception) (logger : ILogger) =
 // ---------------------------------
 
 let configureApp (app : IApplicationBuilder) =
-    app //.UseCloudflareIpAddressWhitelist(None)
+    app.UseCloudflareIpAddressWhitelist(None)
        .UseGiraffeErrorHandler(errorHandler)
        .UseGiraffe(webApp)
 
