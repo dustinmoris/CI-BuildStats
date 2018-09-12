@@ -10,7 +10,7 @@ open Serilog
 let main _ =
     Log.Logger <-
         (new LoggerConfiguration())
-            .MinimumLevel.Information()
+            .MinimumLevel.Warning()
             .Enrich.FromLogContext()
             .WriteTo.Console()
             .CreateLogger()
