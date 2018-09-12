@@ -2,7 +2,7 @@ module BuildStats.SVGs
 
 open System
 open Giraffe.GiraffeViewEngine
-open BuildStats.Models
+open BuildStats.ViewModels
 open BuildStats.TextSize
 
 let svg      = tag     "svg"

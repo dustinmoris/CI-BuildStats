@@ -51,3 +51,173 @@ let indexView =
             ]
         ]
     ] |> masterView "BuildStats.info"
+
+let createApiTokenView =
+    [
+        main [] [
+            h1 [] [ rawText "BuildStats.info" ]
+            h2 [] [ rawText "SVG widget to display build history charts and other badges" ]
+
+            form [ _method "POST" ] [
+                input [ _id "plaintext"; _name "plaintext"; _type "text" ]
+                input [ _type "submit" ]
+            ]
+        ]
+    ] |> masterView "BuildStats.info"
+
+let visualTestsView =
+    [
+        main [] [
+            h1 [] [ rawText "BuildStats.info" ]
+
+            h2 [] [ rawText "Build History Chart" ]
+
+            h3 [] [ rawText "AppVeyor" ]
+            table [] [
+                tr [] [
+                    th [] [ rawText "Basic" ]
+                    td [] [ img [ _src "/appveyor/chart/CharliePoole/nunit" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Branch Filter" ]
+                    td [] [ img [ _src "/appveyor/chart/CharliePoole/nunit?branch=master" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Reduced BuildCount" ]
+                    td [] [ img [ _src "/appveyor/chart/CharliePoole/nunit?buildCount=10" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Increased BuildCount" ]
+                    td [] [ img [ _src "/appveyor/chart/CharliePoole/nunit?buildCount=40" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Exclude PullRequests" ]
+                    td [] [ img [ _src "/appveyor/chart/CharliePoole/nunit?includeBuildsFromPullRequest=false" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Hide Stats" ]
+                    td [] [ img [ _src "/appveyor/chart/CharliePoole/nunit?showStats=false" ] ]
+                ]
+            ]
+
+            h3 [] [ rawText "TravisCI" ]
+            table [] [
+                tr [] [
+                    th [] [ rawText "Basic" ]
+                    td [] [ img [ _src "/travisci/chart/nunit/nunit" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Branch Filter" ]
+                    td [] [ img [ _src "/travisci/chart/nunit/nunit?branch=master" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Reduced BuildCount" ]
+                    td [] [ img [ _src "/travisci/chart/nunit/nunit?buildCount=10" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Increased BuildCount" ]
+                    td [] [ img [ _src "/travisci/chart/nunit/nunit?buildCount=40" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Exclude PullRequests" ]
+                    td [] [ img [ _src "/travisci/chart/nunit/nunit?includeBuildsFromPullRequest=false" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Hide Stats" ]
+                    td [] [ img [ _src "/travisci/chart/nunit/nunit?showStats=false" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Travis-CI.com" ]
+                    td [] [ img [ _src "/travisci/chart/martincostello/sqllocaldb?branch=master&includeBuildsFromPullRequest=false" ] ]
+                ]
+            ]
+
+            h3 [] [ rawText "CircleCI" ]
+            table [] [
+                tr [] [
+                    th [] [ rawText "Basic" ]
+                    td [] [ img [ _src "/circleci/chart/spotify/helios" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Branch Filter" ]
+                    td [] [ img [ _src "/circleci/chart/spotify/helios?branch=master" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Reduced BuildCount" ]
+                    td [] [ img [ _src "/circleci/chart/spotify/helios?buildCount=10" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Increased BuildCount" ]
+                    td [] [ img [ _src "/circleci/chart/spotify/helios?buildCount=40" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Exclude PullRequests" ]
+                    td [] [ img [ _src "/circleci/chart/spotify/helios?includeBuildsFromPullRequest=false" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Hide Stats" ]
+                    td [] [ img [ _src "/circleci/chart/spotify/helios?showStats=false" ] ]
+                ]
+            ]
+
+            h2 [] [ rawText "Package Badges" ]
+
+            h3 [] [ rawText "NuGet" ]
+            table [] [
+                tr [] [
+                    th [] [ rawText "Lanem" ]
+                    td [] [ img [ _src "/nuget/lanem" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Guardo" ]
+                    td [] [ img [ _src "/nuget/guardo" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Newtonsoft.Json" ]
+                    td [] [ img [ _src "/nuget/Newtonsoft.Json" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Moq" ]
+                    td [] [ img [ _src "/nuget/moq" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Nunit" ]
+                    td [] [ img [ _src "/nuget/nunit" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "NSubstitute" ]
+                    td [] [ img [ _src "/nuget/nsubstitute" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "jQuery" ]
+                    td [] [ img [ _src "/nuget/jQuery" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "ASP.NET MVC" ]
+                    td [] [ img [ _src "/nuget/microsoft.aspnet.mvc" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "EntityFramework" ]
+                    td [] [ img [ _src "/nuget/entityframework" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "NServiceBus.PostgreSQL" ]
+                    td [] [ img [ _src "/nuget/NServiceBus.PostgreSQL?includePreReleases=true" ] ]
+                ]
+            ]
+
+            h3 [] [ rawText "My/Get" ]
+            table [] [
+                tr [] [
+                    th [] [ rawText "neventsocket-prerelease/NEventSocket" ]
+                    td [] [ img [ _src "/myget/neventsocket-prerelease/NEventSocket" ] ]
+                ]
+            ]
+
+            p [] [
+                rawText "BuildStats.info is provided by "
+                a [ _href "https://dusted.codes/" ] [ rawText "Dustin Moris Gorski" ]
+                rawText "."
+            ]
+        ]
+    ] |> masterView "BuildStats.info"

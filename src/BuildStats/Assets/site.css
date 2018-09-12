@@ -31,3 +31,28 @@ h3 {
 a {
     color: #c30;
 }
+
+img {
+    display: block;
+    margin: 1em 0;
+}
+
+table {
+    width: 100%;
+}
+
+table th, table td {
+    padding: .3em;
+}
+
+table th {
+    text-align: left;
+}
+
+table tr:nth-child(odd) {
+     background-color: #efefef;
+}
+
+table tr:nth-child(even) {
+     background-color: #fafafa;
+}

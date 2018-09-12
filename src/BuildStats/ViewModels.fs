@@ -1,4 +1,4 @@
-module BuildStats.Models
+module BuildStats.ViewModels
 
 open System
 open BuildStats.PackageServices

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <Version>4.8.0</Version>
+    <Version>4.7.0</Version>
     <AssemblyName>BuildStats</AssemblyName>
     <OutputType>Exe</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -16,6 +16,9 @@
     <PackageReference Include="Giraffe" Version="2.0.*" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="2.1.*" />
     <PackageReference Include="Polly.Extensions.Http" Version="2.0.*" />
+    <PackageReference Include="Serilog.AspNetCore" Version="2.1.*" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.*" />
+    <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="6.5.*" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,15 +26,16 @@
     <Compile Include="BuildHistoryCharts.fs" />
     <Compile Include="PackageServices.fs" />
     <Compile Include="TextSize.fs" />
-    <Compile Include="Models.fs" />
+    <Compile Include="ViewModels.fs" />
     <Compile Include="SVGs.fs" />
     <Compile Include="Views.fs" />
     <Compile Include="IpAddressWhitelisting.fs" />
+    <Compile Include="Web.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="pages\*.html;Dockerfile;Assets\*.*">
+    <Content Include="Dockerfile;Assets\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
