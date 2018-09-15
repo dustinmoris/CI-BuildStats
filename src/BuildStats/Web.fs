@@ -124,6 +124,7 @@ let getBuildHistory (getBuildsFunc) (account, project) =
         }
 
 let appVeyorHandler = getBuildHistory AppVeyor.getBuilds
+let azureHandler    = getBuildHistory AzurePipelines.getBuilds
 let circleCiHandler = getBuildHistory CircleCI.getBuilds
 let travisCiHandler = getBuildHistory (TravisCI.getBuilds false)
 
@@ -183,6 +184,7 @@ let webApp =
                 routef "/appveyor/chart/%s/%s" appVeyorHandler
                 routef "/travisci/chart/%s/%s" travisCiHandler
                 routef "/circleci/chart/%s/%s" circleCiHandler
+                routef "/azurepipelines/chart/%s/%s" azureHandler
             ]
         POST >=> route "/create" >=> createHandler
         notFound "Not Found" ]

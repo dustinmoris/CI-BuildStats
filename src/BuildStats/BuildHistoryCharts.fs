@@ -19,7 +19,7 @@ type BuildStatus =
     | Failed
     | Cancelled
     | Pending
-    | Unkown
+    | Unknown
 
 type Build =
     {
@@ -91,7 +91,7 @@ module AppVeyor =
         | "failed"              -> Failed
         | "cancelled"           -> Cancelled
         | "queued" | "running"  -> Pending
-        | _                     -> Unkown
+        | _                     -> Unknown
 
     let isPullRequest (pullRequestId : string) =
         isNotNull pullRequestId
@@ -165,7 +165,7 @@ module TravisCI =
         | "passed"  | "fixed"   -> Success
         | "canceled"            -> Cancelled
         | "pending"             -> Pending
-        | _                     -> Unkown
+        | _                     -> Unknown
 
     let isPullRequest eventType = eventType = "pull_request"
 
@@ -270,7 +270,7 @@ module CircleCI =
         | "failed"    | "infrastructure_fail"   | "timedout"    -> Failed
         | "canceled"  | "not_run" | "retried"   | "not_running" -> Cancelled
         | "scheduled" | "queued"                | "running"     -> Pending
-        | _                                                     -> Unkown
+        | _                                                     -> Unknown
 
     let isPullRequest (subject : string) =
         isNotNull subject && subject.ToLowerInvariant().Contains("pull request")
@@ -313,6 +313,75 @@ module CircleCI =
             let url =
                 sprintf "https://circleci.com/api/v1/project/%s/%s%s?limit=%i"
                     account project branchFilter limit
+
+            let! json = Http.getJson httpClient url
+
+            return json
+                |> (Str.toOption
+                >> map parseToJArray
+                >> convertToBuilds)
+                |> List.filter (pullRequestFilter inclFromPullRequest)
+                |> List.truncate buildCount
+        }
+
+// -------------------------------------------
+// Azure Pipelines
+// -------------------------------------------
+
+[<RequireQualifiedAccess>]
+module AzurePipelines =
+
+    let parseToJArray (json : string) =
+        let obj = Json.deserialize json :?> JObject
+        obj.Value<JArray> "value"
+
+    let parseStatus (status : string) =
+        match status with
+        | "succeeded"                     -> Success
+        | "failed" | "partiallySucceeded" -> Failed
+        | "canceled"                      -> Cancelled
+        | "none"                          -> Pending
+        | _                               -> Unknown
+
+    let isPullRequest (reason : string) =
+        isNotNull reason && reason.Equals("pullRequest")
+
+    let convertToBuilds (items : JArray option) =
+        match items with
+        | None       -> []
+        | Some items ->
+            items
+            |> Seq.map (fun x ->
+                let started  = x.Value<Nullable<DateTime>> "startTime"
+                let finished = x.Value<Nullable<DateTime>> "finishTime"
+                {
+                    Id              = x.Value<int>     "id"
+                    BuildNumber     = x.Value<int>     "id"
+                    Status          = x.Value<string>  "result"  |> parseStatus
+                    Branch          = (x.Value<string> "sourceBranch").Replace("refs/heads/", "")
+                    FromPullRequest = x.Value<string>  "reason" |> isPullRequest
+                    TimeTaken       = calculateTimeTaken started finished
+                })
+            |> Seq.toList
+
+    let getBuilds   (httpClient          : HttpClient)
+                    (authToken           : string option)
+                    (account             : string)
+                    (project             : string)
+                    (buildCount          : int)
+                    (branch              : string option)
+                    (inclFromPullRequest : bool) =
+        task {
+            let branchFilter =
+                match branch with
+                | Some b -> sprintf "refs/heads/%s" <| WebUtility.UrlEncode b
+                | None   -> ""
+
+            let apiVersion = "4.1"
+
+            let url =
+                sprintf "https://dev.azure.com/%s/%s/_apis/build/builds?branchName=%s&api-version=%s"
+                    account project branchFilter apiVersion
 
             let! json = Http.getJson httpClient url
 
