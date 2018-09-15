@@ -106,7 +106,7 @@ type BuildHistoryModel =
                         | Failed    -> "#ff0000"
                         | Pending   -> "#ffbf00"
                         | Cancelled -> "#888888"
-                        | Unknown    -> "#ffffff"
+                        | Unknown   -> "#ffffff"
                 })
         {
             Width     = totalWidth
