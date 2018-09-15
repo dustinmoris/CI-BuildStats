@@ -381,19 +381,17 @@ module AzurePipelines =
                 match branch with
                 | Some b -> sprintf "refs/heads/%s" <| WebUtility.UrlEncode b
                 | None   -> ""
+            
+            let definitionFilter =
+                match definitionId.HasValue with
+                    | true -> sprintf "%i" <| definitionId.Value
+                    | false -> ""
 
             let apiVersion = "4.1"
 
-            let baseUrl =
-                sprintf "https://dev.azure.com/%s/%s/_apis/build/builds?branchName=%s&api-version=%s"
-                    account project branchFilter apiVersion
-
-            let suffix =
-                match definitionId.HasValue with
-                    | true -> sprintf "&definitions=%i" definitionId.Value
-                    | false -> ""
-
-            let url = baseUrl + suffix
+            let url =
+                sprintf "https://dev.azure.com/%s/%s/_apis/build/builds?branchName=%s&definitions=%s&api-version=%s"
+                    account project branchFilter definitionFilter apiVersion
 
             let! json = Http.getJson httpClient url
 
