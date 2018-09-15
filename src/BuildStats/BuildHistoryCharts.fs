@@ -387,11 +387,13 @@ module AzurePipelines =
                     | true -> sprintf "%i" <| definitionId.Value
                     | false -> ""
 
+            let limit = min 200 (4 * buildCount)
+
             let apiVersion = "4.1"
 
             let url =
-                sprintf "https://dev.azure.com/%s/%s/_apis/build/builds?branchName=%s&definitions=%s&api-version=%s"
-                    account project branchFilter definitionFilter apiVersion
+                sprintf "https://dev.azure.com/%s/%s/_apis/build/builds?branchName=%s&definitions=%s&$top=%i&api-version=%s"
+                    account project branchFilter definitionFilter limit apiVersion
 
             let! json = Http.getJson httpClient url
 
