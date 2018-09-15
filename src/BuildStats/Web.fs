@@ -106,6 +106,10 @@ let getBuildHistory (getBuildsFunc) (account, project) =
                 match ctx.TryGetQueryStringValue "showStats" with
                 | Some x -> bool.Parse x
                 | None   -> true
+            let definitionId =
+                match ctx.TryGetQueryStringValue "definitionId" with
+                | Some x -> new Nullable<int>(int x)
+                | None   -> System.Nullable()
 
             let branch    = ctx.TryGetQueryStringValue "branch"
             let authToken = ctx.TryGetQueryStringValue "authToken"
@@ -113,7 +117,7 @@ let getBuildHistory (getBuildsFunc) (account, project) =
             let httpClientFactory = ctx.GetService<IHttpClientFactory>()
             let httpClient = httpClientFactory.CreateClient(HttpClientConfig.defaultClientName)
 
-            let! builds = getBuildsFunc httpClient authToken account project buildCount branch includePullRequests
+            let! builds = getBuildsFunc httpClient authToken account project buildCount branch includePullRequests definitionId
             return!
                 builds
                 |> BuildHistoryModel.FromBuilds showStats

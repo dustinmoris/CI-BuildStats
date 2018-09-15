@@ -120,7 +120,8 @@ module AppVeyor =
                     (project             : string)
                     (buildCount          : int)
                     (branch              : string option)
-                    (inclFromPullRequest : bool) =
+                    (inclFromPullRequest : bool)
+                    (definitionId        : Nullable<int>) =
         task {
             let branchFilter =
                 match branch with
@@ -195,7 +196,8 @@ module TravisCI =
                         (project             : string)
                         (buildCount          : int)
                         (branch              : string option)
-                        (inclFromPullRequest : bool) =
+                        (inclFromPullRequest : bool)
+                        (definitionId        : Nullable<int>) =
         task {
             let request = new HttpRequestMessage()
             request.Method <- HttpMethod.Get
@@ -252,6 +254,7 @@ module TravisCI =
                         buildCount
                         branch
                         inclFromPullRequest
+                        definitionId
         }
 
 // -------------------------------------------
@@ -299,7 +302,8 @@ module CircleCI =
                     (project             : string)
                     (buildCount          : int)
                     (branch              : string option)
-                    (inclFromPullRequest : bool) =
+                    (inclFromPullRequest : bool)
+                    (definitionId        : Nullable<int>) =
         task {
             let branchFilter =
                 match branch with
@@ -370,7 +374,8 @@ module AzurePipelines =
                     (project             : string)
                     (buildCount          : int)
                     (branch              : string option)
-                    (inclFromPullRequest : bool) =
+                    (inclFromPullRequest : bool)
+                    (definitionId        : Nullable<int>) =
         task {
             let branchFilter =
                 match branch with
@@ -379,9 +384,16 @@ module AzurePipelines =
 
             let apiVersion = "4.1"
 
-            let url =
+            let baseUrl =
                 sprintf "https://dev.azure.com/%s/%s/_apis/build/builds?branchName=%s&api-version=%s"
                     account project branchFilter apiVersion
+
+            let suffix =
+                match definitionId.HasValue with
+                    | true -> sprintf "&definitions=%i" definitionId.Value
+                    | false -> ""
+
+            let url = baseUrl + suffix
 
             let! json = Http.getJson httpClient url
 

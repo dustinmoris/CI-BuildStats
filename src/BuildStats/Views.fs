@@ -171,6 +171,10 @@ let visualTestsView =
                     td [] [ img [ _src "/azurepipelines/chart/github/Desktop?branch=master" ] ]
                 ]
                 tr [] [
+                    th [] [ rawText "Build Definition Filter" ]
+                    td [] [ img [ _src "/azurepipelines/chart/dnceng/public?branch=master&definitionId=59" ] ]
+                ]
+                tr [] [
                     th [] [ rawText "Reduced BuildCount" ]
                     td [] [ img [ _src "/azurepipelines/chart/github/Desktop?buildCount=10" ] ]
                 ]
