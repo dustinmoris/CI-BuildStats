@@ -164,35 +164,35 @@ let visualTestsView =
             table [] [
                 tr [] [
                     th [] [ rawText "Basic" ]
-                    td [] [ img [ _src "/azurepipelines/chart/github/Desktop" ] ]
+                    td [] [ img [ _src "/azurepipelines/chart/github/Desktop/3" ] ]
                 ]
                 tr [] [
                     th [] [ rawText "Branch Filter" ]
-                    td [] [ img [ _src "/azurepipelines/chart/github/Desktop?branch=master" ] ]
+                    td [] [ img [ _src "/azurepipelines/chart/github/Desktop/3?branch=master" ] ]
                 ]
                 tr [] [
                     th [] [ rawText "Build Definition Filter" ]
-                    td [] [ img [ _src "/azurepipelines/chart/dnceng/public?branch=master&definitionId=59" ] ]
+                    td [] [ img [ _src "/azurepipelines/chart/dnceng/public/59?branch=master" ] ]
                 ]
                 tr [] [
                     th [] [ rawText "Reduced BuildCount" ]
-                    td [] [ img [ _src "/azurepipelines/chart/github/Desktop?buildCount=10" ] ]
+                    td [] [ img [ _src "/azurepipelines/chart/github/Desktop/3?buildCount=10" ] ]
                 ]
                 tr [] [
                     th [] [ rawText "Increased BuildCount" ]
-                    td [] [ img [ _src "/azurepipelines/chart/github/Desktop?buildCount=40" ] ]
+                    td [] [ img [ _src "/azurepipelines/chart/github/Desktop/3?buildCount=40" ] ]
                 ]
                 tr [] [
                     th [] [ rawText "Exclude PullRequests" ]
-                    td [] [ img [ _src "/azurepipelines/chart/github/Desktop?includeBuildsFromPullRequest=false" ] ]
+                    td [] [ img [ _src "/azurepipelines/chart/github/Desktop/3?includeBuildsFromPullRequest=false" ] ]
                 ]
                 tr [] [
                     th [] [ rawText "Hide Stats" ]
-                    td [] [ img [ _src "/azurepipelines/chart/github/Desktop?showStats=false" ] ]
+                    td [] [ img [ _src "/azurepipelines/chart/github/Desktop/3?showStats=false" ] ]
                 ]
                 tr [] [
                     th [] [ rawText "Branch and Exclude PullRequests" ]
-                    td [] [ img [ _src "/azurepipelines/chart/martincostello/sqllocaldb?branch=master&includeBuildsFromPullRequest=false" ] ]
+                    td [] [ img [ _src "/azurepipelines/chart/martincostello/sqllocaldb/66?branch=master&includeBuildsFromPullRequest=false" ] ]
                 ]
             ]
 

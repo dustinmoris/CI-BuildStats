@@ -116,13 +116,12 @@ module AppVeyor =
 
     let getBuilds   (httpClient          : HttpClient)
                     (authToken           : string option) // ToDo
-                    (account             : string)
-                    (project             : string)
+                    (slug                : string * string)
                     (buildCount          : int)
                     (branch              : string option)
-                    (inclFromPullRequest : bool)
-                    (definitionId        : Nullable<int>) =
+                    (inclFromPullRequest : bool) =
         task {
+            let account, project = slug
             let branchFilter =
                 match branch with
                 | Some b -> sprintf "&branch=%s" b
@@ -192,13 +191,12 @@ module TravisCI =
     let rec getBuilds   (forceFallback       : bool)
                         (httpClient          : HttpClient)
                         (authToken           : string option)
-                        (account             : string)
-                        (project             : string)
+                        (slug                : string * string)
                         (buildCount          : int)
                         (branch              : string option)
-                        (inclFromPullRequest : bool)
-                        (definitionId        : Nullable<int>) =
+                        (inclFromPullRequest : bool) =
         task {
+            let account, project = slug
             let request = new HttpRequestMessage()
             request.Method <- HttpMethod.Get
             request.Headers.Add("Travis-API-Version", "3")
@@ -249,12 +247,10 @@ module TravisCI =
                         true
                         httpClient
                         authToken
-                        account
-                        project
+                        slug
                         buildCount
                         branch
                         inclFromPullRequest
-                        definitionId
         }
 
 // -------------------------------------------
@@ -298,13 +294,12 @@ module CircleCI =
 
     let getBuilds   (httpClient          : HttpClient)
                     (authToken           : string option)
-                    (account             : string)
-                    (project             : string)
+                    (slug                : string * string)
                     (buildCount          : int)
                     (branch              : string option)
-                    (inclFromPullRequest : bool)
-                    (definitionId        : Nullable<int>) =
+                    (inclFromPullRequest : bool) =
         task {
+            let account, project = slug
             let branchFilter =
                 match branch with
                 | Some b -> sprintf "/tree/%s" <| WebUtility.UrlEncode b
@@ -313,7 +308,6 @@ module CircleCI =
             // CircleCI has a max limit of 100 items per request
             // ToDo: Refactor to pull more items when buildCount is higher
             let limit = min 100 (5 * buildCount)
-
             let url =
                 sprintf "https://circleci.com/api/v1/project/%s/%s%s?limit=%i"
                     account project branchFilter limit
@@ -370,30 +364,24 @@ module AzurePipelines =
 
     let getBuilds   (httpClient          : HttpClient)
                     (authToken           : string option)
-                    (account             : string)
-                    (project             : string)
+                    (slug                : string * string * int)
                     (buildCount          : int)
                     (branch              : string option)
-                    (inclFromPullRequest : bool)
-                    (definitionId        : Nullable<int>) =
+                    (inclFromPullRequest : bool) =
         task {
+            let account, project, definitionId = slug
             let branchFilter =
                 match branch with
-                | Some b -> sprintf "refs/heads/%s" <| WebUtility.UrlEncode b
+                | Some b -> sprintf "&branchName=refs/heads/%s" <| WebUtility.UrlEncode b
                 | None   -> ""
-            
-            let definitionFilter =
-                match definitionId.HasValue with
-                    | true -> sprintf "%i" <| definitionId.Value
-                    | false -> ""
 
             let limit = min 200 (4 * buildCount)
 
             let apiVersion = "4.1"
 
             let url =
-                sprintf "https://dev.azure.com/%s/%s/_apis/build/builds?branchName=%s&definitions=%s&$top=%i&api-version=%s"
-                    account project branchFilter definitionFilter limit apiVersion
+                sprintf "https://dev.azure.com/%s/%s/_apis/build/builds?api-version=%s&definitions=%i&$top=%i%s"
+                    account project apiVersion definitionId limit branchFilter
 
             let! json = Http.getJson httpClient url
 

@@ -67,7 +67,7 @@ if ($Run.IsPresent)
     }
     else
     {
-        dotnet-run $app
+        dotnet-run $app "debug"
     }
 }
 elseif ($Deploy.IsPresent) # -or $env:APPVEYOR_REPO_TAG -eq $true) AppVeyor doesn't support Linux containers yet

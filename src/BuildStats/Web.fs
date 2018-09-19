@@ -91,7 +91,7 @@ let packageHandler getPackageFunc slug =
 let nugetHandler = packageHandler NuGet.getPackageAsync
 let mygetHandler = packageHandler MyGet.getPackageAsync
 
-let getBuildHistory (getBuildsFunc) (account, project) =
+let getBuildHistory (getBuildsFunc) slug =
     fun (next : HttpFunc) (ctx : HttpContext) ->
         task {
             let includePullRequests =
@@ -117,7 +117,7 @@ let getBuildHistory (getBuildsFunc) (account, project) =
             let httpClientFactory = ctx.GetService<IHttpClientFactory>()
             let httpClient = httpClientFactory.CreateClient(HttpClientConfig.defaultClientName)
 
-            let! builds = getBuildsFunc httpClient authToken account project buildCount branch includePullRequests definitionId
+            let! builds = getBuildsFunc httpClient authToken slug buildCount branch includePullRequests
             return!
                 builds
                 |> BuildHistoryModel.FromBuilds showStats
@@ -188,7 +188,7 @@ let webApp =
                 routef "/appveyor/chart/%s/%s" appVeyorHandler
                 routef "/travisci/chart/%s/%s" travisCiHandler
                 routef "/circleci/chart/%s/%s" circleCiHandler
-                routef "/azurepipelines/chart/%s/%s" azureHandler
+                routef "/azurepipelines/chart/%s/%s/%i" azureHandler
             ]
         POST >=> route "/create" >=> createHandler
         notFound "Not Found" ]

@@ -18,7 +18,7 @@ The SVG widget currently works for public repositories built with:
 The base URL to the SVG widget is:
 
 ```
-https://buildstats.info/{buildSystem}/chart/{account}/{project}
+https://buildstats.info/{buildSystem}/chart/{account}/{project}[/{definitionId}]
 ```
 
 Replace `{buildSystem}` with one of the supported build systems:
@@ -36,6 +36,12 @@ The complete markdown for the above chart is as following:
 
 ```
 [![Build history](https://buildstats.info/appveyor/chart/dustinmoris/ci-buildstats)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats/history)
+```
+
+The URL for an Azure Pipelines powered graph has an additional route argument for the definition ID which is an Azure Pipelines specific concept:
+
+```
+https://buildstats.info/azurepipelines/chart/MyAccount/MyProject/12
 ```
 
 ### Configuration
