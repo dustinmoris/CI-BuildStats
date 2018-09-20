@@ -17,6 +17,7 @@ open BuildStats.IpAddressWhitelisting
 open BuildStats.PackageServices
 open BuildStats.BuildHistoryCharts
 open BuildStats.ViewModels
+open Microsoft.Net.Http.Headers
 
 // ---------------------------------
 // Web app
@@ -50,17 +51,18 @@ let requiresApiSecret =
             | false -> accessForbidden finish
         | None      -> accessForbidden finish) ctx
 
-
 let cssHandler (bundle : string) =
     setHttpHeader "Content-Type" "text/css"
     >=> setHttpHeader "Cache-Control" "public, max-age=31536000"
     >=> setHttpHeader "ETag" Views.cssHash
     >=> setBodyFromString bundle
 
-let svg (body : string) =
-    setHttpHeader "Content-Type" "image/svg+xml"
-    >=> setHttpHeader "Cache-Control" "public, max-age=30"
-    >=> setHttpHeader "ETag" (Hash.sha1 body)
+let cachedSvg (body : string) =
+    responseCaching
+        (Public (TimeSpan.FromSeconds 60.0))
+        (Some "Accept-Encoding")
+        (Some [| "includePreReleases"; "includeBuildsFromPullRequest"; "buildCount"; "showStats"; "authToken" |])
+    >=> setHttpHeader "Content-Type" "image/svg+xml"
     >=> setBodyFromString body
 
 let notFound msg = setStatusCode 404 >=> text msg
@@ -83,7 +85,7 @@ let packageHandler getPackageFunc slug =
                     |> PackageModel.FromPackage
                     |> SVGs.packageSVG
                     |> renderXmlNodes
-                    |> svg
+                    |> cachedSvg
                 | None -> notFound "Package not found"
                 <|| (next, ctx)
         }
@@ -106,10 +108,6 @@ let getBuildHistory (getBuildsFunc) slug =
                 match ctx.TryGetQueryStringValue "showStats" with
                 | Some x -> bool.Parse x
                 | None   -> true
-            let definitionId =
-                match ctx.TryGetQueryStringValue "definitionId" with
-                | Some x -> new Nullable<int>(int x)
-                | None   -> System.Nullable()
 
             let branch    = ctx.TryGetQueryStringValue "branch"
             let authToken = ctx.TryGetQueryStringValue "authToken"
@@ -123,7 +121,7 @@ let getBuildHistory (getBuildsFunc) slug =
                 |> BuildHistoryModel.FromBuilds showStats
                 |> SVGs.buildHistorySVG
                 |> renderXmlNode
-                |> svg
+                |> cachedSvg
                 <|| (next, ctx)
         }
 
@@ -177,7 +175,7 @@ let webApp =
                 // Protected
                 route "/debug"        >=> requiresApiSecret >=> debugHandler
                 route "/tests"        >=> requiresApiSecret >=> htmlView Views.visualTestsView
-                route "/chars"        >=> requiresApiSecret >=> (SVGs.measureCharsSVG |> renderXmlNode |> svg)
+                route "/chars"        >=> requiresApiSecret >=> (SVGs.measureCharsSVG |> renderXmlNode |> cachedSvg)
 
                 // Health status
                 route "/ping"         >=> text "pong"
@@ -217,10 +215,12 @@ let configureApp (app : IApplicationBuilder) =
     app.UseForwardedHeaders(forwardedHeadersOptions)
        .UseCloudflareIpAddressWhitelist(true, None, None)
        .UseGiraffeErrorHandler(errorHandler)
+       .UseResponseCaching()
        .UseGiraffe(webApp)
 
 let configureServices (services : IServiceCollection) =
     services
+        .AddResponseCaching()
         .AddGiraffe()
         .AddHttpClient(
             HttpClientConfig.defaultClientName,

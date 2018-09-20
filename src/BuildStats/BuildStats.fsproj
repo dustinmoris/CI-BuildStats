@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <Version>5.0.1</Version>
+    <Version>5.1.0</Version>
     <AssemblyName>BuildStats</AssemblyName>
     <OutputType>Exe</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -13,7 +13,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.*" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.*" />
-    <PackageReference Include="Giraffe" Version="2.0.*" />
+    <PackageReference Include="Giraffe" Version="3.0.*" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="2.1.*" />
     <PackageReference Include="Polly.Extensions.Http" Version="2.0.*" />
     <PackageReference Include="Serilog.AspNetCore" Version="2.1.*" />
