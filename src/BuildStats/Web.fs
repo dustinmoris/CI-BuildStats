@@ -91,7 +91,7 @@ let packageHandler getPackageFunc slug =
 let nugetHandler = packageHandler NuGet.getPackageAsync
 let mygetHandler = packageHandler MyGet.getPackageAsync
 
-let getBuildHistory (getBuildsFunc) (account, project) =
+let getBuildHistory (getBuildsFunc) slug =
     fun (next : HttpFunc) (ctx : HttpContext) ->
         task {
             let includePullRequests =
@@ -106,6 +106,10 @@ let getBuildHistory (getBuildsFunc) (account, project) =
                 match ctx.TryGetQueryStringValue "showStats" with
                 | Some x -> bool.Parse x
                 | None   -> true
+            let definitionId =
+                match ctx.TryGetQueryStringValue "definitionId" with
+                | Some x -> new Nullable<int>(int x)
+                | None   -> System.Nullable()
 
             let branch    = ctx.TryGetQueryStringValue "branch"
             let authToken = ctx.TryGetQueryStringValue "authToken"
@@ -113,7 +117,7 @@ let getBuildHistory (getBuildsFunc) (account, project) =
             let httpClientFactory = ctx.GetService<IHttpClientFactory>()
             let httpClient = httpClientFactory.CreateClient(HttpClientConfig.defaultClientName)
 
-            let! builds = getBuildsFunc httpClient authToken account project buildCount branch includePullRequests
+            let! builds = getBuildsFunc httpClient authToken slug buildCount branch includePullRequests
             return!
                 builds
                 |> BuildHistoryModel.FromBuilds showStats
@@ -124,6 +128,7 @@ let getBuildHistory (getBuildsFunc) (account, project) =
         }
 
 let appVeyorHandler = getBuildHistory AppVeyor.getBuilds
+let azureHandler    = getBuildHistory AzurePipelines.getBuilds
 let circleCiHandler = getBuildHistory CircleCI.getBuilds
 let travisCiHandler = getBuildHistory (TravisCI.getBuilds false)
 
@@ -183,6 +188,7 @@ let webApp =
                 routef "/appveyor/chart/%s/%s" appVeyorHandler
                 routef "/travisci/chart/%s/%s" travisCiHandler
                 routef "/circleci/chart/%s/%s" circleCiHandler
+                routef "/azurepipelines/chart/%s/%s/%i" azureHandler
             ]
         POST >=> route "/create" >=> createHandler
         notFound "Not Found" ]
