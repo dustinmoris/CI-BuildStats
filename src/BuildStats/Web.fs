@@ -17,6 +17,7 @@ open BuildStats.IpAddressWhitelisting
 open BuildStats.PackageServices
 open BuildStats.BuildHistoryCharts
 open BuildStats.ViewModels
+open Microsoft.Net.Http.Headers
 
 // ---------------------------------
 // Web app
@@ -50,17 +51,18 @@ let requiresApiSecret =
             | false -> accessForbidden finish
         | None      -> accessForbidden finish) ctx
 
-
 let cssHandler (bundle : string) =
     setHttpHeader "Content-Type" "text/css"
     >=> setHttpHeader "Cache-Control" "public, max-age=31536000"
     >=> setHttpHeader "ETag" Views.cssHash
     >=> setBodyFromString bundle
 
-let svg (body : string) =
-    setHttpHeader "Content-Type" "image/svg+xml"
-    >=> setHttpHeader "Cache-Control" "public, max-age=30"
-    >=> setHttpHeader "ETag" (Hash.sha1 body)
+let cachedSvg (body : string) =
+    responseCaching
+        (Public (TimeSpan.FromSeconds 60.0))
+        (Some "Accept-Encoding")
+        (Some [| "includePreReleases"; "includeBuildsFromPullRequest"; "buildCount"; "showStats"; "authToken" |])
+    >=> setHttpHeader "Content-Type" "image/svg+xml"
     >=> setBodyFromString body
 
 let notFound msg = setStatusCode 404 >=> text msg
@@ -83,7 +85,7 @@ let packageHandler getPackageFunc slug =
                     |> PackageModel.FromPackage
                     |> SVGs.packageSVG
                     |> renderXmlNodes
-                    |> svg
+                    |> cachedSvg
                 | None -> notFound "Package not found"
                 <|| (next, ctx)
         }
@@ -91,7 +93,7 @@ let packageHandler getPackageFunc slug =
 let nugetHandler = packageHandler NuGet.getPackageAsync
 let mygetHandler = packageHandler MyGet.getPackageAsync
 
-let getBuildHistory (getBuildsFunc) (account, project) =
+let getBuildHistory (getBuildsFunc) slug =
     fun (next : HttpFunc) (ctx : HttpContext) ->
         task {
             let includePullRequests =
@@ -113,17 +115,18 @@ let getBuildHistory (getBuildsFunc) (account, project) =
             let httpClientFactory = ctx.GetService<IHttpClientFactory>()
             let httpClient = httpClientFactory.CreateClient(HttpClientConfig.defaultClientName)
 
-            let! builds = getBuildsFunc httpClient authToken account project buildCount branch includePullRequests
+            let! builds = getBuildsFunc httpClient authToken slug buildCount branch includePullRequests
             return!
                 builds
                 |> BuildHistoryModel.FromBuilds showStats
                 |> SVGs.buildHistorySVG
                 |> renderXmlNode
-                |> svg
+                |> cachedSvg
                 <|| (next, ctx)
         }
 
 let appVeyorHandler = getBuildHistory AppVeyor.getBuilds
+let azureHandler    = getBuildHistory AzurePipelines.getBuilds
 let circleCiHandler = getBuildHistory CircleCI.getBuilds
 let travisCiHandler = getBuildHistory (TravisCI.getBuilds false)
 
@@ -172,7 +175,7 @@ let webApp =
                 // Protected
                 route "/debug"        >=> requiresApiSecret >=> debugHandler
                 route "/tests"        >=> requiresApiSecret >=> htmlView Views.visualTestsView
-                route "/chars"        >=> requiresApiSecret >=> (SVGs.measureCharsSVG |> renderXmlNode |> svg)
+                route "/chars"        >=> requiresApiSecret >=> (SVGs.measureCharsSVG |> renderXmlNode |> cachedSvg)
 
                 // Health status
                 route "/ping"         >=> text "pong"
@@ -183,6 +186,7 @@ let webApp =
                 routef "/appveyor/chart/%s/%s" appVeyorHandler
                 routef "/travisci/chart/%s/%s" travisCiHandler
                 routef "/circleci/chart/%s/%s" circleCiHandler
+                routef "/azurepipelines/chart/%s/%s/%i" azureHandler
             ]
         POST >=> route "/create" >=> createHandler
         notFound "Not Found" ]
@@ -211,10 +215,12 @@ let configureApp (app : IApplicationBuilder) =
     app.UseForwardedHeaders(forwardedHeadersOptions)
        .UseCloudflareIpAddressWhitelist(true, None, None)
        .UseGiraffeErrorHandler(errorHandler)
+       .UseResponseCaching()
        .UseGiraffe(webApp)
 
 let configureServices (services : IServiceCollection) =
     services
+        .AddResponseCaching()
         .AddGiraffe()
         .AddHttpClient(
             HttpClientConfig.defaultClientName,

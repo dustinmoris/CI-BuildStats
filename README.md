@@ -11,14 +11,14 @@ A little SVG widget to display build history charts and other badges for public 
 
 The SVG widget currently works for public repositories built with:
 
-<a href="https://www.appveyor.com/" title="AppVeyor"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/assets/AppVeyor.png" width="80" height="80" style="margin-right: 30px;" alt="AppVeyor" title="AppVeyor"/></a><a href="https://travis-ci.org/" title="TravisCI"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/assets/TravisCI.jpg" width="80" height="80" style="margin-right: 30px;" alt="TravisCI" title="TravisCI"/></a><a href="https://circleci.com/" title="CircleCI"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/assets/CircleCI.png" width="80" height="80" style="margin-right: 10px;" alt="CircleCI" title="CircleCI"/></a>
+<a href="https://www.appveyor.com/" title="AppVeyor"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/assets/AppVeyor.png" width="80" height="80" style="margin-right: 30px;" alt="AppVeyor" title="AppVeyor"/></a><a href="https://travis-ci.org/" title="TravisCI"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/assets/TravisCI.jpg" width="80" height="80" style="margin-right: 30px;" alt="TravisCI" title="TravisCI"/></a><a href="https://circleci.com/" title="CircleCI"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/assets/CircleCI.png" width="80" height="80" style="margin-right: 10px;" alt="CircleCI" title="CircleCI"/></a><a href="https://dev.azure.com/" title="Azure Pipelines"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/assets/AzurePipelines.png" width="80" height="80" style="margin-right: 30px;" alt="Azure Pipelines" title="Azure Pipelines"/></a>
 
 ### How it works
 
 The base URL to the SVG widget is:
 
 ```
-https://buildstats.info/{buildSystem}/chart/{account}/{project}
+https://buildstats.info/{buildSystem}/chart/{account}/{project}[/{definitionId}]
 ```
 
 Replace `{buildSystem}` with one of the supported build systems:
@@ -26,6 +26,7 @@ Replace `{buildSystem}` with one of the supported build systems:
 -   appveyor
 -   travisci
 -   circleci
+-   azurepipelines
 
 Replace `{account}` and `{project}` with your personal values.
 
@@ -35,6 +36,12 @@ The complete markdown for the above chart is as following:
 
 ```
 [![Build history](https://buildstats.info/appveyor/chart/dustinmoris/ci-buildstats)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats/history)
+```
+
+The URL for an Azure Pipelines powered graph has an additional route argument for the definition ID which is an Azure Pipelines specific concept:
+
+```
+https://buildstats.info/azurepipelines/chart/MyAccount/MyProject/12
 ```
 
 ### Configuration

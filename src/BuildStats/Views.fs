@@ -14,7 +14,7 @@ let masterView (pageTitle : string)
     html [] [
         head [] [
             meta [ _charset "utf-8" ]
-            meta [ _name "description"; _content "Little SVG widget to display AppVeyor, TravisCI or CircleCI build history charts and other SVG badges" ]
+            meta [ _name "description"; _content "Little SVG widget to display AppVeyor, TravisCI, CircleCI or Azure Pipelines build history charts and other SVG badges" ]
             meta [ _name "author"; _content "Dustin Moris Gorski, https://dusted.codes/" ]
 
             link [ attr "href" (sprintf "/site.css?v=%s" cssHash); attr "rel" "stylesheet" ]
@@ -157,6 +157,42 @@ let visualTestsView =
                 tr [] [
                     th [] [ rawText "Hide Stats" ]
                     td [] [ img [ _src "/circleci/chart/spotify/helios?showStats=false" ] ]
+                ]
+            ]
+
+            h3 [] [ rawText "Azure Pipelines" ]
+            table [] [
+                tr [] [
+                    th [] [ rawText "Basic" ]
+                    td [] [ img [ _src "/azurepipelines/chart/github/Desktop/3" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Branch Filter" ]
+                    td [] [ img [ _src "/azurepipelines/chart/github/Desktop/3?branch=master" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Build Definition Filter" ]
+                    td [] [ img [ _src "/azurepipelines/chart/dnceng/public/59?branch=master" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Reduced BuildCount" ]
+                    td [] [ img [ _src "/azurepipelines/chart/github/Desktop/3?buildCount=10" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Increased BuildCount" ]
+                    td [] [ img [ _src "/azurepipelines/chart/github/Desktop/3?buildCount=40" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Exclude PullRequests" ]
+                    td [] [ img [ _src "/azurepipelines/chart/github/Desktop/3?includeBuildsFromPullRequest=false" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Hide Stats" ]
+                    td [] [ img [ _src "/azurepipelines/chart/github/Desktop/3?showStats=false" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "Branch and Exclude PullRequests" ]
+                    td [] [ img [ _src "/azurepipelines/chart/martincostello/sqllocaldb/66?branch=master&includeBuildsFromPullRequest=false" ] ]
                 ]
             ]
 

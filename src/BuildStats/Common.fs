@@ -13,7 +13,6 @@ open Microsoft.AspNetCore.Authentication
 open FSharp.Control.Tasks.V2.ContextInsensitive
 open Polly
 open Polly.Extensions.Http
-open Giraffe
 
 // -------------------------------------
 // String helper functions

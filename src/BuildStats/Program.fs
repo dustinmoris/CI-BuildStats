@@ -5,12 +5,18 @@ open System.IO
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Serilog
+open Giraffe
 
 [<EntryPoint>]
-let main _ =
+let main args =
+    let logLevel =
+        match isNotNull args && args.Length > 0 && args.[0] = "debug" with
+        | true  -> Events.LogEventLevel.Debug
+        | false -> Events.LogEventLevel.Error
+
     Log.Logger <-
         (new LoggerConfiguration())
-            .MinimumLevel.Warning()
+            .MinimumLevel.Is(logLevel)
             .Enrich.FromLogContext()
             .WriteTo.Console()
             .CreateLogger()
