@@ -5,9 +5,19 @@ A little SVG widget to display build history charts and other badges for public 
 
 [![Build History](https://buildstats.info/appveyor/chart/dustinmoris/CI-BuildStats?branch=develop)](https://ci.appveyor.com/project/dustinmoris/ci-buildstats/history?branch=develop)
 
-## Build History Chart
+## Table of contents
 
-### Support
+- [Build History Chart](#build-history-chart)
+    - [How it works](#how-it-works)
+    - [Configuration](#configuration)
+- [NuGet Badges](#nuget-badges)
+- [MyGet Badges](#myget-badges)
+- [API Documentation](#api-documentation)
+- [Docker image](#docker-image)
+- [Contributing](#contributing)
+- [Support](#support)
+
+## Build History Chart
 
 The SVG widget currently works for public repositories built with:
 
@@ -87,7 +97,7 @@ The full URL to the SVG widget is:
 https://buildstats.info/{buildSystem}/chart/{account}/{project}[?buildCount={buildCount}&branch={branch}&includeBuildsFromPullRequest={includeBuildsFromPullRequest}&showStats={true/false}]
 ```
 
-## NuGet Badge
+## NuGet Badges
 
 NuGet badges are in beta state at the moment.
 
@@ -115,7 +125,7 @@ You can append the `includePreReleases=true` flag to include pre-release package
 [![NuGet Badge](https://buildstats.info/nuget/NServiceBus.PostgreSQL?includePreReleases=true)](https://www.nuget.org/packages/NServiceBus.PostgreSQL/1.0.0-CI00021)
 ```
 
-## MyGet Badge
+## MyGet Badges
 
 MyGet badges are in alpha state.
 
@@ -141,6 +151,12 @@ For a complete API documentation please check out the attached [api.raml](https:
 
 You can also self host the application by running [CI-BuildStats from a Docker container](https://hub.docker.com/r/dustinmoris/ci-buildstats/).
 
-## Contribution
+## Contributing
 
 Feedback is welcome and pull requests get accepted.
+
+## Support
+
+If you've got value from any of the content which I have created, but pull requests are not your thing, then I would also very much appreciate your support by buying me a coffee.
+
+<a href="https://www.buymeacoffee.com/dustinmoris" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
