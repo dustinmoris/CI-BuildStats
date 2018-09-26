@@ -5,9 +5,10 @@ open BuildStats.Common
 
 let minifiedCss =
     "Assets/site.css"
-    |> StaticAssets.minifyCssFile
+    |> Css.getMinifiedContent
 
-let cssHash = Hash.sha1 minifiedCss
+let cssPath = "/site.css"
+let cssHash = Hash.md5 minifiedCss
 
 let masterView (pageTitle : string)
                (content   : XmlNode list) =
@@ -17,7 +18,7 @@ let masterView (pageTitle : string)
             meta [ _name "description"; _content "Little SVG widget to display AppVeyor, TravisCI, CircleCI or Azure Pipelines build history charts and other SVG badges" ]
             meta [ _name "author"; _content "Dustin Moris Gorski, https://dusted.codes/" ]
 
-            link [ attr "href" (sprintf "/site.css?v=%s" cssHash); attr "rel" "stylesheet" ]
+            link [ attr "href" (sprintf "%s?v=%s" cssPath cssHash); attr "rel" "stylesheet" ]
 
             title [] [ encodedText pageTitle ]
         ]

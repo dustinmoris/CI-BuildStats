@@ -145,31 +145,38 @@ module Hash =
 // -------------------------------------
 
 [<RequireQualifiedAccess>]
-module StaticAssets =
+module Css =
+    open NUglify
 
-    let minifyCss (css : string) =
-        let css = css.Replace(Environment.NewLine, "")
-        let css = (Regex("\\s*{\\s*")).Replace(css, "{")
-        let css = (Regex("\\s*}\\s*")).Replace(css, "}")
-        let css = (Regex("\\s*:\\s*")).Replace(css, ":")
-        let css = (Regex("\\s*,\\s*")).Replace(css, ",")
-        let css = (Regex("\\s*;\\s*")).Replace(css, ";")
-        let css = (Regex("\\s*>\\s*")).Replace(css, ">")
-        let css = (Regex(";}")).Replace(css, "}")
+    let private getErrorMsg (errors : UglifyError seq) =
+        let msg =
+            errors
+            |> Seq.fold (fun (sb : StringBuilder) t ->
+                sprintf "Error: %s, File: %s" t.Message t.File
+                |> sb.AppendLine
+            ) (new StringBuilder("Couldn't uglify content."))
+        msg.ToString()
+
+    let minify (css : string) =
         css
+        |> Uglify.Css
+        |> (fun res ->
+            match res.HasErrors with
+            | true  -> failwith (getErrorMsg res.Errors)
+            | false -> res.Code)
 
-    let minifyCssFile (fileName : string) =
+    let getMinifiedContent (fileName : string) =
         fileName
         |> File.ReadAllText
-        |> minifyCss
+        |> minify
 
-    let bundleCssFiles (fileNames : string list) =
+    let getBundledContent (fileNames : string list) =
         let result =
             fileNames
             |> List.fold(
                 fun (sb : StringBuilder) fileName ->
                     fileName
-                    |> minifyCssFile
+                    |> getMinifiedContent
                     |> sb.AppendLine
             ) (new StringBuilder())
         result.ToString()
@@ -182,20 +189,15 @@ module StaticAssets =
 module HttpClientConfig =
     let defaultClientName = "DefaultHttpClient"
 
-    let transientHttpErrorPolicy =
-        HttpPolicyExtensions
-            .HandleTransientHttpError()
-            .WaitAndRetryAsync(
-                [
-                    TimeSpan.FromSeconds(1.0)
-                    TimeSpan.FromSeconds(3.0)
-                    TimeSpan.FromSeconds(5.0)
-                ])
-
     let tooManyRequestsPolicy =
         Policy
             .Handle<HttpRequestException>()
             .OrResult(
                 fun (msg : HttpResponseMessage) ->
                     msg.StatusCode.Equals StatusCodes.Status429TooManyRequests)
-            .CircuitBreakerAsync(2, TimeSpan.FromSeconds 30.0)
+            .WaitAndRetryAsync(
+                [
+                    TimeSpan.FromSeconds(1.0)
+                    TimeSpan.FromSeconds(3.0)
+                    TimeSpan.FromSeconds(5.0)
+                ])
