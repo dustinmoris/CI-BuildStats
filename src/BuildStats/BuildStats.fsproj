@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <Version>5.1.0</Version>
+    <Version>5.2.0</Version>
     <AssemblyName>BuildStats</AssemblyName>
     <OutputType>Exe</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -19,6 +19,8 @@
     <PackageReference Include="Serilog.AspNetCore" Version="2.1.*" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.*" />
     <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="6.5.*" />
+    <PackageReference Include="NUglify" Version="1.5.*" />
+    <PackageReference Include="Firewall" Version="1.1.*" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,7 +31,6 @@
     <Compile Include="ViewModels.fs" />
     <Compile Include="SVGs.fs" />
     <Compile Include="Views.fs" />
-    <Compile Include="IpAddressWhitelisting.fs" />
     <Compile Include="Web.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

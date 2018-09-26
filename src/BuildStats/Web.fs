@@ -7,17 +7,17 @@ open System.Threading.Tasks
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.AspNetCore.Http
+open Microsoft.AspNetCore.HttpOverrides
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
 open FSharp.Control.Tasks.V2.ContextInsensitive
 open Giraffe
 open Giraffe.GiraffeViewEngine
+open Firewall
 open BuildStats.Common
-open BuildStats.IpAddressWhitelisting
 open BuildStats.PackageServices
 open BuildStats.BuildHistoryCharts
 open BuildStats.ViewModels
-open Microsoft.Net.Http.Headers
 
 // ---------------------------------
 // Web app
@@ -166,7 +166,7 @@ let webApp =
         GET >=>
             choose [
                 // Assets
-                route "/site.css"     >=> cssHandler Views.minifiedCss
+                route Views.cssPath   >=> cssHandler Views.minifiedCss
 
                 // HTML Views
                 route "/"             >=> htmlView Views.indexView
@@ -203,8 +203,6 @@ let errorHandler (ex : Exception) (logger : ILogger) =
 // Config and Main
 // ---------------------------------
 
-open Microsoft.AspNetCore.HttpOverrides
-
 let configureApp (app : IApplicationBuilder) =
     let forwardedHeadersOptions =
         new ForwardedHeadersOptions(
@@ -213,8 +211,8 @@ let configureApp (app : IApplicationBuilder) =
         )
 
     app.UseForwardedHeaders(forwardedHeadersOptions)
-       .UseCloudflareIpAddressWhitelist(true, None, None)
        .UseGiraffeErrorHandler(errorHandler)
+       .UseCloudflareFirewall(true)
        .UseResponseCaching()
        .UseGiraffe(webApp)
 
@@ -222,12 +220,12 @@ let configureServices (services : IServiceCollection) =
     services
         .AddResponseCaching()
         .AddGiraffe()
+        .AddFirewall()
         .AddHttpClient(
             HttpClientConfig.defaultClientName,
             fun client ->
                 client.DefaultRequestHeaders.Accept.Add(Headers.MediaTypeWithQualityHeaderValue("application/json"))
             )
             .SetHandlerLifetime(TimeSpan.FromHours 1.0)
-            .AddPolicyHandler(HttpClientConfig.transientHttpErrorPolicy)
             .AddPolicyHandler(HttpClientConfig.tooManyRequestsPolicy)
             |> ignore
