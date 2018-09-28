@@ -99,8 +99,6 @@ https://buildstats.info/{buildSystem}/chart/{account}/{project}[?buildCount={bui
 
 ## NuGet Badges
 
-NuGet badges are in beta state at the moment.
-
 The URL to the NuGet badge is:
 
 ```
@@ -127,9 +125,9 @@ You can append the `includePreReleases=true` flag to include pre-release package
 
 ## MyGet Badges
 
-MyGet badges are in alpha state.
+MyGet badges are supported for the officially MyGet feed as well as for MyGet Enterprise customers.
 
-The URL to the MyGet badge is:
+The URL to a MyGet badge from the official feed is:
 
 ```
 https://buildstats.info/myget/{feedName}/{packageName}
@@ -141,6 +139,20 @@ For example the badge and Markdown for the [NEventSocket](https://github.com/dan
 
 ```
 [![MyGet Badge](https://buildstats.info/myget/neventsocket-prerelease/NEventSocket)](https://www.myget.org/feed/neventsocket-prerelease/package/nuget/NEventSocket)
+```
+
+The URL to a MuyGet badge from an Enterprise feed is:
+
+```
+https://buildstats.info/myget/{subDomain}/{feedName}/{packageName}
+```
+
+For example the badge and Markdown for the [Microsoft.Bot.Builder](https://botbuilder.myget.org/feed/botbuilder-v4-dotnet-daily/package/nuget/Microsoft.Bot.Builder) MyGet badge would be:
+
+[![MyGet Badge](https://buildstats.info/myget/botbuilder/botbuilder-v4-dotnet-daily/Microsoft.Bot.Builder)](https://botbuilder.myget.org/feed/botbuilder-v4-dotnet-daily/package/nuget/Microsoft.Bot.Builder)
+
+```
+[![MyGet Badge](https://buildstats.info/myget/botbuilder/botbuilder-v4-dotnet-daily/Microsoft.Bot.Builder)](https://botbuilder.myget.org/feed/botbuilder-v4-dotnet-daily/package/nuget/Microsoft.Bot.Builder)
 ```
 
 ## API Documentation

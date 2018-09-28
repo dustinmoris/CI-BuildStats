@@ -62,7 +62,7 @@ protocols: HTTPS
         body:
           text/html:
             example: Package could not be found.
-            
+
 /myget/{feedName}/{packageName}:
   displayName: MyGet Package Info
   description: Renders a MyGet package badge.
@@ -81,6 +81,31 @@ protocols: HTTPS
       404:
         description:
           The specified feed and/or package could not be found.
+        body:
+          text/html:
+            example: Package could not be found.
+
+/myget/{subDomain}/{feedName}/{packageName}:
+  displayName: MyGet Enterprise Package Info
+  description: Renders a MyGet Enterprise package badge.
+  uriParameters:
+    subDomain:
+      type: string
+      example: botbuilder
+    feedName:
+      type: string
+      example: botbuilder-v4-dotnet-daily
+    packageName:
+      type: string
+      example: Microsoft.Bot.Builder
+  get:
+    responses:
+      200:
+        description:
+          Renders an SVG image to display the the latest version of the requested MyGet Enterprise package.
+      404:
+        description:
+          The specified sub domain, feed and/or package could not be found.
         body:
           text/html:
             example: Package could not be found.
