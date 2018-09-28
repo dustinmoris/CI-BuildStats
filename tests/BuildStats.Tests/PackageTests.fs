@@ -158,4 +158,3 @@ let ``Microsoft.Bot.Builder returns correct result``() =
         |> runTask
 
     package.Value.Name        |> shouldEqual "Microsoft.Bot.Builder"
-    package.Value.Downloads   |> shouldBeGreaterThan 7
