@@ -125,7 +125,7 @@ You can append the `includePreReleases=true` flag to include pre-release package
 
 ## MyGet Badges
 
-MyGet badges are supported for the officially MyGet feed as well as for MyGet Enterprise customers.
+MyGet badges are supported for both the standard MyGet feed as well as MyGet Enterprise customers.
 
 The URL to a MyGet badge from the official feed is:
 
@@ -141,7 +141,7 @@ For example the badge and Markdown for the [NEventSocket](https://github.com/dan
 [![MyGet Badge](https://buildstats.info/myget/neventsocket-prerelease/NEventSocket)](https://www.myget.org/feed/neventsocket-prerelease/package/nuget/NEventSocket)
 ```
 
-The URL to a MuyGet badge from an Enterprise feed is:
+The URL to a MyGet badge from an Enterprise feed is:
 
 ```
 https://buildstats.info/myget/{subDomain}/{feedName}/{packageName}
@@ -149,15 +149,15 @@ https://buildstats.info/myget/{subDomain}/{feedName}/{packageName}
 
 For example the badge and Markdown for the [Microsoft.Bot.Builder](https://botbuilder.myget.org/feed/botbuilder-v4-dotnet-daily/package/nuget/Microsoft.Bot.Builder) MyGet badge would be:
 
-[![MyGet Badge](https://buildstats.info/myget/botbuilder/botbuilder-v4-dotnet-daily/Microsoft.Bot.Builder)](https://botbuilder.myget.org/feed/botbuilder-v4-dotnet-daily/package/nuget/Microsoft.Bot.Builder)
+[![MyGet Badge](https://buildstats.info/myget/botbuilder/botbuilder-v4-dotnet-daily/Microsoft.Bot.Builder?includePreReleases=true)](https://botbuilder.myget.org/feed/botbuilder-v4-dotnet-daily/package/nuget/Microsoft.Bot.Builder)
 
 ```
-[![MyGet Badge](https://buildstats.info/myget/botbuilder/botbuilder-v4-dotnet-daily/Microsoft.Bot.Builder)](https://botbuilder.myget.org/feed/botbuilder-v4-dotnet-daily/package/nuget/Microsoft.Bot.Builder)
+[![MyGet Badge](https://buildstats.info/myget/botbuilder/botbuilder-v4-dotnet-daily/Microsoft.Bot.Builder?includePreReleases=true)](https://botbuilder.myget.org/feed/botbuilder-v4-dotnet-daily/package/nuget/Microsoft.Bot.Builder)
 ```
 
 ## API Documentation
 
-For a complete API documentation please check out the attached [api.raml](https://github.com/dustinmoris/CI-BuildStats/blob/master/api.raml) or visit the public [API Portal](https://anypoint.mulesoft.com/apiplatform/dustinmoris/#/portals/organizations/1c966d9b-793c-46bc-a87a-427b9a4a9b4a/apis/76973/versions/79960).
+For complete API documentation please check out the attached [api.raml](https://github.com/dustinmoris/CI-BuildStats/blob/master/api.raml) or visit the public [API Portal](https://anypoint.mulesoft.com/apiplatform/dustinmoris/#/portals/organizations/1c966d9b-793c-46bc-a87a-427b9a4a9b4a/apis/76973/versions/79960).
 
 ## Docker image
 
