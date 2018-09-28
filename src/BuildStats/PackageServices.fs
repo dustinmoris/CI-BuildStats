@@ -70,12 +70,13 @@ module MyGet =
         else None
 
     let getPackageAsync (httpClient         : HttpClient)
+                        (subDomain          : string)
                         (feedName           : string,
                          packageName        : string)
                         (includePreReleases : bool) =
         task {
             let filter = sprintf "Id eq '%s'" packageName |> WebUtility.UrlEncode
-            let url = sprintf "https://www.myget.org/F/%s/api/v2/Packages()?$filter=%s&$orderby=Published desc&$top=1" feedName filter
+            let url = sprintf "https://%s.myget.org/F/%s/api/v2/Packages()?$filter=%s&$orderby=Published desc&$top=1" subDomain feedName filter
             let! json = Http.getJson httpClient url
             return
                 json
@@ -84,3 +85,14 @@ module MyGet =
                 >> map deserialize
                 >> bind (validatePackage packageName))
         }
+
+    let getPackageFromOfficialFeedAsync (httpClient         : HttpClient)
+                                        (slug               : string * string)
+                                        (includePreReleases : bool) =
+        getPackageAsync httpClient "www" slug includePreReleases
+
+    let getPackageFromEnterpriseFeedAsync (httpClient         : HttpClient)
+                                          (slug               : string * string * string)
+                                          (includePreReleases : bool) =
+        let (subDomain, feedName, packageName) =  slug
+        getPackageAsync httpClient subDomain (feedName, packageName) includePreReleases

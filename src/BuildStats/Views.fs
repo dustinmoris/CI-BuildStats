@@ -243,11 +243,23 @@ let visualTestsView =
                 ]
             ]
 
-            h3 [] [ rawText "My/Get" ]
+            h3 [] [ rawText "MyGet" ]
             table [] [
                 tr [] [
                     th [] [ rawText "neventsocket-prerelease/NEventSocket" ]
                     td [] [ img [ _src "/myget/neventsocket-prerelease/NEventSocket" ] ]
+                ]
+            ]
+
+            h3 [] [ rawText "MyGet Enterprise" ]
+            table [] [
+                tr [] [
+                    th [] [ rawText "botbuilder/botbuilder-v4-dotnet-daily/Microsoft.Bot.Builder" ]
+                    td [] [ img [ _src "/myget/botbuilder/botbuilder-v4-dotnet-daily/Microsoft.Bot.Builder" ] ]
+                ]
+                tr [] [
+                    th [] [ rawText "botbuilder/botbuilder-v4-dotnet-daily/Microsoft.Bot.Configuration" ]
+                    td [] [ img [ _src "/myget/botbuilder/botbuilder-v4-dotnet-daily/Microsoft.Bot.Configuration" ] ]
                 ]
             ]
 

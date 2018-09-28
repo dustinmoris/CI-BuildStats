@@ -90,8 +90,9 @@ let packageHandler getPackageFunc slug =
                 <|| (next, ctx)
         }
 
-let nugetHandler = packageHandler NuGet.getPackageAsync
-let mygetHandler = packageHandler MyGet.getPackageAsync
+let nugetHandler           = packageHandler NuGet.getPackageAsync
+let mygetOfficialHandler   = packageHandler MyGet.getPackageFromOfficialFeedAsync
+let mygetEnterpriseHandler = packageHandler MyGet.getPackageFromEnterpriseFeedAsync
 
 let getBuildHistory (getBuildsFunc) slug =
     fun (next : HttpFunc) (ctx : HttpContext) ->
@@ -182,7 +183,8 @@ let webApp =
 
                 // SVG endpoints
                 routef "/nuget/%s"    nugetHandler
-                routef "/myget/%s/%s" mygetHandler
+                routef "/myget/%s/%s/%s" mygetEnterpriseHandler
+                routef "/myget/%s/%s" mygetOfficialHandler
                 routef "/appveyor/chart/%s/%s" appVeyorHandler
                 routef "/travisci/chart/%s/%s" travisCiHandler
                 routef "/circleci/chart/%s/%s" circleCiHandler

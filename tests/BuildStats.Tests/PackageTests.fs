@@ -126,20 +126,36 @@ let ``Non existing package returns none``() =
 
 [<Fact>]
 let ``NEventSocket returns correct result``() =
-    let package = MyGet.getPackageAsync httpClient ("neventsocket-prerelease", "NEventSocket") false |> runTask
+    let package = MyGet.getPackageFromOfficialFeedAsync httpClient ("neventsocket-prerelease", "NEventSocket") false |> runTask
 
     package.Value.Name        |> shouldEqual "NEventSocket"
     package.Value.Downloads   |> shouldBeGreaterThan 4
 
 [<Fact>]
 let ``MyGet Package written in lowercase returns correct result``() =
-    let package = MyGet.getPackageAsync httpClient ("neventsocket-prerelease", "neventsocket") false |> runTask
+    let package = MyGet.getPackageFromOfficialFeedAsync httpClient ("neventsocket-prerelease", "neventsocket") false |> runTask
 
     package.Value.Name        |> shouldEqual "NEventSocket"
     package.Value.Downloads   |> shouldBeGreaterThan 4
 
 [<Fact>]
 let ``Non existing MyGet package returns none``() =
-    let package = MyGet.getPackageAsync httpClient ("not-found", "myPackage.which.does.not.exist") false |> runTask
+    let package = MyGet.getPackageFromOfficialFeedAsync httpClient ("not-found", "myPackage.which.does.not.exist") false |> runTask
 
     package.IsNone |> shouldBeTrue
+
+/// -------------------------------------
+/// MyGet Enterprise tests
+/// -------------------------------------
+
+[<Fact>]
+let ``Microsoft.Bot.Builder returns correct result``() =
+    let package =
+        MyGet.getPackageFromEnterpriseFeedAsync
+            httpClient
+            ("botbuilder", "botbuilder-v4-dotnet-daily", "Microsoft.Bot.Builder")
+            false
+        |> runTask
+
+    package.Value.Name        |> shouldEqual "Microsoft.Bot.Builder"
+    package.Value.Downloads   |> shouldBeGreaterThan 7
