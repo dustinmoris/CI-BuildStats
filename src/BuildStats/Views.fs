@@ -32,11 +32,18 @@ let indexView =
             h2 [] [ rawText "SVG widget to display build history charts and other badges" ]
 
             h3 [] [ rawText "Build History Chart" ]
-            p [] [ rawText "Add a build history widget to your public GitHub repository:" ]
+            p [] [ rawText "Add a build history widget to your public Git repository:" ]
             img [ _src "/appveyor/chart/dustinmoris/dustedcodes?branch=master" ]
+            p [ _style "margin-top: 2em;" ] [ rawText "Build history charts are currently supported for:" ]
+            ul [] [
+                li [] [ a [ _href "https://www.appveyor.com/"; _target "_blank" ] [ rawText "AppVeyor" ] ]
+                li [] [ a [ _href "https://travis-ci.org/"; _target "_blank" ] [ rawText "TravisCI" ] ]
+                li [] [ a [ _href "https://circleci.com/"; _target "_blank" ] [ rawText "CircleCI" ] ]
+                li [] [ a [ _href "https://azure.microsoft.com/en-us/services/devops/pipelines/"; _target "_blank" ] [ rawText "Azure Pipelines" ] ]
+            ]
 
             h3 [] [ rawText "NuGet and MyGet Badges" ]
-            p [] [ rawText "Display a badge for your NuGet or MyGet packages:" ]
+            p [] [ rawText "Display the most beautiful badge for your NuGet or MyGet package:" ]
             img [ _src "/nuget/nunit" ]
 
             h3 [] [ rawText "About" ]
@@ -45,7 +52,21 @@ let indexView =
                 a [ _href "https://github.com/dustinmoris/CI-BuildStats" ] [ rawText "official GitHub repository" ]
                 rawText "."
             ]
+            h3 [] [ rawText "Support" ]
             p [] [
+                rawText "If you've got value from any of the content which I have created, then I would very much appreciate your support by buying me a coffee."
+                a [
+                    _href "https://www.buymeacoffee.com/dustinmoris"
+                    _target "_blank"
+                ] [
+                    img [
+                        _src "https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png"
+                        _alt "Buy Me A Coffee"
+                        _style "height: auto !important;width: auto !important;"
+                    ]
+                ]
+            ]
+            p [ _class "footer" ] [
                 rawText "BuildStats.info is provided by "
                 a [ _href "https://dusted.codes/" ] [ rawText "Dustin Moris Gorski" ]
                 rawText "."

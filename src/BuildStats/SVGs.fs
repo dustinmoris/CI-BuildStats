@@ -10,8 +10,59 @@ let g        = tag     "g"
 let defs     = tag     "defs"
 let gradient = tag     "linearGradient"
 let text     = tag     "text"
+let path     = tag     "path"
+let mask     = tag     "mask"
 let rect     = voidTag "rect"
 let stop     = voidTag "stop"
+
+
+let nuGetSvg =
+    svg [
+        attr "x" "3"
+        attr "y" "2"
+        _width "14px"
+        _height "14px"
+        attr "viewBox" "0 0 512 512"
+        attr "xmlns" "http://www.w3.org/2000/svg"
+        attr "xmlns:xlink" "http://www.w3.org/1999/xlink"
+    ] [
+        g [
+            attr "stroke" "none"
+            attr "stroke-width" "1"
+            attr "fill" "none"
+            attr "fill-rule" "evenodd"
+        ] [
+            defs [] [
+                tag "polygon" [
+                    _id "path-1"
+                    attr "points" "0 46.021103 0 3.7002935 84.6521577 3.7002935 84.6521577 88.3419125 0 88.3419125"
+                ] []
+            ]
+            g [ attr "transform" "translate(0.000000, 6.000000)" ] [
+                path [
+                    attr "d" "M374.424959,454.856991 C327.675805,454.856991 289.772801,416.950177 289.772801,370.196324 C289.772801,323.463635 327.675805,285.535656 374.424959,285.535656 C421.174113,285.535656 459.077116,323.463635 459.077116,370.196324 C459.077116,416.950177 421.174113,454.856991 374.424959,454.856991 M205.565067,260.814741 C176.33891,260.814741 152.657469,237.109754 152.657469,207.901824 C152.657469,178.672728 176.33891,154.988907 205.565067,154.988907 C234.791225,154.988907 258.472666,178.672728 258.472666,207.901824 C258.472666,237.109754 234.791225,260.814741 205.565067,260.814741 M378.170817,95.6417786 L236.886365,95.6417786 C164.889705,95.6417786 106.479717,154.057639 106.479717,226.082702 L106.479717,367.360191 C106.479717,439.40642 164.889705,497.77995 236.886365,497.77995 L378.170817,497.77995 C450.209803,497.77995 508.577466,439.40642 508.577466,367.360191 L508.577466,226.082702 C508.577466,154.057639 450.209803,95.6417786 378.170817,95.6417786"
+                    attr "id" "Fill-12"
+                    attr "fill" "#eeeeee"
+                    attr "fill-rule" "evenodd"
+                ] [
+                    mask [
+                        _id "mask-2"
+                        attr "fill" "white"
+                    ] [
+                        tag "use" [ attr "xlink:href" "#path-1" ] []
+                    ]
+                ]
+                path [
+                    attr "d" "M84.6521577,46.0115787 C84.6521577,69.3990881 65.6900744,88.3419125 42.3260788,88.3419125 C18.9409203,88.3419125 0,69.3990881 0,46.0115787 C0,22.6452344 18.9409203,3.68124485 42.3260788,3.68124485 C65.6900744,3.68124485 84.6521577,22.6452344 84.6521577,46.0115787"
+                    _id "Fill-14"
+                    attr "fill" "#eeeeee"
+                    attr "fill-rule" "evenodd"
+                    attr "mask" "url(#mask-2)"
+                ] []
+            ]
+        ]
+    ]
+
 
 let defaultComment =
     let nl = Environment.NewLine
@@ -76,37 +127,43 @@ let colouredText (colour : string) (x : int) (y : int) (value : string) =
 let whiteText = colouredText "#ffffff"
 let blackText = colouredText "#777777"
 
-let packageSVG (model : PackageModel) = [
-    defaultComment
-    defaultSvg model.Width 20 [
-        defaultG "#000000" [
-            defs [] [ packageGradient ]
-            roundedRect
-                0 0
-                (model.Width - 50) 20
-                "#444444"
-            squareRect
-                model.FeedWidth 0
-                (model.VersionWidth) 20
-                "#43ba1b"
-            squareRect
-                (model.FeedWidth + model.VersionWidth) 0
-                (model.DownloadsWidth - 10) 20
-                "#483C32"
-            roundedRect
-                (model.FeedWidth + model.VersionWidth) 0
-                (model.DownloadsWidth) 20
-                "#483C32"
-            roundedRect
-                0 0
-                model.Width 20
-                "url(#grad1)"
+let packageSVG (model : PackageModel) =
+    let nugetLogoWidth = 16
+    [
+        defaultComment
+        defaultSvg (model.Width + nugetLogoWidth) 20 [
+            defaultG "#000000" [
+                defs [] [ packageGradient ]
+                roundedRect
+                    0 0
+                    (nugetLogoWidth + model.Width - 50) 20
+                    "#444444"
+                squareRect
+                    (nugetLogoWidth + model.FeedWidth) 0
+                    (model.VersionWidth) 20
+                    "#43ba1b"
+                squareRect
+                    (nugetLogoWidth + model.FeedWidth + model.VersionWidth) 0
+                    (model.DownloadsWidth - 10) 20
+                    "#483C32"
+                roundedRect
+                    (nugetLogoWidth + model.FeedWidth + model.VersionWidth) 0
+                    (model.DownloadsWidth) 20
+                    "#483C32"
+                roundedRect
+                    0 0
+                    (nugetLogoWidth + model.Width) 20
+                    "url(#grad1)"
 
-            blackText (model.FeedWidth + model.Padding) 15 model.Version
+                blackText (nugetLogoWidth + model.FeedWidth + model.Padding) 15 model.Version
 
-            whiteText model.Padding 14 model.FeedName
-            whiteText (model.FeedWidth + model.Padding) 14 model.Version
-            whiteText (model.FeedWidth + model.VersionWidth + model.Padding) 14 model.Downloads ] ] ]
+                whiteText (nugetLogoWidth + model.Padding) 14 model.FeedName
+                whiteText (nugetLogoWidth + model.FeedWidth + model.Padding) 14 model.Version
+                whiteText (nugetLogoWidth + model.FeedWidth + model.VersionWidth + model.Padding) 14 model.Downloads ]
+            g [] [
+                nuGetSvg
+            ] ]
+        ]
 
 let buildHistorySVG (model : BuildHistoryModel) =
     defaultSvg model.Width model.Height [
