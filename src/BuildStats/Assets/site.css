@@ -9,14 +9,20 @@ main {
     margin: 3em auto;
 }
 
+p {
+    line-height: 1.6em;
+}
+
 h1, h2, h4, h5, h6, p {
     margin: 1em 0;
-    color: #000;
+    color: #333;
 }
 
 h1 {
     margin-bottom: 0;
     font-size: 2.6em;
+    color: #6473aa;
+    font-weight: 700;
 }
 
 h2 {
@@ -25,6 +31,7 @@ h2 {
 }
 
 h3 {
+    margin-top: 1.5em;
     font-size: 1.6em;
 }
 
@@ -55,4 +62,12 @@ table tr:nth-child(odd) {
 
 table tr:nth-child(even) {
      background-color: #fafafa;
+}
+
+ul li { margin: .4em 0 ;}
+
+.footer {
+    margin-top: 4em;
+    font-size: .9em;
+    color: #aaa;
 }
