@@ -31,7 +31,7 @@ let defaultG (fill : string) =
 
 let whiteStop (offset : int) (opacity : float) =
     stop [ attr "offset" (sprintf "%i%%" offset)
-           attr "style" (sprintf "stop-color: rgb(255, 255, 255); stop-opacity: %.1f" opacity)]
+           attr "style" (sprintf "stop-color: rgb(240, 240, 240); stop-opacity: %.1f" opacity)]
 
 let packageGradient =
     gradient [
@@ -41,7 +41,7 @@ let packageGradient =
         attr "x2" "0%"
         attr "y2" "100%" ]
         [
-            whiteStop 0 0.3
+            whiteStop 0 0.15
             whiteStop 100 0.0 ]
 
 let squareRect (x : int) (y : int) (width : int) (height : int) (fill : string) =
@@ -60,18 +60,21 @@ let roundedRect (x : int) (y : int) (width : int)  (height : int)(fill : string)
         attr "y" (y.ToString())
         attr "height" (height.ToString())
         attr "width" (width.ToString())
-        attr "rx" "2"
-        attr "ry" "2"
+        attr "rx" "2.5"
+        attr "ry" "2.5"
         attr "stroke-width" "0"
         attr "fill" fill
     ]
 
-let whiteText (x : int) (y : int) (value : string) =
+let colouredText (colour : string) (x : int) (y : int) (value : string) =
     text [
         attr "x" (x.ToString())
         attr "y" (y.ToString())
-        attr "fill" "#ffffff"
+        attr "fill" colour
     ] [ rawText value ]
+
+let whiteText = colouredText "#ffffff"
+let blackText = colouredText "#777777"
 
 let packageSVG (model : PackageModel) = [
     defaultComment
@@ -81,11 +84,11 @@ let packageSVG (model : PackageModel) = [
             roundedRect
                 0 0
                 (model.Width - 50) 20
-                "#333333"
+                "#444444"
             squareRect
                 model.FeedWidth 0
                 (model.VersionWidth) 20
-                "#00b359"
+                "#43ba1b"
             squareRect
                 (model.FeedWidth + model.VersionWidth) 0
                 (model.DownloadsWidth - 10) 20
@@ -98,6 +101,9 @@ let packageSVG (model : PackageModel) = [
                 0 0
                 model.Width 20
                 "url(#grad1)"
+
+            blackText (model.FeedWidth + model.Padding) 15 model.Version
+
             whiteText model.Padding 14 model.FeedName
             whiteText (model.FeedWidth + model.Padding) 14 model.Version
             whiteText (model.FeedWidth + model.VersionWidth + model.Padding) 14 model.Downloads ] ] ]
