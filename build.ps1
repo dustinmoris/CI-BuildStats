@@ -4,8 +4,8 @@
 
 param
 (
+    [string] $Run,
     [switch] $Release,
-    [switch] $Run,
     [switch] $ExcludeTests,
     [switch] $Docker,
     [switch] $Deploy,
@@ -57,7 +57,7 @@ if ($Docker.IsPresent -or $Deploy.IsPresent -or $env:APPVEYOR_REPO_TAG -eq $true
     Invoke-Cmd "docker build -t dustinmoris/ci-buildstats:$version $publishFolder"
 }
 
-if ($Run.IsPresent)
+if ($Run)
 {
     Write-Host "Launching application..." -ForegroundColor Magenta
 
@@ -67,7 +67,7 @@ if ($Run.IsPresent)
     }
     else
     {
-        dotnet-run $app "debug"
+        dotnet-run $app $Run
     }
 }
 elseif ($Deploy.IsPresent) # -or $env:APPVEYOR_REPO_TAG -eq $true) AppVeyor doesn't support Linux containers yet

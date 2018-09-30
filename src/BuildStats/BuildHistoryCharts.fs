@@ -4,11 +4,13 @@ open System
 open System.Net
 open System.Net.Http
 open System.Net.Http.Headers
+open Microsoft.Extensions.Logging
 open Microsoft.FSharp.Core.Option
+open FSharp.Control.Tasks.V2.ContextInsensitive
 open Newtonsoft.Json.Linq
 open Giraffe
-open FSharp.Control.Tasks.V2.ContextInsensitive
 open BuildStats.Common
+open BuildStats.HttpClients
 
 // -------------------------------------------
 // Common Types and Functions
@@ -78,8 +80,7 @@ module BuildMetrics =
 // AppVeyor
 // -------------------------------------------
 
-[<RequireQualifiedAccess>]
-module AppVeyor =
+type AppVeyorHttpClient (httpClient : FallbackHttpClient) =
 
     let parseToJArray (json : string) =
         let obj = Json.deserialize json :?> JObject
@@ -114,12 +115,11 @@ module AppVeyor =
                 })
             |> Seq.toList
 
-    let getBuilds   (httpClient          : HttpClient)
-                    (authToken           : string option) // ToDo
-                    (slug                : string * string)
-                    (buildCount          : int)
-                    (branch              : string option)
-                    (inclFromPullRequest : bool) =
+    member this.GetBuildsAsync (authToken           : string option)
+                               (slug                : string * string)
+                               (buildCount          : int)
+                               (branch              : string option)
+                               (inclFromPullRequest : bool) =
         task {
             let account, project = slug
             let branchFilter =
@@ -133,11 +133,11 @@ module AppVeyor =
 
             let request = new HttpRequestMessage(HttpMethod.Get, url)
 
-            if (authToken.IsSome) then
+            if authToken.IsSome then
                 let token = AES.decryptUrlEncodedString AES.key authToken.Value
                 request.Headers.Authorization <- AuthenticationHeaderValue("Bearer", token)
 
-            let! json = Http.sendRequest httpClient request
+            let! json = httpClient.SendAsync request
 
             return json
                 |> (Str.toOption
@@ -151,8 +151,7 @@ module AppVeyor =
 // TravisCI
 // -------------------------------------------
 
-[<RequireQualifiedAccess>]
-module TravisCI =
+type TravisCIHttpClient (httpClient : FallbackHttpClient) =
 
     let parseToJArray (json : string) =
         let obj = Json.deserialize json :?> JObject
@@ -188,19 +187,19 @@ module TravisCI =
                 })
             |> Seq.toList
 
-    let rec getBuilds   (forceFallback       : bool)
-                        (httpClient          : HttpClient)
-                        (authToken           : string option)
-                        (slug                : string * string)
-                        (buildCount          : int)
-                        (branch              : string option)
-                        (inclFromPullRequest : bool) =
+    let rec getBuildsAsync (forceFallback       : bool)
+                           (authToken           : string option)
+                           (slug                : string * string)
+                           (buildCount          : int)
+                           (branch              : string option)
+                           (inclFromPullRequest : bool) =
         task {
             let account, project = slug
+
             let request = new HttpRequestMessage()
             request.Method <- HttpMethod.Get
             request.Headers.Add("Travis-API-Version", "3")
-            request.Headers.TryAddWithoutValidation("User-Agent", "https://buildstats.info") |> ignore
+            request.Headers.TryAddWithoutValidation("User-Agent", "BuildStats.info-API") |> ignore
 
             let topLevelDomain =
                 match forceFallback, authToken with
@@ -231,7 +230,7 @@ module TravisCI =
 
             request.RequestUri <- new Uri(url)
 
-            let! json = Http.sendRequest httpClient request
+            let! json = httpClient.SendAsync request
 
             let builds =
                 json
@@ -243,9 +242,8 @@ module TravisCI =
                 return builds
             else
                 return!
-                    getBuilds
+                    getBuildsAsync
                         true
-                        httpClient
                         authToken
                         slug
                         buildCount
@@ -253,12 +251,18 @@ module TravisCI =
                         inclFromPullRequest
         }
 
+    member __.GetBuildsAsync (authToken           : string option)
+                             (slug                : string * string)
+                             (buildCount          : int)
+                             (branch              : string option)
+                             (inclFromPullRequest : bool) =
+        getBuildsAsync false authToken slug buildCount branch inclFromPullRequest
+
 // -------------------------------------------
 // CircleCI
 // -------------------------------------------
 
-[<RequireQualifiedAccess>]
-module CircleCI =
+type CircleCIHttpClient (httpClient : FallbackHttpClient) =
 
     let parseToJArray (json : string) =
         Json.deserialize json :?> JArray
@@ -292,12 +296,11 @@ module CircleCI =
                 })
             |> Seq.toList
 
-    let getBuilds   (httpClient          : HttpClient)
-                    (authToken           : string option)
-                    (slug                : string * string)
-                    (buildCount          : int)
-                    (branch              : string option)
-                    (inclFromPullRequest : bool) =
+    member this.GetBuildsAsync  (authToken           : string option)
+                                (slug                : string * string)
+                                (buildCount          : int)
+                                (branch              : string option)
+                                (inclFromPullRequest : bool) =
         task {
             let account, project = slug
             let branchFilter =
@@ -312,7 +315,8 @@ module CircleCI =
                 sprintf "https://circleci.com/api/v1/project/%s/%s%s?limit=%i"
                     account project branchFilter limit
 
-            let! json = Http.getJson httpClient url
+            let request = new HttpRequestMessage(HttpMethod.Get, url)
+            let! json   = httpClient.SendAsync request
 
             return json
                 |> (Str.toOption
@@ -326,8 +330,7 @@ module CircleCI =
 // Azure Pipelines
 // -------------------------------------------
 
-[<RequireQualifiedAccess>]
-module AzurePipelines =
+type AzurePipelinesHttpClient (httpClient : FallbackHttpClient) =
 
     let parseToJArray (json : string) =
         let obj = Json.deserialize json :?> JObject
@@ -362,12 +365,11 @@ module AzurePipelines =
                 })
             |> Seq.toList
 
-    let getBuilds   (httpClient          : HttpClient)
-                    (authToken           : string option)
-                    (slug                : string * string * int)
-                    (buildCount          : int)
-                    (branch              : string option)
-                    (inclFromPullRequest : bool) =
+    member this.GetBuildsAsync  (authToken           : string option)
+                                (slug                : string * string * int)
+                                (buildCount          : int)
+                                (branch              : string option)
+                                (inclFromPullRequest : bool) =
         task {
             let account, project, definitionId = slug
             let branchFilter =
@@ -376,14 +378,13 @@ module AzurePipelines =
                 | None   -> ""
 
             let limit = min 200 (4 * buildCount)
-
             let apiVersion = "4.1"
-
             let url =
                 sprintf "https://dev.azure.com/%s/%s/_apis/build/builds?api-version=%s&definitions=%i&$top=%i%s"
                     account project apiVersion definitionId limit branchFilter
 
-            let! json = Http.getJson httpClient url
+            let request = new HttpRequestMessage(HttpMethod.Get, url)
+            let! json   = httpClient.SendAsync request
 
             return json
                 |> (Str.toOption

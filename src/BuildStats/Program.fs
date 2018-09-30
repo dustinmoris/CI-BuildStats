@@ -10,9 +10,17 @@ open Giraffe
 [<EntryPoint>]
 let main args =
     let logLevel =
-        match isNotNull args && args.Length > 0 && args.[0] = "debug" with
-        | true  -> Events.LogEventLevel.Debug
-        | false -> Events.LogEventLevel.Error
+        match isNotNull args && args.Length > 0 with
+        | false -> Events.LogEventLevel.Warning
+        | true  ->
+            match args.[0] with
+            | "verbose" -> Events.LogEventLevel.Verbose
+            | "debug"   -> Events.LogEventLevel.Debug
+            | "info"    -> Events.LogEventLevel.Information
+            | "warning" -> Events.LogEventLevel.Warning
+            | "error"   -> Events.LogEventLevel.Error
+            | "fatal"   -> Events.LogEventLevel.Fatal
+            | _         -> Events.LogEventLevel.Warning
 
     Log.Logger <-
         (new LoggerConfiguration())
