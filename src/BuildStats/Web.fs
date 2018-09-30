@@ -2,8 +2,8 @@ module BuildStats.Web
 
 open System
 open System.Text
-open System.Net.Http
 open System.Threading.Tasks
+open System.Net.Http
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.AspNetCore.Http
@@ -18,6 +18,7 @@ open BuildStats.Common
 open BuildStats.PackageServices
 open BuildStats.BuildHistoryCharts
 open BuildStats.ViewModels
+open BuildStats.HttpClients
 
 // ---------------------------------
 // Web app
@@ -70,8 +71,7 @@ let notFound msg = setStatusCode 404 >=> text msg
 let packageHandler getPackageFunc slug =
     fun (next : HttpFunc) (ctx : HttpContext) ->
         task {
-            let httpClientFactory = ctx.GetService<IHttpClientFactory>()
-            let httpClient = httpClientFactory.CreateClient(HttpClientConfig.defaultClientName)
+            let httpClient = ctx.GetService<PackageHttpClient>()
 
             let preRelease =
                 match ctx.TryGetQueryStringValue "includePreReleases" with
@@ -94,7 +94,7 @@ let nugetHandler           = packageHandler NuGet.getPackageAsync
 let mygetOfficialHandler   = packageHandler MyGet.getPackageFromOfficialFeedAsync
 let mygetEnterpriseHandler = packageHandler MyGet.getPackageFromEnterpriseFeedAsync
 
-let getBuildHistory (getBuildsFunc) slug =
+let getBuildHistory getBuildsFunc slug =
     fun (next : HttpFunc) (ctx : HttpContext) ->
         task {
             let includePullRequests =
@@ -112,11 +112,7 @@ let getBuildHistory (getBuildsFunc) slug =
 
             let branch    = ctx.TryGetQueryStringValue "branch"
             let authToken = ctx.TryGetQueryStringValue "authToken"
-
-            let httpClientFactory = ctx.GetService<IHttpClientFactory>()
-            let httpClient = httpClientFactory.CreateClient(HttpClientConfig.defaultClientName)
-
-            let! builds = getBuildsFunc httpClient authToken slug buildCount branch includePullRequests
+            let! builds   = getBuildsFunc authToken slug buildCount branch includePullRequests
             return!
                 builds
                 |> BuildHistoryModel.FromBuilds showStats
@@ -126,10 +122,25 @@ let getBuildHistory (getBuildsFunc) slug =
                 <|| (next, ctx)
         }
 
-let appVeyorHandler = getBuildHistory AppVeyor.getBuilds
-let azureHandler    = getBuildHistory AzurePipelines.getBuilds
-let circleCiHandler = getBuildHistory CircleCI.getBuilds
-let travisCiHandler = getBuildHistory (TravisCI.getBuilds false)
+let appVeyorHandler slug =
+    fun (next : HttpFunc) (ctx : HttpContext) ->
+        let client = ctx.GetService<AppVeyorHttpClient>()
+        getBuildHistory client.GetBuildsAsync slug next ctx
+
+let azureHandler slug =
+    fun (next : HttpFunc) (ctx : HttpContext) ->
+        let client = ctx.GetService<AzurePipelinesHttpClient>()
+        getBuildHistory client.GetBuildsAsync slug next ctx
+
+let circleCiHandler slug =
+    fun (next : HttpFunc) (ctx : HttpContext) ->
+        let client = ctx.GetService<CircleCIHttpClient>()
+        getBuildHistory client.GetBuildsAsync slug next ctx
+
+let travisCiHandler slug =
+    fun (next : HttpFunc) (ctx : HttpContext) ->
+        let client = ctx.GetService<TravisCIHttpClient>()
+        getBuildHistory client.GetBuildsAsync slug next ctx
 
 let createHandler : HttpHandler =
     fun (next : HttpFunc) (ctx : HttpContext) ->
@@ -182,9 +193,9 @@ let webApp =
                 route "/ping"         >=> text "pong"
 
                 // SVG endpoints
-                routef "/nuget/%s"    nugetHandler
+                routef "/nuget/%s"       nugetHandler
                 routef "/myget/%s/%s/%s" mygetEnterpriseHandler
-                routef "/myget/%s/%s" mygetOfficialHandler
+                routef "/myget/%s/%s"    mygetOfficialHandler
                 routef "/appveyor/chart/%s/%s" appVeyorHandler
                 routef "/travisci/chart/%s/%s" travisCiHandler
                 routef "/circleci/chart/%s/%s" circleCiHandler
@@ -218,16 +229,38 @@ let configureApp (app : IApplicationBuilder) =
        .UseResponseCaching()
        .UseGiraffe(webApp)
 
+let createResilientHttpClient (svc : IServiceProvider) =
+    new FallbackHttpClient(
+        new CircuitBreakerHttpClient(
+            new RetryHttpClient(
+                new BaseHttpClient(
+                    svc.GetService<IHttpClientFactory>()),
+                svc.GetService<ILogger<RetryHttpClient>>(),
+                maxRetries = 1),
+            svc.GetService<ILogger<CircuitBreakerHttpClient>>(),
+            minBreakDuration = TimeSpan.FromSeconds 1.0),
+        svc.GetService<ILogger<FallbackHttpClient>>())
+
 let configureServices (services : IServiceCollection) =
     services
+        .AddHttpClient()
+        .AddSingleton<TravisCIHttpClient>(
+            fun svc -> new TravisCIHttpClient(createResilientHttpClient svc))
+        .AddSingleton<AppVeyorHttpClient>(
+            fun svc -> new AppVeyorHttpClient(createResilientHttpClient svc))
+        .AddSingleton<CircleCIHttpClient>(
+            fun svc -> new CircleCIHttpClient(createResilientHttpClient svc))
+        .AddSingleton<AzurePipelinesHttpClient>(
+            fun svc -> new AzurePipelinesHttpClient(createResilientHttpClient svc))
+        .AddTransient<PackageHttpClient>(
+            fun svc ->
+                new PackageHttpClient(
+                    new FallbackHttpClient(
+                        new BaseHttpClient(
+                            svc.GetService<IHttpClientFactory>()),
+                        svc.GetService<ILogger<FallbackHttpClient>>()))
+        )
         .AddResponseCaching()
         .AddGiraffe()
         .AddFirewall()
-        .AddHttpClient(
-            HttpClientConfig.defaultClientName,
-            fun client ->
-                client.DefaultRequestHeaders.Accept.Add(Headers.MediaTypeWithQualityHeaderValue("application/json"))
-            )
-            .SetHandlerLifetime(TimeSpan.FromHours 1.0)
-            .AddPolicyHandler(HttpClientConfig.tooManyRequestsPolicy)
-            |> ignore
+        |> ignore

@@ -263,12 +263,16 @@ function Install-NetCoreSdk ($sdkZipPath)
         The zip archive which contains the .NET Core SDK.
     #>
 
-
-    $env:DOTNET_INSTALL_DIR = "$pwd\.dotnetsdk"
+    $env:DOTNET_INSTALL_DIR = [System.IO.Path]::Combine($pwd, ".dotnetsdk")
     New-Item $env:DOTNET_INSTALL_DIR -ItemType Directory -Force
 
-    Add-Type -AssemblyName System.IO.Compression.FileSystem;
-    [System.IO.Compression.ZipFile]::ExtractToDirectory($sdkZipPath, $env:DOTNET_INSTALL_DIR)
+    if (Test-IsWindows) {
+        Expand-Archive -Path $sdkZipPath -DestinationPath $env:DOTNET_INSTALL_DIR
+    }
+    else {
+        Invoke-Cmd "tar -xzf $sdkZipPath -C $env:DOTNET_INSTALL_DIR"
+    }
+
     $env:Path = "$env:DOTNET_INSTALL_DIR;$env:Path"
 }
 

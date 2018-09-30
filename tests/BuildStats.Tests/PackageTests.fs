@@ -1,15 +1,29 @@
 module BuildStats.Tests.PackageTests
 
 open System.Net.Http
+
+open Microsoft.Extensions.Logging
+open Microsoft.Extensions.Logging.Console
 open Xunit
 open BuildStats.PackageServices
+open BuildStats.HttpClients
+open NSubstitute
 
 /// -------------------------------------
 /// Helper functions
 /// -------------------------------------
 
-let httpClient = new HttpClient()
-httpClient.DefaultRequestHeaders.Accept.Add(Headers.MediaTypeWithQualityHeaderValue("application/json"))
+type DefaultHttpClientFactory() =
+    interface IHttpClientFactory with
+        member __.CreateClient (name) =
+            new HttpClient()
+
+let httpClient =
+    new PackageHttpClient(
+        new FallbackHttpClient(
+            new BaseHttpClient(
+                new DefaultHttpClientFactory()),
+            Substitute.For<ILogger<FallbackHttpClient>>()))
 
 let runTask task =
     task
@@ -158,4 +172,3 @@ let ``Microsoft.Bot.Builder returns correct result``() =
         |> runTask
 
     package.Value.Name        |> shouldEqual "Microsoft.Bot.Builder"
-    package.Value.Downloads   |> shouldBeGreaterThan 7

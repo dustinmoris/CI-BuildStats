@@ -3,16 +3,12 @@ module BuildStats.Common
 open System
 open System.IO
 open System.Text
-open System.Text.RegularExpressions
 open System.Net
 open System.Net.Http
 open System.Security.Cryptography
 open Newtonsoft.Json
-open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.Authentication
 open FSharp.Control.Tasks.V2.ContextInsensitive
-open Polly
-open Polly.Extensions.Http
 
 // -------------------------------------
 // String helper functions
@@ -42,29 +38,6 @@ module Json =
 
     let deserialize (json : string) =
         JsonConvert.DeserializeObject json
-
-// -------------------------------------
-// Http
-// -------------------------------------
-
-[<RequireQualifiedAccess>]
-module Http =
-
-    let getJson (httpClient : HttpClient) (url : string) =
-        task {
-            let! response = httpClient.GetAsync url
-            match response.StatusCode with
-            | HttpStatusCode.OK -> return! response.Content.ReadAsStringAsync()
-            | _ -> return ""
-        }
-
-    let sendRequest (httpClient : HttpClient) (request : HttpRequestMessage) =
-        task {
-            let! response = httpClient.SendAsync request
-            match response.StatusCode with
-            | HttpStatusCode.OK -> return! response.Content.ReadAsStringAsync()
-            | _ -> return ""
-        }
 
 // -------------------------------------
 // Cryptography
@@ -180,24 +153,3 @@ module Css =
                     |> sb.AppendLine
             ) (new StringBuilder())
         result.ToString()
-
-// -------------------------------------
-// HTTP Client
-// -------------------------------------
-
-[<RequireQualifiedAccess>]
-module HttpClientConfig =
-    let defaultClientName = "DefaultHttpClient"
-
-    let tooManyRequestsPolicy =
-        Policy
-            .Handle<HttpRequestException>()
-            .OrResult(
-                fun (msg : HttpResponseMessage) ->
-                    msg.StatusCode.Equals StatusCodes.Status429TooManyRequests)
-            .WaitAndRetryAsync(
-                [
-                    TimeSpan.FromSeconds(1.0)
-                    TimeSpan.FromSeconds(3.0)
-                    TimeSpan.FromSeconds(5.0)
-                ])

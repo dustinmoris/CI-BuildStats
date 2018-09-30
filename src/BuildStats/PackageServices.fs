@@ -3,9 +3,10 @@ module BuildStats.PackageServices
 open System.Net
 open System.Net.Http
 open Microsoft.FSharp.Core.Option
+open FSharp.Control.Tasks.V2.ContextInsensitive
 open Newtonsoft.Json.Linq
 open BuildStats.Common
-open FSharp.Control.Tasks.V2.ContextInsensitive
+open BuildStats.HttpClients
 
 type Package =
     {
@@ -14,6 +15,10 @@ type Package =
         Version     : string
         Downloads   : int
     }
+
+type PackageHttpClient (httpClient : FallbackHttpClient) =
+    member __.SendAsync request =
+        httpClient.SendAsync request
 
 module NuGet =
 
@@ -33,12 +38,13 @@ module NuGet =
             Downloads = item.Value<int> "totalDownloads"
         }
 
-    let getPackageAsync (httpClient         : HttpClient)
+    let getPackageAsync (httpClient         : PackageHttpClient)
                         (packageName        : string)
                         (includePreReleases : bool) =
         task {
             let url = sprintf "https://api-v2v3search-0.nuget.org/query?q=%s&skip=0&take=10&prerelease=%b" packageName includePreReleases
-            let! json = Http.getJson httpClient url
+            let request = new HttpRequestMessage(HttpMethod.Get, url)
+            let! json = httpClient.SendAsync request
             return
                 json
                 |> (Str.toOption
@@ -69,7 +75,7 @@ module MyGet =
         then Some package
         else None
 
-    let getPackageAsync (httpClient         : HttpClient)
+    let getPackageAsync (httpClient         : PackageHttpClient)
                         (subDomain          : string)
                         (feedName           : string,
                          packageName        : string)
@@ -77,7 +83,8 @@ module MyGet =
         task {
             let filter = sprintf "Id eq '%s'" packageName |> WebUtility.UrlEncode
             let url = sprintf "https://%s.myget.org/F/%s/api/v2/Packages()?$filter=%s&$orderby=Published desc&$top=1" subDomain feedName filter
-            let! json = Http.getJson httpClient url
+            let request = new HttpRequestMessage(HttpMethod.Get, url)
+            let! json = httpClient.SendAsync request
             return
                 json
                 |> (Str.toOption
@@ -86,12 +93,12 @@ module MyGet =
                 >> bind (validatePackage packageName))
         }
 
-    let getPackageFromOfficialFeedAsync (httpClient         : HttpClient)
+    let getPackageFromOfficialFeedAsync (httpClient         : PackageHttpClient)
                                         (slug               : string * string)
                                         (includePreReleases : bool) =
         getPackageAsync httpClient "www" slug includePreReleases
 
-    let getPackageFromEnterpriseFeedAsync (httpClient         : HttpClient)
+    let getPackageFromEnterpriseFeedAsync (httpClient         : PackageHttpClient)
                                           (slug               : string * string * string)
                                           (includePreReleases : bool) =
         let (subDomain, feedName, packageName) =  slug
