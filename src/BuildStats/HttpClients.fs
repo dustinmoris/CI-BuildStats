@@ -52,7 +52,7 @@ type CircuitBreakerHttpClient (httpClient        : IResilientHttpClient,
                     | true  -> return response
                     | false ->
                         let breakDuration = getBreakDuration response
-                        logger.LogWarning("Request to '{url}' has failed. Breaking circuit for: {seconds}sec.", request.RequestUri, breakDuration.TotalSeconds)
+                        logger.LogWarning("Request to '{url}' has failed (Http status code: {statusCode}). Breaking circuit for: {seconds}sec.", request.RequestUri, response.StatusCode, breakDuration.TotalSeconds)
                         brokenSince     <- DateTime.Now
                         isBrokenCircuit <- true
                         return response
