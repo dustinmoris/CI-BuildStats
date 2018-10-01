@@ -15,6 +15,7 @@ let masterView (pageTitle : string)
     html [] [
         head [] [
             meta [ _charset "utf-8" ]
+            meta [ _name "viewport"; _content "width=device-width, initial-scale=1.0" ]
             meta [ _name "description"; _content "Little SVG widget to display AppVeyor, TravisCI, CircleCI or Azure Pipelines build history charts and other SVG badges" ]
             meta [ _name "author"; _content "Dustin Moris Gorski, https://dusted.codes/" ]
 
