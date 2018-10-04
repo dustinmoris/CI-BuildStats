@@ -4,7 +4,7 @@ open System
 open System.Net
 open System.Net.Http
 open System.Net.Http.Headers
-open Microsoft.Extensions.Logging
+open Microsoft.Extensions.Caching.Memory
 open Microsoft.FSharp.Core.Option
 open FSharp.Control.Tasks.V2.ContextInsensitive
 open Newtonsoft.Json.Linq
@@ -151,7 +151,17 @@ type AppVeyorHttpClient (httpClient : FallbackHttpClient) =
 // TravisCI
 // -------------------------------------------
 
-type TravisCIHttpClient (httpClient : FallbackHttpClient) =
+type TravisCIHttpClient (httpClient : FallbackHttpClient, cache : IMemoryCache) =
+
+    let tryGetTLD account project =
+        let key = sprintf "%s%s" account project
+        match cache.TryGetValue<string> key with
+        | true, tld -> Some tld
+        | false, _  -> None
+
+    let cacheTLD account project tld =
+        let key = sprintf "%s%s" account project
+        cache.Set(key, tld) |> ignore
 
     let parseToJArray (json : string) =
         let obj = Json.deserialize json :?> JObject
@@ -187,7 +197,7 @@ type TravisCIHttpClient (httpClient : FallbackHttpClient) =
                 })
             |> Seq.toList
 
-    let rec getBuildsAsync (forceFallback       : bool)
+    let rec getBuildsAsync (isFallback          : bool)
                            (authToken           : string option)
                            (slug                : string * string)
                            (buildCount          : int)
@@ -202,9 +212,9 @@ type TravisCIHttpClient (httpClient : FallbackHttpClient) =
             request.Headers.TryAddWithoutValidation("User-Agent", "BuildStats.info-API") |> ignore
 
             let topLevelDomain =
-                match forceFallback, authToken with
+                match isFallback, authToken with
                 | true, _       -> "org"
-                | false, None   -> "com"
+                | false, None   -> defaultArg (tryGetTLD account project) "com"
                 | false, Some t ->
                     let token = AES.decryptUrlEncodedString AES.key t
                     request.Headers.Authorization <- AuthenticationHeaderValue("token", token)
@@ -217,7 +227,7 @@ type TravisCIHttpClient (httpClient : FallbackHttpClient) =
 
             let eventFilter =
                 match inclFromPullRequest with
-                | true -> ""
+                | true  -> ""
                 | false -> "&build.event_type[]=push&build.event_type[]=cron&build.event_type[]=api"
 
             let url =
@@ -238,7 +248,8 @@ type TravisCIHttpClient (httpClient : FallbackHttpClient) =
                 >> map parseToJArray
                 >> convertToBuilds)
 
-            if not builds.IsEmpty then
+            if isFallback || not builds.IsEmpty then
+                cacheTLD account project topLevelDomain
                 return builds
             else
                 return!
