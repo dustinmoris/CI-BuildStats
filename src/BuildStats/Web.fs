@@ -8,6 +8,7 @@ open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.HttpOverrides
+open Microsoft.Extensions.Caching.Memory
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
 open FSharp.Control.Tasks.V2.ContextInsensitive
@@ -243,9 +244,10 @@ let createResilientHttpClient (svc : IServiceProvider) =
 
 let configureServices (services : IServiceCollection) =
     services
+        .AddMemoryCache()
         .AddHttpClient()
         .AddSingleton<TravisCIHttpClient>(
-            fun svc -> new TravisCIHttpClient(createResilientHttpClient svc))
+            fun svc -> new TravisCIHttpClient(createResilientHttpClient svc, svc.GetService<IMemoryCache>()))
         .AddSingleton<AppVeyorHttpClient>(
             fun svc -> new AppVeyorHttpClient(createResilientHttpClient svc))
         .AddSingleton<CircleCIHttpClient>(
