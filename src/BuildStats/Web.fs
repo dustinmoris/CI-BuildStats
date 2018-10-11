@@ -61,7 +61,7 @@ let cssHandler (bundle : string) =
 
 let cachedSvg (body : string) =
     responseCaching
-        (Public (TimeSpan.FromSeconds 180.0))
+        (Public (TimeSpan.FromSeconds 90.0))
         (Some "Accept-Encoding")
         (Some [| "includePreReleases"; "includeBuildsFromPullRequest"; "buildCount"; "showStats"; "authToken" |])
     >=> setHttpHeader "Content-Type" "image/svg+xml"
@@ -176,7 +176,7 @@ let debugHandler : HttpHandler =
 
 let webApp =
     choose [
-        GET >=>
+        choose [ GET; HEAD ] >=>
             choose [
                 // Assets
                 route Views.cssPath   >=> cssHandler Views.minifiedCss
