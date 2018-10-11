@@ -247,7 +247,7 @@ function Get-NetCoreSdkFromWeb ($version)
             | Where-Object { $_.onclick -eq "recordManualDownload()" } `
             | Select-Object -Expand href
 
-    $tempFile  = [System.IO.Path]::GetTempFileName()
+    $tempFile  = [System.IO.Path]::GetTempFileName() + ".zip"
     $webClient = New-Object System.Net.WebClient
     $webClient.DownloadFile($downloadLink, $tempFile)
     return $tempFile
@@ -263,16 +263,11 @@ function Install-NetCoreSdk ($sdkZipPath)
         The zip archive which contains the .NET Core SDK.
     #>
 
-    $env:DOTNET_INSTALL_DIR = [System.IO.Path]::Combine($pwd, ".dotnetsdk")
+
+    $env:DOTNET_INSTALL_DIR = "$pwd\.dotnetsdk"
     New-Item $env:DOTNET_INSTALL_DIR -ItemType Directory -Force
 
-    if (Test-IsWindows) {
-        Expand-Archive -Path $sdkZipPath -DestinationPath $env:DOTNET_INSTALL_DIR
-    }
-    else {
-        Invoke-Cmd "tar -xzf $sdkZipPath -C $env:DOTNET_INSTALL_DIR"
-    }
-
+    Expand-Archive -Path $sdkZipPath -DestinationPath $env:DOTNET_INSTALL_DIR
     $env:Path = "$env:DOTNET_INSTALL_DIR;$env:Path"
 }
 
