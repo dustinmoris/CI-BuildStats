@@ -235,6 +235,8 @@ function Get-NetCoreSdkFromWeb ($version)
         The SDK version which should be downloaded.
     #>
 
+    Write-Host "Downloading .NET Core SDK $version..."
+
     $os = if (Test-IsWindows) { "windows" } else { "linux" }
 
     $response = Invoke-WebRequest `
@@ -248,8 +250,12 @@ function Get-NetCoreSdkFromWeb ($version)
             | Select-Object -Expand href
 
     $tempFile  = [System.IO.Path]::GetTempFileName() + ".zip"
+
     $webClient = New-Object System.Net.WebClient
     $webClient.DownloadFile($downloadLink, $tempFile)
+
+    Write-Host "Download finished. SDK has been saved to '$tempFile'."
+
     return $tempFile
 }
 
@@ -263,12 +269,18 @@ function Install-NetCoreSdk ($sdkZipPath)
         The zip archive which contains the .NET Core SDK.
     #>
 
-
     $env:DOTNET_INSTALL_DIR = "$pwd\.dotnetsdk"
-    New-Item $env:DOTNET_INSTALL_DIR -ItemType Directory -Force
+    New-Item $env:DOTNET_INSTALL_DIR -ItemType Directory -Force | Out-Null
 
-    Expand-Archive -Path $sdkZipPath -DestinationPath $env:DOTNET_INSTALL_DIR
+    Write-Host "Created folder '$env:DOTNET_INSTALL_DIR'."
+
+    Expand-Archive -LiteralPath $sdkZipPath -DestinationPath $env:DOTNET_INSTALL_DIR -Force
+
+    Write-Host "Extracted '$sdkZipPath' to folder '$env:DOTNET_INSTALL_DIR'."
+
     $env:Path = "$env:DOTNET_INSTALL_DIR;$env:Path"
+
+    Write-Host "Added '$env:DOTNET_INSTALL_DIR' to the environment variables."
 }
 
 # ----------------------------------------------
