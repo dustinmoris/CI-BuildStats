@@ -279,7 +279,7 @@ function Install-NetCoreSdk ($sdkArchivePath)
         Expand-Archive -LiteralPath $sdkArchivePath -DestinationPath $env:DOTNET_INSTALL_DIR -Force
     }
     else {
-        Invoke-Cmd "tar -xvzf $sdkArchivePath"
+        Invoke-Cmd "tar -xvzf $sdkArchivePath -C $env:DOTNET_INSTALL_DIR"
     }
 
     Write-Host "Extracted '$sdkArchivePath' to folder '$env:DOTNET_INSTALL_DIR'."
