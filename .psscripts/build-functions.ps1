@@ -269,7 +269,7 @@ function Install-NetCoreSdk ($sdkZipPath)
         The zip archive which contains the .NET Core SDK.
     #>
 
-    $env:DOTNET_INSTALL_DIR = "$pwd\.dotnetsdk"
+    $env:DOTNET_INSTALL_DIR = [System.IO.Path]::Combine($pwd, ".dotnetsdk")
     New-Item $env:DOTNET_INSTALL_DIR -ItemType Directory -Force | Out-Null
 
     Write-Host "Created folder '$env:DOTNET_INSTALL_DIR'."
