@@ -29,8 +29,15 @@ if ($desiredSdk -eq $currentSdk)
 Write-Host "The current .NET SDK ($currentSdk) doesn't match the project's desired .NET SDK ($desiredSdk)." -ForegroundColor Yellow
 # Write-Host "Attempting to download and install the correct .NET SDK..."
 
-$sdkZipPath = Get-NetCoreSdkFromWeb $desiredSdk
-Install-NetCoreSdk $sdkZipPath
+if (Test-IsWindows)
+{
+    $sdkZipPath = Get-NetCoreSdkFromWeb $desiredSdk
+    Install-NetCoreSdkFromArchive $sdkZipPath
+}
+else
+{
+    Install-NetCoreSdkForUbuntu "16.04"
+}
 
 Write-Host ".NET SDK installation complete." -ForegroundColor Green
 dotnet-version

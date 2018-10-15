@@ -260,7 +260,7 @@ function Get-NetCoreSdkFromWeb ($version)
     return $tempFile
 }
 
-function Install-NetCoreSdk ($sdkArchivePath)
+function Install-NetCoreSdkFromArchive ($sdkArchivePath)
 {
     <#
         .DESCRIPTION
@@ -279,10 +279,7 @@ function Install-NetCoreSdk ($sdkArchivePath)
         Expand-Archive -LiteralPath $sdkArchivePath -DestinationPath $env:DOTNET_INSTALL_DIR -Force
     }
     else {
-        Invoke-Cmd "tar -xzf $sdkArchivePath -C $env:DOTNET_INSTALL_DIR"
-        Push-Location $env:DOTNET_INSTALL_DIR
-        Get-ChildItem
-        Pop-Location
+        Invoke-Cmd "tar -xf $sdkArchivePath -C $env:DOTNET_INSTALL_DIR"
     }
 
     Write-Host "Extracted '$sdkArchivePath' to folder '$env:DOTNET_INSTALL_DIR'."
@@ -290,6 +287,15 @@ function Install-NetCoreSdk ($sdkArchivePath)
     $env:Path = "$env:DOTNET_INSTALL_DIR;$env:Path"
 
     Write-Host "Added '$env:DOTNET_INSTALL_DIR' to the environment variables."
+}
+
+function Install-NetCoreSdkForUbuntu ($ubuntuVersion)
+{
+    Invoke-Cmd "wget -q https://packages.microsoft.com/config/ubuntu/$ubuntuVersion/packages-microsoft-prod.deb"
+    Invoke-Cmd "sudo dpkg -i packages-microsoft-prod.deb"
+    Invoke-Cmd "sudo apt-get install apt-transport-https"
+    Invoke-Cmd "sudo apt-get update"
+    Invoke-Cmd "sudo apt-get install dotnet-sdk-2.1"
 }
 
 # ----------------------------------------------
