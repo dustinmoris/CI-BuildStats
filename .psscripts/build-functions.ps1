@@ -289,13 +289,13 @@ function Install-NetCoreSdkFromArchive ($sdkArchivePath)
     Write-Host "Added '$env:DOTNET_INSTALL_DIR' to the environment variables."
 }
 
-function Install-NetCoreSdkForUbuntu ($ubuntuVersion)
+function Install-NetCoreSdkForUbuntu ($ubuntuVersion, $sdkVersion)
 {
     Invoke-Cmd "wget -q https://packages.microsoft.com/config/ubuntu/$ubuntuVersion/packages-microsoft-prod.deb"
     Invoke-Cmd "sudo dpkg -i packages-microsoft-prod.deb"
     Invoke-Cmd "sudo apt-get install apt-transport-https"
     Invoke-Cmd "sudo apt-get update"
-    Invoke-Cmd "sudo apt-get -y install dotnet-sdk-2.1"
+    Invoke-Cmd "sudo apt-get -y install dotnet-sdk-$sdkVersion"
 }
 
 # ----------------------------------------------

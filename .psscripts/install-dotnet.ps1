@@ -36,7 +36,8 @@ if (Test-IsWindows)
 }
 else
 {
-    Install-NetCoreSdkForUbuntu "16.04"
+    $ubuntuVersion = Invoke-Cmd "$ lsb_release -r -s"
+    Install-NetCoreSdkForUbuntu $ubuntuVersion $desiredSdk
 }
 
 Write-Host ".NET SDK installation complete." -ForegroundColor Green
