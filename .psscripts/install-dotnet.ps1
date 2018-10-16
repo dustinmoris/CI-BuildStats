@@ -13,9 +13,13 @@ Import-module "$PSScriptRoot\build-functions.ps1" -Force
 
 if ($ForceUbuntuInstall.IsPresent)
 {
+    $desiredSdk    = Get-DesiredSdk
+    $versionParts  = $desiredSdk.Split(".")
+    $majorMinorVer = $versionParts[0] + "." + $versionParts[1]
     $ubuntuVersion = Get-UbuntuVersion
+
     Write-Host "Ubuntu version: $ubuntuVersion"
-    Install-NetCoreSdkForUbuntu $ubuntuVersion $desiredSdk
+    Install-NetCoreSdkForUbuntu $ubuntuVersion $majorMinorVer
     return
 }
 
