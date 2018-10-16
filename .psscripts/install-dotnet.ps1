@@ -30,8 +30,17 @@ Write-Host "The current .NET SDK ($currentSdk) doesn't match the project's desir
 
 Write-Host "Attempting to download and install the correct .NET SDK..."
 
-$sdkZipPath = Get-NetCoreSdkFromWeb $desiredSdk
-Install-NetCoreSdkFromArchive $sdkZipPath
+if (Test-IsWindows)
+{
+    $sdkZipPath = Get-NetCoreSdkFromWeb $desiredSdk
+    Install-NetCoreSdkFromArchive $sdkZipPath
+}
+else
+{
+    $ubuntuVersion = Invoke-Cmd "lsb_release -r -s"
+    Write-Host "Ubuntu version: $ubuntuVersion"
+    Install-NetCoreSdkForUbuntu $ubuntuVersion $desiredSdk
+}
 
 Write-Host ".NET SDK installation complete." -ForegroundColor Green
 dotnet-version
