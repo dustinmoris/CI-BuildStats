@@ -15,6 +15,20 @@ function Test-IsWindows
     [environment]::OSVersion.Platform -ne "Unix"
 }
 
+function Get-UbuntuVersion
+{
+    <#
+        .DESCRIPTION
+        Gets the Ubuntu version.
+
+        .EXAMPLE
+        $ubuntuVersion = Get-UbuntuVersion
+    #>
+
+    $version = Invoke-Cmd "lsb_release -r -s"
+    return $version
+}
+
 function Invoke-UnsafeCmd ($cmd)
 {
     <#

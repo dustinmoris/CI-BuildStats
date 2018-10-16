@@ -2,9 +2,22 @@
 # Install .NET Core SDK
 # ----------------------------------------------
 
+param
+(
+    [switch] $ForceUbuntuInstall
+)
+
 $ErrorActionPreference = "Stop"
 
 Import-module "$PSScriptRoot\build-functions.ps1" -Force
+
+if ($ForceUbuntuInstall.IsPresent)
+{
+    $ubuntuVersion = Get-UbuntuVersion
+    Write-Host "Ubuntu version: $ubuntuVersion"
+    Install-NetCoreSdkForUbuntu $ubuntuVersion $desiredSdk
+    return
+}
 
 # Rename the global.json before making the dotnet --version call
 # This will prevent AppVeyor to fail because it might not find
@@ -30,17 +43,8 @@ Write-Host "The current .NET SDK ($currentSdk) doesn't match the project's desir
 
 Write-Host "Attempting to download and install the correct .NET SDK..."
 
-if (Test-IsWindows)
-{
-    $sdkZipPath = Get-NetCoreSdkFromWeb $desiredSdk
-    Install-NetCoreSdkFromArchive $sdkZipPath
-}
-else
-{
-    $ubuntuVersion = Invoke-Cmd "lsb_release -r -s"
-    Write-Host "Ubuntu version: $ubuntuVersion"
-    Install-NetCoreSdkForUbuntu $ubuntuVersion $desiredSdk
-}
+$sdkZipPath = Get-NetCoreSdkFromWeb $desiredSdk
+Install-NetCoreSdkFromArchive $sdkZipPath
 
 Write-Host ".NET SDK installation complete." -ForegroundColor Green
 dotnet-version
