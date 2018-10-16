@@ -282,24 +282,14 @@ function Install-NetCoreSdkFromArchive ($sdkArchivePath)
     }
     else
     {
-        $dotnetInstallDir = "$env:HOME/dotnet"
+        $dotnetInstallDir = "$env:HOME/.dotnetsdk"
         Invoke-Cmd "mkdir -p $dotnetInstallDir"
         Write-Host "Created folder '$dotnetInstallDir'."
         Invoke-Cmd "tar -xf $sdkArchivePath -C $dotnetInstallDir"
         Write-Host "Extracted '$sdkArchivePath' to folder '$dotnetInstallDir'."
-        # Invoke-Cmd "export PATH=$env:PATH:$dotnetInstallDir"
         $env:PATH = "$env:PATH:$dotnetInstallDir"
         Write-Host "Added '$dotnetInstallDir' to the environment variables."
     }
-}
-
-function Install-NetCoreSdkForUbuntu ($ubuntuVersion, $sdkVersion)
-{
-    Invoke-Cmd "wget -q https://packages.microsoft.com/config/ubuntu/$ubuntuVersion/packages-microsoft-prod.deb"
-    Invoke-Cmd "sudo dpkg -i packages-microsoft-prod.deb"
-    Invoke-Cmd "sudo apt-get install apt-transport-https"
-    Invoke-Cmd "sudo apt-get update"
-    Invoke-Cmd "sudo apt-get -y install dotnet-sdk-$sdkVersion"
 }
 
 # ----------------------------------------------
