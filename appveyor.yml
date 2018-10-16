@@ -9,7 +9,7 @@ environment:
 init:
   - git config --global core.autocrlf true
 install:
-  - ps: .\.psscripts\install-dotnet.ps1
+  - ps: .\.psscripts\install-dotnet.ps1 -ForceUbuntuInstall
 build: off
 build_script:
   - ps: .\build.ps1
