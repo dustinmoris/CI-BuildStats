@@ -36,7 +36,8 @@ if (Test-IsWindows)
 }
 else
 {
-    $ubuntuVersion = Invoke-Cmd "$ lsb_release -r -s"
+    $ubuntuVersion = Invoke-Cmd "lsb_release -r -s"
+    Write-Host "Ubuntu version: $ubuntuVersion"
     Install-NetCoreSdkForUbuntu $ubuntuVersion $desiredSdk
 }
 
