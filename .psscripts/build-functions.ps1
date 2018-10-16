@@ -270,23 +270,26 @@ function Install-NetCoreSdkFromArchive ($sdkArchivePath)
         The zip archive which contains the .NET Core SDK.
     #>
 
-    $env:DOTNET_INSTALL_DIR = [System.IO.Path]::Combine($pwd, ".dotnetsdk")
-    New-Item $env:DOTNET_INSTALL_DIR -ItemType Directory -Force | Out-Null
-
-    Write-Host "Created folder '$env:DOTNET_INSTALL_DIR'."
-
-    if (Test-IsWindows) {
+    if (Test-IsWindows)
+    {
+        $env:DOTNET_INSTALL_DIR = [System.IO.Path]::Combine($pwd, ".dotnetsdk")
+        New-Item $env:DOTNET_INSTALL_DIR -ItemType Directory -Force | Out-Null
+        Write-Host "Created folder '$env:DOTNET_INSTALL_DIR'."
         Expand-Archive -LiteralPath $sdkArchivePath -DestinationPath $env:DOTNET_INSTALL_DIR -Force
+        Write-Host "Extracted '$sdkArchivePath' to folder '$env:DOTNET_INSTALL_DIR'."
+        $env:Path = "$env:DOTNET_INSTALL_DIR;$env:Path"
+        Write-Host "Added '$env:DOTNET_INSTALL_DIR' to the environment variables."
     }
-    else {
-        Invoke-Cmd "tar -xf $sdkArchivePath -C $env:DOTNET_INSTALL_DIR"
+    else
+    {
+        $dotnetInstallDir = "`$HOME/dotnet"
+        Invoke-Cmd "mkdir -p $dotnetInstallDir"
+        Write-Host "Created folder '$dotnetInstallDir'."
+        Invoke-Cmd "tar -xf $sdkArchivePath -C $dotnetInstallDir"
+        Write-Host "Extracted '$sdkArchivePath' to folder '$dotnetInstallDir'."
+        Invoke-Cmd "export PATH=`$PATH:$dotnetInstallDir"
+        Write-Host "Added '$dotnetInstallDir' to the environment variables."
     }
-
-    Write-Host "Extracted '$sdkArchivePath' to folder '$env:DOTNET_INSTALL_DIR'."
-
-    $env:Path = "$env:DOTNET_INSTALL_DIR;$env:Path"
-
-    Write-Host "Added '$env:DOTNET_INSTALL_DIR' to the environment variables."
 }
 
 function Install-NetCoreSdkForUbuntu ($ubuntuVersion, $sdkVersion)
