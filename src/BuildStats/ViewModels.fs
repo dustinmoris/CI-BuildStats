@@ -16,7 +16,7 @@ type PackageModel =
         Version        : string
         Downloads      : string
     }
-    static member FromPackage (package : Package) =
+    static member FromPackage (vWidth : int option) (dWidth : int option) (package : Package) =
         let padding = 7
         let downloads =
             let million  = 1000000
@@ -27,8 +27,8 @@ type PackageModel =
             | dl                     -> dl                          |> sprintf "▾ %i"
         let version        = sprintf "v%s" package.Version
         let feedWidth      = measureTextWidth package.Feed + padding * 2
-        let versionWidth   = measureTextWidth version + padding * 2
-        let downloadsWidth = measureTextWidth downloads + padding * 2
+        let versionWidth   = defaultArg vWidth (measureTextWidth version + padding * 2)
+        let downloadsWidth = defaultArg dWidth (measureTextWidth downloads + padding * 2)
         {
             Width          = feedWidth + versionWidth + downloadsWidth
             FeedWidth      = feedWidth
