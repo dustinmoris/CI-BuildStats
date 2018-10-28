@@ -123,6 +123,16 @@ You can append the `includePreReleases=true` flag to include pre-release package
 [![NuGet Badge](https://buildstats.info/nuget/NServiceBus.PostgreSQL?includePreReleases=true)](https://www.nuget.org/packages/NServiceBus.PostgreSQL/1.0.0-CI00021)
 ```
 
+### Setting a fixed width
+
+If you want to control the width of the version and/or downloads label then you can use the `vWidth` and `dWidth` query parameters. Both accept an integer value representing the width in pixels:
+
+[![NuGet Badge](https://buildstats.info/nuget/Giraffe?vWidth=100&dWidth=100)](https://www.nuget.org/packages/Giraffe)
+
+```
+[![NuGet Badge](https://buildstats.info/nuget/Giraffe?vWidth=100&dWidth=100)](https://www.nuget.org/packages/Giraffe)
+```
+
 ## MyGet Badges
 
 MyGet badges are supported for both the standard MyGet feed as well as MyGet Enterprise customers.
@@ -154,6 +164,10 @@ For example the badge and Markdown for the [Microsoft.Bot.Builder](https://botbu
 ```
 [![MyGet Badge](https://buildstats.info/myget/botbuilder/botbuilder-v4-dotnet-daily/Microsoft.Bot.Builder?includePreReleases=true)](https://botbuilder.myget.org/feed/botbuilder-v4-dotnet-daily/package/nuget/Microsoft.Bot.Builder)
 ```
+
+### Additional settings
+
+The `includePreReleases`, `vWidth` and `dWidth` query parameters work the same as for NuGet badges.
 
 ## API Documentation
 

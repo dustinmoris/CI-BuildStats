@@ -79,12 +79,10 @@ let packageHandler getPackageFunc slug =
                 match ctx.TryGetQueryStringValue "includePreReleases" with
                 | Some value -> bool.Parse value
                 | None       -> false
-
             let versionWidth =
                 match ctx.TryGetQueryStringValue "vWidth" with
                 | Some value -> Some (Int32.Parse value)
                 | None       -> None
-
             let downloadsWidth =
                 match ctx.TryGetQueryStringValue "dWidth" with
                 | Some value -> Some (Int32.Parse value)

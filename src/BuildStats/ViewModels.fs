@@ -27,14 +27,8 @@ type PackageModel =
             | dl                     -> dl                          |> sprintf "▾ %i"
         let version        = sprintf "v%s" package.Version
         let feedWidth      = measureTextWidth package.Feed + padding * 2
-        let versionWidth   =
-            match vWidth with
-            | Some v -> v
-            | None   -> measureTextWidth version + padding * 2
-        let downloadsWidth =
-            match dWidth with
-            | Some v -> v
-            | None   -> measureTextWidth downloads + padding * 2
+        let versionWidth   = defaultArg vWidth (measureTextWidth version + padding * 2)
+        let downloadsWidth = defaultArg dWidth (measureTextWidth downloads + padding * 2)
         {
             Width          = feedWidth + versionWidth + downloadsWidth
             FeedWidth      = feedWidth
