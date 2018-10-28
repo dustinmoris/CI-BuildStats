@@ -36,9 +36,10 @@ let apiSecret =
 
 let accessForbidden =
     fun (next : HttpFunc) (ctx : HttpContext) ->
-        let loggerFactory = ctx.GetService<ILoggerFactory>()
-        let logger = loggerFactory.CreateLogger "BuildStats.ApiSecretHandler"
-        logger.LogWarning (sprintf "Unauthorized request to '%s' has been blocked." (ctx.Request.Path.ToString()))
+        let logger = ctx.GetLogger()
+        logger.LogWarning(
+            "Unauthorized request to '{url}' has been blocked.",
+            ctx.GetRequestUrl())
         RequestErrors.FORBIDDEN
             "Access denied. Please provide a valid API secret in order to access this resource." next ctx
 
@@ -63,7 +64,7 @@ let cachedSvg (body : string) =
     responseCaching
         (Public (TimeSpan.FromSeconds 90.0))
         (Some "Accept-Encoding")
-        (Some [| "includePreReleases"; "includeBuildsFromPullRequest"; "buildCount"; "showStats"; "authToken" |])
+        (Some [| "includePreReleases"; "includeBuildsFromPullRequest"; "buildCount"; "showStats"; "authToken"; "vWidth"; "dWidth" |])
     >=> setHttpHeader "Content-Type" "image/svg+xml"
     >=> setBodyFromString body
 
@@ -78,12 +79,23 @@ let packageHandler getPackageFunc slug =
                 match ctx.TryGetQueryStringValue "includePreReleases" with
                 | Some value -> bool.Parse value
                 | None       -> false
+
+            let versionWidth =
+                match ctx.TryGetQueryStringValue "vWidth" with
+                | Some value -> Some (Int32.Parse value)
+                | None       -> None
+
+            let downloadsWidth =
+                match ctx.TryGetQueryStringValue "dWidth" with
+                | Some value -> Some (Int32.Parse value)
+                | None       -> None
+
             let! package = getPackageFunc httpClient slug preRelease
             return!
                 match package with
                 | Some pkg ->
                     pkg
-                    |> PackageModel.FromPackage
+                    |> PackageModel.FromPackage versionWidth downloadsWidth
                     |> SVGs.packageSVG
                     |> renderXmlNodes
                     |> cachedSvg
