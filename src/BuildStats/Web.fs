@@ -238,7 +238,11 @@ let configureApp (app : IApplicationBuilder) =
 
     app.UseForwardedHeaders(forwardedHeadersOptions)
        .UseGiraffeErrorHandler(errorHandler)
-       .UseCloudflareFirewall(true)
+       .UseFirewall(
+            FirewallRulesEngine
+                .DenyAllAccess()
+                .ExceptFromCloudflare()
+                .ExceptFromLocalhost())
        .UseResponseCaching()
        .UseGiraffe(webApp)
 
@@ -276,5 +280,4 @@ let configureServices (services : IServiceCollection) =
         )
         .AddResponseCaching()
         .AddGiraffe()
-        .AddFirewall()
         |> ignore
