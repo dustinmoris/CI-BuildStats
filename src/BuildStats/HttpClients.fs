@@ -3,10 +3,10 @@ module BuildStats.HttpClients
 open System
 open System.Net
 open System.Net.Http
+open System.Net.Http.Headers
 open System.Threading.Tasks
 open Microsoft.Extensions.Logging
 open FSharp.Control.Tasks.V2.ContextInsensitive
-open System.Net.Http.Headers
 
 exception BrokenCircuitException
 

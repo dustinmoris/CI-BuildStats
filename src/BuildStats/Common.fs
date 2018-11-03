@@ -3,12 +3,9 @@ module BuildStats.Common
 open System
 open System.IO
 open System.Text
-open System.Net
-open System.Net.Http
 open System.Security.Cryptography
 open Newtonsoft.Json
 open Microsoft.AspNetCore.Authentication
-open FSharp.Control.Tasks.V2.ContextInsensitive
 
 // -------------------------------------
 // String helper functions
@@ -18,13 +15,73 @@ open FSharp.Control.Tasks.V2.ContextInsensitive
 module Str =
 
     let equals (name1 : string)
-                (name2 : string) =
+               (name2 : string) =
         name1.Equals(name2, StringComparison.CurrentCultureIgnoreCase)
 
     let toOption str =
         match str with
         | null | "" -> None
         | _         -> Some str
+
+// -------------------------------------
+// Config
+// -------------------------------------
+
+[<RequireQualifiedAccess>]
+module Config =
+
+    let private envVar (key : string) = Environment.GetEnvironmentVariable key
+
+    let environmentName =
+        envVar "ASPNETCORE_ENVIRONMENT"
+        |> Str.toOption
+        |> defaultArg
+        <| "Development"
+
+    let isProduction =
+        environmentName
+        |> Str.equals "Production"
+
+    let logLevel =
+        envVar "LOG_LEVEL"
+        |> Str.toOption
+        |> defaultArg
+        <| "error"
+
+    let apiSecret =
+        let devApiSecret =
+            Guid.NewGuid()
+                .ToString("n")
+                .Substring(0, 10)
+        envVar "API_SECRET"
+        |> Str.toOption
+        |> defaultArg
+        <| devApiSecret
+
+    let cryptoKey =
+        let devCryptoKey = Guid.NewGuid().ToString()
+        envVar "CRYPTO_KEY"
+        |> Str.toOption
+        |> defaultArg
+        <| devCryptoKey
+
+    let elasticUrl =
+        envVar "ELASTIC_URL"
+        |> Str.toOption
+        |> defaultArg
+        <| String.Empty
+
+    let elasticUser =
+        envVar "ELASTIC_USER"
+        |> Str.toOption
+        |> defaultArg
+        <| String.Empty
+
+    let elasticPassword =
+        envVar "ELASTIC_PASSWORD"
+        |> Str.toOption
+        |> defaultArg
+        <| String.Empty
 
 // -------------------------------------
 // Serialization
@@ -46,15 +103,7 @@ module Json =
 [<RequireQualifiedAccess>]
 module AES =
 
-    let private devKey = Guid.NewGuid().ToString()
     let private ivLength = 16
-
-    let key =
-        Environment.GetEnvironmentVariable "CRYPTO_KEY"
-        |> Str.toOption
-        |> function
-            | Some k -> k
-            | None   -> devKey
 
     let private mergeIVandCipher (iv : byte array) (cipher : byte array) =
         let result = Array.init (iv.Length + cipher.Length) (fun _ -> Byte.MinValue)

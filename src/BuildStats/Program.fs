@@ -5,37 +5,56 @@ open System.IO
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Serilog
+open Serilog.Events
+open Serilog.Sinks.Elasticsearch
+open Elasticsearch.Net
 open Giraffe
+open BuildStats.Common
 
 [<EntryPoint>]
 let main args =
     let logLevel =
         match isNotNull args && args.Length > 0 with
-        | false -> Events.LogEventLevel.Warning
-        | true  ->
-            match args.[0] with
-            | "verbose" -> Events.LogEventLevel.Verbose
-            | "debug"   -> Events.LogEventLevel.Debug
-            | "info"    -> Events.LogEventLevel.Information
-            | "warning" -> Events.LogEventLevel.Warning
-            | "error"   -> Events.LogEventLevel.Error
-            | "fatal"   -> Events.LogEventLevel.Fatal
-            | _         -> Events.LogEventLevel.Warning
+        | true  -> args.[0]
+        | false -> Config.logLevel
+        |> (function
+            | "verbose" -> LogEventLevel.Verbose
+            | "debug"   -> LogEventLevel.Debug
+            | "info"    -> LogEventLevel.Information
+            | "warning" -> LogEventLevel.Warning
+            | "error"   -> LogEventLevel.Error
+            | "fatal"   -> LogEventLevel.Fatal
+            | _         -> LogEventLevel.Warning)
+
+    let elasticOptions =
+        new ElasticsearchSinkOptions(
+            new Uri(Config.elasticUrl),
+            AutoRegisterTemplate = true,
+            AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv6,
+            ModifyConnectionSettings =
+                fun (config : ConnectionConfiguration) ->
+                    config.BasicAuthentication(
+                        Config.elasticUser,
+                        Config.elasticPassword))
 
     Log.Logger <-
         (new LoggerConfiguration())
             .MinimumLevel.Is(logLevel)
-            .Enrich.FromLogContext()
+            .Enrich.WithProperty("Environment", Config.environmentName)
+            .Enrich.WithProperty("Application", "CI-BuildStats")
             .WriteTo.Console()
+            .WriteTo.Elasticsearch(elasticOptions)
             .CreateLogger()
     try
         try
             Log.Information "Starting BuildStats.info..."
-            Log.Information (sprintf "API Secret: %s" Web.apiSecret)
+
+            if not Config.isProduction then
+                Log.Information (sprintf "API Secret: %s" Config.apiSecret)
 
             WebHostBuilder()
                 .UseSerilog()
-                .UseKestrel()
+                .UseKestrel(fun k -> k.AddServerHeader <- false)
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .Configure(Action<IApplicationBuilder> Web.configureApp)
                 .ConfigureServices(Web.configureServices)
