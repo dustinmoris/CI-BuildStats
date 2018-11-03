@@ -1,8 +1,6 @@
 module BuildStats.Web
 
 open System
-open System.Text
-open System.Threading.Tasks
 open System.Net.Http
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
@@ -25,15 +23,6 @@ open BuildStats.HttpClients
 // Web app
 // ---------------------------------
 
-let devApiSecret = Guid.NewGuid().ToString("n").Substring(0, 10)
-
-let apiSecret =
-        Environment.GetEnvironmentVariable "API_SECRET"
-        |> Str.toOption
-        |> function
-            | Some v -> v
-            | None   -> devApiSecret
-
 let accessForbidden =
     fun (next : HttpFunc) (ctx : HttpContext) ->
         let logger = ctx.GetLogger()
@@ -43,16 +32,15 @@ let accessForbidden =
         RequestErrors.FORBIDDEN
             "Access denied. Please provide a valid API secret in order to access this resource." next ctx
 
-let finish = Some >> Task.FromResult
+let validateApiSecret (ctx : HttpContext) =
+    match ctx.TryGetRequestHeader "X-API-SECRET" with
+    | Some v -> Config.apiSecret.Equals v
+    | None   ->
+        match ctx.TryGetQueryStringValue "apiSecret" with
+        | Some v -> Config.apiSecret.Equals v
+        | None   -> false
 
-let requiresApiSecret =
-    fun (next : HttpFunc) (ctx : HttpContext) ->
-        (match ctx.TryGetQueryStringValue "apiSecret" with
-        | Some secretFromQuery ->
-            match apiSecret.Equals secretFromQuery with
-            | true  -> next
-            | false -> accessForbidden finish
-        | None      -> accessForbidden finish) ctx
+let requiresApiSecret = authorizeRequest validateApiSecret accessForbidden
 
 let cssHandler (bundle : string) =
     setHttpHeader "Content-Type" "text/css"
@@ -157,31 +145,8 @@ let createHandler : HttpHandler =
     fun (next : HttpFunc) (ctx : HttpContext) ->
         task {
             let plainText = (ctx.Request.Form.["plaintext"]).ToString()
-            let cipherText = AES.encryptToUrlEncodedString AES.key plainText
+            let cipherText = AES.encryptToUrlEncodedString Config.cryptoKey plainText
             return! ctx.WriteTextAsync (sprintf "Encrypted auth token: %s" cipherText)
-        }
-
-let debugHandler : HttpHandler =
-    fun (next : HttpFunc) (ctx : HttpContext) ->
-        task {
-            let sb = new StringBuilder()
-
-            ctx.Connection.RemoteIpAddress.ToString()
-            |> sprintf "RemoteIpAddress: %s"
-            |> sb.AppendLine |> ignore
-
-            ctx.Connection.RemotePort
-            |> sprintf "RemotePort: %i"
-            |> sb.AppendLine |> ignore
-
-            ctx.Request.Headers.Keys
-            |> Seq.iter (fun k ->
-                ctx.Request.Headers.[k].ToString()
-                |> sprintf "%s: %s" k
-                |> sb.AppendLine
-                |> ignore)
-
-            return! ctx.WriteTextAsync (sb.ToString())
         }
 
 let webApp =
@@ -189,19 +154,18 @@ let webApp =
         choose [ GET; HEAD ] >=>
             choose [
                 // Assets
-                route Views.cssPath   >=> cssHandler Views.minifiedCss
+                route Views.cssPath >=> cssHandler Views.minifiedCss
 
                 // HTML Views
-                route "/"             >=> htmlView Views.indexView
-                route "/create"       >=> htmlView Views.createApiTokenView
+                route "/"       >=> htmlView Views.indexView
+                route "/create" >=> htmlView Views.createApiTokenView
 
                 // Protected
-                route "/debug"        >=> requiresApiSecret >=> debugHandler
-                route "/tests"        >=> requiresApiSecret >=> htmlView Views.visualTestsView
-                route "/chars"        >=> requiresApiSecret >=> (SVGs.measureCharsSVG |> renderXmlNode |> cachedSvg)
+                route "/tests"  >=> requiresApiSecret >=> htmlView Views.visualTestsView
+                route "/chars"  >=> requiresApiSecret >=> (SVGs.measureCharsSVG |> renderXmlNode |> cachedSvg)
 
                 // Health status
-                route "/ping"         >=> text "pong"
+                route "/ping"   >=> text "pong"
 
                 // SVG endpoints
                 routef "/nuget/%s"       nugetHandler
@@ -220,7 +184,7 @@ let webApp =
 // ---------------------------------
 
 let errorHandler (ex : Exception) (logger : ILogger) =
-    logger.LogError(EventId(0), ex, "An unhandled exception has occurred while executing the request.")
+    logger.LogError(ex, "An unhandled exception has occurred while executing the request.")
     clearResponse >=> setStatusCode 500 >=> text ex.Message
 
 // ---------------------------------
@@ -240,6 +204,7 @@ let configureApp (app : IApplicationBuilder) =
             FirewallRulesEngine
                 .DenyAllAccess()
                 .ExceptFromCloudflare()
+                .ExceptWhen(fun ctx -> validateApiSecret ctx)
                 .ExceptFromLocalhost())
        .UseResponseCaching()
        .UseGiraffe(webApp)

@@ -115,11 +115,11 @@ type AppVeyorHttpClient (httpClient : FallbackHttpClient) =
                 })
             |> Seq.toList
 
-    member this.GetBuildsAsync (authToken           : string option)
-                               (slug                : string * string)
-                               (buildCount          : int)
-                               (branch              : string option)
-                               (inclFromPullRequest : bool) =
+    member __.GetBuildsAsync (authToken           : string option)
+                             (slug                : string * string)
+                             (buildCount          : int)
+                             (branch              : string option)
+                             (inclFromPullRequest : bool) =
         task {
             let account, project = slug
             let branchFilter =
@@ -134,7 +134,7 @@ type AppVeyorHttpClient (httpClient : FallbackHttpClient) =
             let request = new HttpRequestMessage(HttpMethod.Get, url)
 
             if authToken.IsSome then
-                let token = AES.decryptUrlEncodedString AES.key authToken.Value
+                let token = AES.decryptUrlEncodedString Config.cryptoKey authToken.Value
                 request.Headers.Authorization <- AuthenticationHeaderValue("Bearer", token)
 
             let! json = httpClient.SendAsync request
@@ -216,7 +216,7 @@ type TravisCIHttpClient (httpClient : FallbackHttpClient, cache : IMemoryCache) 
                 | true, _       -> "org"
                 | false, None   -> defaultArg (tryGetTLD account project) "com"
                 | false, Some t ->
-                    let token = AES.decryptUrlEncodedString AES.key t
+                    let token = AES.decryptUrlEncodedString Config.cryptoKey t
                     request.Headers.Authorization <- AuthenticationHeaderValue("token", token)
                     "com"
 
@@ -307,11 +307,11 @@ type CircleCIHttpClient (httpClient : FallbackHttpClient) =
                 })
             |> Seq.toList
 
-    member this.GetBuildsAsync  (authToken           : string option)
-                                (slug                : string * string)
-                                (buildCount          : int)
-                                (branch              : string option)
-                                (inclFromPullRequest : bool) =
+    member __.GetBuildsAsync  (authToken           : string option)
+                              (slug                : string * string)
+                              (buildCount          : int)
+                              (branch              : string option)
+                              (inclFromPullRequest : bool) =
         task {
             let account, project = slug
             let branchFilter =
@@ -376,11 +376,11 @@ type AzurePipelinesHttpClient (httpClient : FallbackHttpClient) =
                 })
             |> Seq.toList
 
-    member this.GetBuildsAsync  (authToken           : string option)
-                                (slug                : string * string * int)
-                                (buildCount          : int)
-                                (branch              : string option)
-                                (inclFromPullRequest : bool) =
+    member __.GetBuildsAsync  (authToken           : string option)
+                              (slug                : string * string * int)
+                              (buildCount          : int)
+                              (branch              : string option)
+                              (inclFromPullRequest : bool) =
         task {
             let account, project, definitionId = slug
             let branchFilter =
