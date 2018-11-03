@@ -37,14 +37,19 @@ let main args =
                         Config.elasticUser,
                         Config.elasticPassword))
 
-    Log.Logger <-
+    let loggerConfig =
         (new LoggerConfiguration())
             .MinimumLevel.Is(logLevel)
             .Enrich.WithProperty("Environment", Config.environmentName)
             .Enrich.WithProperty("Application", "CI-BuildStats")
-            .WriteTo.Console()
-            .WriteTo.Elasticsearch(elasticOptions)
-            .CreateLogger()
+
+    let loggerConfig' =
+        match Config.isProduction with
+        | true  -> loggerConfig.WriteTo.Elasticsearch(elasticOptions)
+        | false -> loggerConfig.WriteTo.Console()
+
+    Log.Logger <- loggerConfig'.CreateLogger()
+
     try
         try
             Log.Information "Starting BuildStats.info..."
