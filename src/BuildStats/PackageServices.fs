@@ -28,7 +28,7 @@ module NuGet =
 
     let tryFindByName  (packageName : string)
                        (data        : JArray)  =
-        data |> Seq.tryFind(fun item -> item.Value<string> "id" |> Str.equals packageName)
+        data |> Seq.tryFind(fun item -> item.Value<string> "id" |> Str.equalsCi packageName)
 
     let convertIntoPackage (item : JToken) =
         {
@@ -71,7 +71,7 @@ module MyGet =
         }
 
     let validatePackage packageName package =
-        if packageName |> Str.equals package.Name
+        if packageName |> Str.equalsCi package.Name
         then Some package
         else None
 
