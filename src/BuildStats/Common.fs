@@ -1,22 +1,16 @@
 module BuildStats.Common
 
-open System
-open System.IO
-open System.Text
-open System.Security.Cryptography
-open Newtonsoft.Json
-open Microsoft.AspNetCore.Authentication
-
 // -------------------------------------
 // String helper functions
 // -------------------------------------
 
 [<RequireQualifiedAccess>]
 module Str =
+    open System
 
-    let equals (name1 : string)
-               (name2 : string) =
-        name1.Equals(name2, StringComparison.CurrentCultureIgnoreCase)
+    let private ignoreCase = StringComparison.InvariantCultureIgnoreCase
+
+    let equalsCi (str1 : string) str2 = str1.Equals(str2, ignoreCase)
 
     let toOption str =
         match str with
@@ -28,60 +22,66 @@ module Str =
 // -------------------------------------
 
 [<RequireQualifiedAccess>]
+module DevSecrets =
+    open System
+    open System.IO
+    open System.Collections.Generic
+    open Newtonsoft.Json
+
+    let private userFolder  = Environment.GetEnvironmentVariable "HOME"
+    let private secretsFile = sprintf "%s/.secrets/ci-buildstats.sec.json" userFolder
+
+    let private secrets =
+        secretsFile
+        |> File.Exists
+        |> function
+            | false -> new Dictionary<string, string>()
+            | true  ->
+                secretsFile
+                |> File.ReadAllText
+                |> JsonConvert.DeserializeObject<Dictionary<string, string>>
+
+    let get key =
+        match secrets.TryGetValue key with
+        | true , value -> value
+        | false, _     -> String.Empty
+
+[<RequireQualifiedAccess>]
 module Config =
+    open System
 
-    let private envVar (key : string) = Environment.GetEnvironmentVariable key
+    let private envVar key = Environment.GetEnvironmentVariable key
 
-    let environmentName =
-        envVar "ASPNETCORE_ENVIRONMENT"
+    let private getSecret key =
+        envVar key
         |> Str.toOption
         |> defaultArg
-        <| "Development"
+        <| DevSecrets.get key
 
-    let isProduction =
-        environmentName
-        |> Str.equals "Production"
-
-    let logLevel =
-        envVar "LOG_LEVEL"
+    let private getOrDefault key defaultValue =
+        envVar key
         |> Str.toOption
         |> defaultArg
-        <| "error"
+        <| defaultValue
 
-    let apiSecret =
-        let devApiSecret =
-            Guid.NewGuid()
-                .ToString("n")
-                .Substring(0, 10)
-        envVar "API_SECRET"
-        |> Str.toOption
-        |> defaultArg
-        <| devApiSecret
+    let private ASPNETCORE_ENVIRONMENT   = "ASPNETCORE_ENVIRONMENT"
+    let private LOG_LEVEL_CONSOLE        = "LOG_LEVEL_CONSOLE"
+    let private LOG_LEVEL_ELASTIC        = "LOG_LEVEL_ELASTIC"
+    let private API_SECRET               = "API_SECRET"
+    let private CRYPTO_KEY               = "CRYPTO_KEY"
+    let private ELASTIC_URL              = "ELASTIC_URL"
+    let private ELASTIC_USER             = "ELASTIC_USER"
+    let private ELASTIC_PASSWORD         = "ELASTIC_PASSWORD"
 
-    let cryptoKey =
-        let devCryptoKey = Guid.NewGuid().ToString()
-        envVar "CRYPTO_KEY"
-        |> Str.toOption
-        |> defaultArg
-        <| devCryptoKey
-
-    let elasticUrl =
-        envVar "ELASTIC_URL"
-        |> Str.toOption
-        |> defaultArg
-        <| String.Empty
-
-    let elasticUser =
-        envVar "ELASTIC_USER"
-        |> Str.toOption
-        |> defaultArg
-        <| String.Empty
-
-    let elasticPassword =
-        envVar "ELASTIC_PASSWORD"
-        |> Str.toOption
-        |> defaultArg
-        <| String.Empty
+    let environmentName = getOrDefault ASPNETCORE_ENVIRONMENT "Development"
+    let isProduction    = environmentName |> Str.equalsCi "Production"
+    let logLevelConsole = getOrDefault LOG_LEVEL_CONSOLE "error"
+    let logLevelElastic = getOrDefault LOG_LEVEL_ELASTIC "warning"
+    let apiSecret       = getSecret API_SECRET
+    let cryptoKey       = getSecret CRYPTO_KEY
+    let elasticUrl      = getSecret ELASTIC_URL
+    let elasticUser     = getSecret ELASTIC_USER
+    let elasticPassword = getSecret ELASTIC_PASSWORD
 
 // -------------------------------------
 // Serialization
@@ -89,12 +89,10 @@ module Config =
 
 [<RequireQualifiedAccess>]
 module Json =
+    open Newtonsoft.Json
 
-    let serialize (x : obj) =
-        JsonConvert.SerializeObject x
-
-    let deserialize (json : string) =
-        JsonConvert.DeserializeObject json
+    let serialize   (x    : obj)    = JsonConvert.SerializeObject x
+    let deserialize (json : string) = JsonConvert.DeserializeObject json
 
 // -------------------------------------
 // Cryptography
@@ -102,6 +100,10 @@ module Json =
 
 [<RequireQualifiedAccess>]
 module AES =
+    open System
+    open System.Text
+    open System.Security.Cryptography
+    open Microsoft.AspNetCore.Authentication
 
     let private ivLength = 16
 
@@ -147,6 +149,8 @@ module AES =
 
 [<RequireQualifiedAccess>]
 module Hash =
+    open System.Text
+    open System.Security.Cryptography
 
     let md5 (str : string) =
         str
@@ -168,6 +172,8 @@ module Hash =
 
 [<RequireQualifiedAccess>]
 module Css =
+    open System.IO
+    open System.Text
     open NUglify
 
     let private getErrorMsg (errors : UglifyError seq) =

@@ -13,24 +13,32 @@ open BuildStats.Common
 
 [<EntryPoint>]
 let main args =
-    let logLevel =
+    let parseLogLevel =
+        function
+        | "verbose" -> LogEventLevel.Verbose
+        | "debug"   -> LogEventLevel.Debug
+        | "info"    -> LogEventLevel.Information
+        | "warning" -> LogEventLevel.Warning
+        | "error"   -> LogEventLevel.Error
+        | "fatal"   -> LogEventLevel.Fatal
+        | _         -> LogEventLevel.Warning
+
+    let logLevelConsole =
         match isNotNull args && args.Length > 0 with
         | true  -> args.[0]
-        | false -> Config.logLevel
-        |> (function
-            | "verbose" -> LogEventLevel.Verbose
-            | "debug"   -> LogEventLevel.Debug
-            | "info"    -> LogEventLevel.Information
-            | "warning" -> LogEventLevel.Warning
-            | "error"   -> LogEventLevel.Error
-            | "fatal"   -> LogEventLevel.Fatal
-            | _         -> LogEventLevel.Warning)
+        | false -> Config.logLevelConsole
+        |> parseLogLevel
+
+    let logLevelElastic =
+        Config.logLevelElastic
+        |> parseLogLevel
 
     let elasticOptions =
         new ElasticsearchSinkOptions(
             new Uri(Config.elasticUrl),
             AutoRegisterTemplate = true,
             AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv6,
+            MinimumLogEventLevel = new Nullable<LogEventLevel>(logLevelElastic),
             ModifyConnectionSettings =
                 fun (config : ConnectionConfiguration) ->
                     config.BasicAuthentication(
@@ -39,18 +47,16 @@ let main args =
 
     Log.Logger <-
         (new LoggerConfiguration())
-            .MinimumLevel.Is(logLevel)
+            .MinimumLevel.Information()
             .Enrich.WithProperty("Environment", Config.environmentName)
             .Enrich.WithProperty("Application", "CI-BuildStats")
-            .WriteTo.Console()
+            .WriteTo.Console(logLevelConsole)
             .WriteTo.Elasticsearch(elasticOptions)
             .CreateLogger()
+
     try
         try
             Log.Information "Starting BuildStats.info..."
-
-            if not Config.isProduction then
-                Log.Information (sprintf "API Secret: %s" Config.apiSecret)
 
             WebHostBuilder()
                 .UseSerilog()
