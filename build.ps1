@@ -48,13 +48,9 @@ if (!$ExcludeTests.IsPresent)
 
 if ($Docker.IsPresent -or $Deploy.IsPresent -or $env:APPVEYOR_REPO_TAG -eq $true)
 {
-    Write-Host "Publishing web application..." -ForegroundColor Magenta
-    dotnet-publish $app "-c $configuration"
-
+    $appDir = [System.IO.Path]::GetDirectoryName($app)
     Write-Host "Building Docker image..." -ForegroundColor Magenta
-    $targetFramework = Get-NetCoreTargetFramework $app
-    $publishFolder = "./src/BuildStats/bin/$configuration/$targetFramework/publish"
-    Invoke-Cmd "docker build -t dustinmoris/ci-buildstats:$version $publishFolder"
+    Invoke-Cmd "docker build -t dustinmoris/ci-buildstats:$version $appDir"
 }
 
 if ($Run)
@@ -70,7 +66,7 @@ if ($Run)
         dotnet-run $app $Run
     }
 }
-elseif ($Deploy.IsPresent) # -or $env:APPVEYOR_REPO_TAG -eq $true) AppVeyor doesn't support Linux containers yet
+elseif ($Deploy.IsPresent -or $env:APPVEYOR_REPO_TAG -eq $true)
 {
     if ([string]::IsNullOrEmpty($DockerUsername) -or [string]::IsNullOrEmpty($DockerPassword))
     {
@@ -83,9 +79,6 @@ elseif ($Deploy.IsPresent) # -or $env:APPVEYOR_REPO_TAG -eq $true) AppVeyor does
     Invoke-Cmd "docker login -u='$DockerUsername' -p='$DockerPassword'"
     Invoke-Cmd "docker push dustinmoris/ci-buildstats:$version"
     Invoke-Cmd "docker push dustinmoris/ci-buildstats:latest"
-
-    Write-Host "Updating Kubernetes deployment..." -ForegroundColor Magenta
-    Invoke-Cmd "kubectl set image deployment/ci-buildstats ci-buildstats=docker.io/dustinmoris/ci-buildstats:$version"
 }
 
 Write-SuccessFooter "Build script completed successfully!"

@@ -3,7 +3,6 @@ module BuildStats.Web
 open System
 open System.Net.Http
 open Microsoft.AspNetCore.Builder
-open Microsoft.AspNetCore.Hosting
 open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.HttpOverrides
 open Microsoft.Extensions.Caching.Memory
@@ -52,7 +51,16 @@ let cachedSvg (body : string) =
     responseCaching
         (Public (TimeSpan.FromSeconds 90.0))
         (Some "Accept-Encoding")
-        (Some [| "includePreReleases"; "includeBuildsFromPullRequest"; "buildCount"; "showStats"; "authToken"; "vWidth"; "dWidth" |])
+        (Some [|
+            "packageVersion"
+            "includePreReleases"
+            "includeBuildsFromPullRequest"
+            "buildCount"
+            "showStats"
+            "authToken"
+            "vWidth"
+            "dWidth"
+        |])
     >=> setHttpHeader "Content-Type" "image/svg+xml"
     >=> setBodyFromString body
 
@@ -76,7 +84,10 @@ let packageHandler getPackageFunc slug =
                 | Some value -> Some (Int32.Parse value)
                 | None       -> None
 
-            let! package = getPackageFunc httpClient slug preRelease
+            let packageVersion =
+                ctx.TryGetQueryStringValue "packageVersion"
+
+            let! package = getPackageFunc httpClient slug preRelease packageVersion
             return!
                 match package with
                 | Some pkg ->

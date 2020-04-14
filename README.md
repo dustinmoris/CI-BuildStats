@@ -123,6 +123,16 @@ You can append the `includePreReleases=true` flag to include pre-release package
 [![NuGet Badge](https://buildstats.info/nuget/NServiceBus.PostgreSQL?includePreReleases=true)](https://www.nuget.org/packages/NServiceBus.PostgreSQL/1.0.0-CI00021)
 ```
 
+### Setting a specific package version
+
+By adding the `packageVersion` query parameter you can set a specific version:
+
+[![NuGet Badge](https://buildstats.info/nuget/Giraffe?packageVersion=3.0.0)](https://www.nuget.org/packages/Giraffe/3.0.0)
+
+```
+[![NuGet Badge](https://buildstats.info/nuget/NServiceBus.PostgreSQL?includePreReleases=true)](https://www.nuget.org/packages/NServiceBus.PostgreSQL/1.0.0-CI00021)
+```
+
 ### Setting a fixed width
 
 If you want to control the width of the version and/or downloads label then you can use the `vWidth` and `dWidth` query parameters. Both accept an integer value representing the width in pixels:
@@ -167,7 +177,7 @@ For example the badge and Markdown for the [Microsoft.Bot.Builder](https://botbu
 
 ### Additional settings
 
-The `includePreReleases`, `vWidth` and `dWidth` query parameters work the same as for NuGet badges.
+The `includePreReleases`, `packageVersion`, `vWidth` and `dWidth` query parameters work the same way as for NuGet badges (see above for more information).
 
 ## API Documentation
 
