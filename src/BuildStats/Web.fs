@@ -11,7 +11,6 @@ open Microsoft.Extensions.Logging
 open FSharp.Control.Tasks.V2.ContextInsensitive
 open Giraffe
 open Giraffe.GiraffeViewEngine
-open Firewall
 open BuildStats.Common
 open BuildStats.PackageServices
 open BuildStats.BuildHistoryCharts
@@ -211,12 +210,6 @@ let configureApp (app : IApplicationBuilder) =
 
     app.UseForwardedHeaders(forwardedHeadersOptions)
        .UseGiraffeErrorHandler(errorHandler)
-       .UseFirewall(
-            FirewallRulesEngine
-                .DenyAllAccess()
-                .ExceptFromCloudflare()
-                .ExceptWhen(fun ctx -> validateApiSecret ctx)
-                .ExceptFromLocalhost())
        .UseResponseCaching()
        .UseGiraffe(webApp)
 

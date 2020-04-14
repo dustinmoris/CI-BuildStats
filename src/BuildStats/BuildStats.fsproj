@@ -16,7 +16,6 @@
     <PackageReference Include="Serilog.AspNetCore" Version="3.2.*" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.*" />
     <PackageReference Include="NUglify" Version="1.5.*" />
-    <PackageReference Include="Firewall" Version="2.2.*" />
   </ItemGroup>
 
   <ItemGroup>
