@@ -70,8 +70,16 @@ elseif ($Deploy.IsPresent -or $env:APPVEYOR_REPO_TAG -eq $true)
 {
     if ([string]::IsNullOrEmpty($DockerUsername) -or [string]::IsNullOrEmpty($DockerPassword))
     {
-        Write-Error "Cannot deploy because Docker Hub credentials are missing."
-        return
+        if ($env:DOCKER_USERNAME -and $env:DOCKER_PASSWORD)
+        {
+            $DockerUsername = $env:DOCKER_USERNAME
+            $DockerPassword = $env:DOCKER_PASSWORD
+        }
+        else
+        {
+            Write-Error "Cannot deploy because Docker Hub credentials are missing."
+            return
+        }
     }
 
     Write-Host "Deploying Docker image..." -ForegroundColor Magenta
