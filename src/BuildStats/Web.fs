@@ -202,13 +202,7 @@ let errorHandler (ex : Exception) (logger : ILogger) =
 // ---------------------------------
 
 let configureApp (app : IApplicationBuilder) =
-    let forwardedHeadersOptions =
-        new ForwardedHeadersOptions(
-            ForwardedHeaders = ForwardedHeaders.XForwardedFor,
-            ForwardLimit = new Nullable<int>(1)
-        )
-
-    app.UseForwardedHeaders(forwardedHeadersOptions)
+    app.UseHttpsRedirection()
        .UseGiraffeErrorHandler(errorHandler)
        .UseResponseCaching()
        .UseGiraffe(webApp)
