@@ -1,5 +1,6 @@
 module BuildStats.PackageServices
 
+open System
 open System.Net
 open System.Net.Http
 open Microsoft.FSharp.Core.Option
@@ -30,26 +31,30 @@ module NuGet =
                        (data        : JArray)  =
         data |> Seq.tryFind(fun item -> item.Value<string> "id" |> Str.equalsCi packageName)
 
+    let mapSemVer200 (version : string) =
+        version.Split([| '+' |], 2).[0]
+
     let convertIntoPackage (packageVersion : string option) (item : JToken) =
         match packageVersion with
         | None ->
             {
                 Feed = "nuget"
                 Name = item.Value<string> "id"
-                Version = item.Value<string> "version"
+                Version = item.Value<string> "version" |> mapSemVer200
                 Downloads = item.Value<int> "totalDownloads"
             } |> Some
         | Some version ->
             item.Value<JArray> "versions"
             |> fun a -> a.Children()
-            |> Seq.tryFind(fun x -> (x .Value<string> "version").Equals version)
+            |> Seq.tryFind(fun x ->
+                (x.Value<string> "version" |> mapSemVer200).Equals version)
             |> function
                 | None -> None
                 | Some item ->
                     {
                         Feed = "nuget"
                         Name = item.Value<string> "id"
-                        Version = item.Value<string> "version"
+                        Version = item.Value<string> "version" |> mapSemVer200
                         Downloads = item.Value<int> "downloads"
                     } |> Some
 
@@ -58,7 +63,7 @@ module NuGet =
                         (includePreReleases : bool)
                         (packageVersion     : string option) =
         task {
-            let url = sprintf "https://api-v2v3search-0.nuget.org/query?q=%s&skip=0&take=10&prerelease=%b" packageName includePreReleases
+            let url = sprintf "https://api-v2v3search-0.nuget.org/query?q=%s&skip=0&take=10&prerelease=%b&semVerLevel=2.0.0" packageName includePreReleases
             let request = new HttpRequestMessage(HttpMethod.Get, url)
             let! json = httpClient.SendAsync request
             return

@@ -202,8 +202,7 @@ let errorHandler (ex : Exception) (logger : ILogger) =
 // ---------------------------------
 
 let configureApp (app : IApplicationBuilder) =
-    app.UseHttpsRedirection()
-       .UseGiraffeErrorHandler(errorHandler)
+    app.UseGiraffeErrorHandler(errorHandler)
        .UseResponseCaching()
        .UseGiraffe(webApp)
 
