@@ -30,7 +30,7 @@ type PackageModel =
         let versionWidth   = defaultArg vWidth (measureTextWidth version + padding * 2)
         let downloadsWidth = defaultArg dWidth (measureTextWidth downloads + padding * 2)
         {
-            Width          = feedWidth + versionWidth + downloadsWidth
+            Width          = max (feedWidth + versionWidth + downloadsWidth) 62
             FeedWidth      = feedWidth
             VersionWidth   = versionWidth
             DownloadsWidth = downloadsWidth

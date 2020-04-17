@@ -136,12 +136,23 @@ let packageSVG (model : PackageModel) =
                 defs [] [ packageGradient ]
                 roundedRect
                     0 0
-                    (nugetLogoWidth + model.Width - 50) 20
+                    (max 62 (nugetLogoWidth + model.Width - (min 50 model.FeedWidth))) 20
                     "#444444"
-                squareRect
-                    (nugetLogoWidth + model.FeedWidth) 0
-                    (model.VersionWidth) 20
-                    "#43ba1b"
+                match model.DownloadsWidth with
+                | 0 ->
+                    squareRect
+                        (nugetLogoWidth + model.FeedWidth) 0
+                        (model.VersionWidth / 2) 20
+                        "#43ba1b"
+                    roundedRect
+                        (nugetLogoWidth + model.FeedWidth) 0
+                        (model.VersionWidth) 20
+                        "#43ba1b"
+                | _ ->
+                    squareRect
+                        (nugetLogoWidth + model.FeedWidth) 0
+                        (model.VersionWidth) 20
+                        "#43ba1b"
                 squareRect
                     (nugetLogoWidth + model.FeedWidth + model.VersionWidth) 0
                     (model.DownloadsWidth - 10) 20
@@ -155,11 +166,21 @@ let packageSVG (model : PackageModel) =
                     (nugetLogoWidth + model.Width) 20
                     "url(#grad1)"
 
-                blackText (nugetLogoWidth + model.FeedWidth + model.Padding) 15 model.Version
-
-                whiteText (nugetLogoWidth + model.Padding) 14 model.FeedName
-                whiteText (nugetLogoWidth + model.FeedWidth + model.Padding) 14 model.Version
-                whiteText (nugetLogoWidth + model.FeedWidth + model.VersionWidth + model.Padding) 14 model.Downloads ]
+                match model.VersionWidth, model.DownloadsWidth with
+                | 0, 0 ->
+                    whiteText (nugetLogoWidth + model.Padding) 14 model.FeedName
+                | 0, _ ->
+                    whiteText (nugetLogoWidth + model.Padding) 14 model.FeedName
+                    whiteText (nugetLogoWidth + model.FeedWidth + model.VersionWidth + model.Padding) 14 model.Downloads
+                | _, 0 ->
+                    blackText (nugetLogoWidth + model.FeedWidth + model.Padding) 15 model.Version
+                    whiteText (nugetLogoWidth + model.Padding) 14 model.FeedName
+                    whiteText (nugetLogoWidth + model.FeedWidth + model.Padding) 14 model.Version
+                | _, _ ->
+                    blackText (nugetLogoWidth + model.FeedWidth + model.Padding) 15 model.Version
+                    whiteText (nugetLogoWidth + model.Padding) 14 model.FeedName
+                    whiteText (nugetLogoWidth + model.FeedWidth + model.Padding) 14 model.Version
+                    whiteText (nugetLogoWidth + model.FeedWidth + model.VersionWidth + model.Padding) 14 model.Downloads ]
             g [] [
                 nuGetSvg
             ] ]
