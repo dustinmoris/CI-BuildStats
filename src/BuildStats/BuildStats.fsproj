@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>5.16.0</Version>
+    <Version>5.17.0</Version>
     <AssemblyName>BuildStats</AssemblyName>
     <OutputType>Exe</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -16,6 +16,7 @@
     <PackageReference Include="Serilog.AspNetCore" Version="3.2.*" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.*" />
     <PackageReference Include="NUglify" Version="1.5.*" />
+    <PackageReference Include="Sentry.AspNetCore" Version="2.1.*" />
   </ItemGroup>
 
   <ItemGroup>

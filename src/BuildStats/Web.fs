@@ -4,7 +4,6 @@ open System
 open System.Net.Http
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Http
-open Microsoft.AspNetCore.HttpOverrides
 open Microsoft.Extensions.Caching.Memory
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
@@ -175,7 +174,9 @@ let webApp =
                 route "/chars"  >=> requiresApiSecret >=> (SVGs.measureCharsSVG |> renderXmlNode |> cachedSvg)
 
                 // Health status
-                route "/ping"   >=> text "pong"
+                route "/ping"    >=> text "pong"
+                route "/version" >=> json {| version = Config.version |}
+                if not Config.isProduction then route "/error" >=> warbler (fun _ -> json(1/0))
 
                 // SVG endpoints
                 routef "/nuget/%s"       nugetHandler
