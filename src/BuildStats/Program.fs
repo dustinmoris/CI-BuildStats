@@ -4,6 +4,7 @@ open System
 open System.IO
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
+open Microsoft.Extensions.Hosting
 open Serilog
 open Serilog.Events
 open Giraffe
@@ -28,7 +29,7 @@ let main args =
         |> parseLogLevel
 
     Log.Logger <-
-        (new LoggerConfiguration())
+        (LoggerConfiguration())
             .MinimumLevel.Information()
             .Enrich.WithProperty("Environment", Config.environmentName)
             .Enrich.WithProperty("Application", "CI-BuildStats")
@@ -39,12 +40,23 @@ let main args =
         try
             Log.Information "Starting BuildStats.info..."
 
-            WebHostBuilder()
-                .UseSerilog()
-                .UseKestrel(fun k -> k.AddServerHeader <- false)
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .Configure(Action<IApplicationBuilder> Web.configureApp)
-                .ConfigureServices(Web.configureServices)
+            Host.CreateDefaultBuilder()
+                .ConfigureWebHostDefaults(
+                    fun webHostBuilder ->
+                        webHostBuilder
+                            .UseSentry(
+                                fun sentry ->
+                                      sentry.Debug            <- false
+                                      sentry.Environment      <- Config.environmentName
+                                      sentry.Release          <- Config.version
+                                      sentry.AttachStacktrace <- true
+                                      sentry.Dsn              <- Config.sentryDsn)
+                            .ConfigureKestrel(
+                                fun k -> k.AddServerHeader <- false)
+                            .UseContentRoot(Directory.GetCurrentDirectory())
+                            .Configure(Web.configureApp)
+                            .ConfigureServices(Web.configureServices)
+                            |> ignore)
                 .Build()
                 .Run()
             0

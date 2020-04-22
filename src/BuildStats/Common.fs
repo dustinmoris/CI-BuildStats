@@ -49,8 +49,12 @@ module DevSecrets =
 [<RequireQualifiedAccess>]
 module Config =
     open System
+    open System.Diagnostics
 
-    let private envVar key = Environment.GetEnvironmentVariable key
+    type Foo = { Bar : string }
+
+    let private envVar key =
+        Environment.GetEnvironmentVariable key
 
     let private getSecret key =
         envVar key
@@ -66,22 +70,22 @@ module Config =
 
     let private ASPNETCORE_ENVIRONMENT   = "ASPNETCORE_ENVIRONMENT"
     let private LOG_LEVEL_CONSOLE        = "LOG_LEVEL_CONSOLE"
-    let private LOG_LEVEL_ELASTIC        = "LOG_LEVEL_ELASTIC"
     let private API_SECRET               = "API_SECRET"
     let private CRYPTO_KEY               = "CRYPTO_KEY"
-    let private ELASTIC_URL              = "ELASTIC_URL"
-    let private ELASTIC_USER             = "ELASTIC_USER"
-    let private ELASTIC_PASSWORD         = "ELASTIC_PASSWORD"
+    let private SENTRY_DSN               = "SENTRY_DSN"
 
     let environmentName = getOrDefault ASPNETCORE_ENVIRONMENT "Development"
     let isProduction    = environmentName |> Str.equalsCi "Production"
     let logLevelConsole = getOrDefault LOG_LEVEL_CONSOLE "error"
-    let logLevelElastic = getOrDefault LOG_LEVEL_ELASTIC "warning"
     let apiSecret       = getSecret API_SECRET
     let cryptoKey       = getSecret CRYPTO_KEY
-    let elasticUrl      = getSecret ELASTIC_URL
-    let elasticUser     = getSecret ELASTIC_USER
-    let elasticPassword = getSecret ELASTIC_PASSWORD
+    let sentryDsn       = getSecret SENTRY_DSN
+
+    let version =
+        typeof<Foo>
+        |> fun t -> t.Assembly.Location
+        |> FileVersionInfo.GetVersionInfo
+        |> fun v-> v.ProductVersion
 
 // -------------------------------------
 // Serialization
