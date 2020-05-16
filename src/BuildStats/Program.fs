@@ -38,8 +38,8 @@ module Program =
         Mute.When(muteFilter)
             .Otherwise(
                 match Environment.isProduction with
-                | false -> ConsoleLogWriter(Environment.logSeverity).AsLogWriter()
-                | true  -> googleCloudLogWriter.AsLogWriter())
+                | true  -> googleCloudLogWriter.AsLogWriter()
+                | false -> ConsoleLogWriter(Environment.logSeverity).AsLogWriter())
 
     let createResilientHttpClient (svc : IServiceProvider) =
         FallbackHttpClient(
@@ -78,12 +78,18 @@ module Program =
 
     let configureApp (app : IApplicationBuilder) =
         app.UseGiraffeErrorHandler(HttpHandlers.genericError)
-           .UseRequestBasedLogWriter(
-                fun ctx ->
-                    googleCloudLogWriter
-                        .AddHttpContext(ctx)
-                        .AddCorrelationId(Guid.NewGuid().ToString("N"))
-                        .AsLogWriter())
+           .UseWhen(
+                (fun _ -> Environment.isProduction),
+                fun x ->
+                    x.UseRequestBasedLogWriter(
+                        fun ctx ->
+                            Mute.When(muteFilter)
+                                .Otherwise(
+                                    googleCloudLogWriter
+                                        .AddHttpContext(ctx)
+                                        .AddCorrelationId(Guid.NewGuid().ToString("N"))
+                                        .AsLogWriter()))
+                    |> ignore)
            .UseGiraffeErrorHandler(HttpHandlers.genericError)
            .UseRequestLogging(Environment.enableRequestLogging, false)
            .UseForwardedHeaders()

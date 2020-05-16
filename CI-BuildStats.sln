@@ -13,7 +13,6 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BuildStats.Tests", "tests\B
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_build", "_build", "{ED48320B-3073-4F7F-B692-00862473CF5B}"
 ProjectSection(SolutionItems) = preProject
-	build.sh = build.sh
 	build.ps1 = build.ps1
 	appveyor.yml = appveyor.yml
 	global.json = global.json
