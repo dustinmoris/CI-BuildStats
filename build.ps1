@@ -4,9 +4,6 @@
 
 param
 (
-    [string] $Run,
-    [switch] $Release,
-    [switch] $ExcludeTests,
     [switch] $Docker,
     [switch] $Deploy,
     [string] $DockerUsername,
@@ -34,17 +31,14 @@ if (Test-IsAppVeyorBuildTriggeredByGitTag)
 Write-DotnetCoreVersions
 Remove-OldBuildArtifacts
 
-$configuration = if ($Release.IsPresent -or $Docker.IsPresent -or $Deploy.IsPresent -or $env:APPVEYOR -eq $true) { "Release" } else { "Debug" }
+$configuration = "Release"
 
 Write-Host "Building application..." -ForegroundColor Magenta
 dotnet-build   $app "-c $configuration"
 
-if (!$ExcludeTests.IsPresent)
-{
-    Write-Host "Building and running tests..." -ForegroundColor Magenta
-    dotnet-build   $tests
-    dotnet-test    $tests
-}
+Write-Host "Building and running tests..." -ForegroundColor Magenta
+dotnet-build   $tests
+dotnet-test    $tests
 
 if ($Docker.IsPresent -or $Deploy.IsPresent -or $env:APPVEYOR_REPO_TAG -eq $true)
 {
@@ -53,20 +47,7 @@ if ($Docker.IsPresent -or $Deploy.IsPresent -or $env:APPVEYOR_REPO_TAG -eq $true
     Invoke-Cmd "docker build -t dustinmoris/ci-buildstats:$version $appDir"
 }
 
-if ($Run)
-{
-    Write-Host "Launching application..." -ForegroundColor Magenta
-
-    if ($Docker.IsPresent)
-    {
-        Invoke-Cmd "docker run -p 8080:8080 ci-buildstats:$version"
-    }
-    else
-    {
-        dotnet-run $app $Run
-    }
-}
-elseif ($Deploy.IsPresent -or $env:APPVEYOR_REPO_TAG -eq $true)
+if ($Deploy.IsPresent -or $env:APPVEYOR_REPO_TAG -eq $true)
 {
     if ([string]::IsNullOrEmpty($DockerUsername) -or [string]::IsNullOrEmpty($DockerPassword))
     {
