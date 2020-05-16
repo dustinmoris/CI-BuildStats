@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>5.18.0</Version>
+    <Version>5.19.0</Version>
     <AssemblyName>BuildStats</AssemblyName>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
@@ -13,7 +13,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.*" />
     <PackageReference Include="NUglify" Version="1.5.*" />
     <PackageReference Include="Giraffe" Version="4.1.*" />
-    <PackageReference Include="Logfella" Version="6.0.*" />
+    <PackageReference Include="Logfella" Version="6.1.*" />
     <PackageReference Include="Sentry.AspNetCore" Version="2.1.*" />
   </ItemGroup>
 
