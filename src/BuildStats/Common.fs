@@ -1,4 +1,4 @@
-module BuildStats.Common
+namespace BuildStats
 
 // -------------------------------------
 // String helper functions
@@ -16,76 +16,6 @@ module Str =
         match str with
         | null | "" -> None
         | _         -> Some str
-
-// -------------------------------------
-// Config
-// -------------------------------------
-
-[<RequireQualifiedAccess>]
-module DevSecrets =
-    open System
-    open System.IO
-    open System.Collections.Generic
-    open Newtonsoft.Json
-
-    let private userFolder  = Environment.GetEnvironmentVariable "HOME"
-    let private secretsFile = sprintf "%s/.secrets/ci-buildstats.sec.json" userFolder
-
-    let private secrets =
-        secretsFile
-        |> File.Exists
-        |> function
-            | false -> new Dictionary<string, string>()
-            | true  ->
-                secretsFile
-                |> File.ReadAllText
-                |> JsonConvert.DeserializeObject<Dictionary<string, string>>
-
-    let get key =
-        match secrets.TryGetValue key with
-        | true , value -> value
-        | false, _     -> String.Empty
-
-[<RequireQualifiedAccess>]
-module Config =
-    open System
-    open System.Diagnostics
-
-    type Foo = { Bar : string }
-
-    let private envVar key =
-        Environment.GetEnvironmentVariable key
-
-    let private getSecret key =
-        envVar key
-        |> Str.toOption
-        |> defaultArg
-        <| DevSecrets.get key
-
-    let private getOrDefault key defaultValue =
-        envVar key
-        |> Str.toOption
-        |> defaultArg
-        <| defaultValue
-
-    let private ASPNETCORE_ENVIRONMENT   = "ASPNETCORE_ENVIRONMENT"
-    let private LOG_LEVEL_CONSOLE        = "LOG_LEVEL_CONSOLE"
-    let private API_SECRET               = "API_SECRET"
-    let private CRYPTO_KEY               = "CRYPTO_KEY"
-    let private SENTRY_DSN               = "SENTRY_DSN"
-
-    let environmentName = getOrDefault ASPNETCORE_ENVIRONMENT "Development"
-    let isProduction    = environmentName |> Str.equalsCi "Production"
-    let logLevelConsole = getOrDefault LOG_LEVEL_CONSOLE "error"
-    let apiSecret       = getSecret API_SECRET
-    let cryptoKey       = getSecret CRYPTO_KEY
-    let sentryDsn       = getSecret SENTRY_DSN
-
-    let version =
-        typeof<Foo>
-        |> fun t -> t.Assembly.Location
-        |> FileVersionInfo.GetVersionInfo
-        |> fun v-> v.ProductVersion
 
 // -------------------------------------
 // Serialization

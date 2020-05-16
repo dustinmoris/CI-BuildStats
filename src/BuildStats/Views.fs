@@ -1,7 +1,6 @@
 module BuildStats.Views
 
 open Giraffe.GiraffeViewEngine
-open BuildStats.Common
 
 let minifiedCss =
     "Assets/site.css"

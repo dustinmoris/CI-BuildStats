@@ -1,13 +1,4 @@
-module BuildStats.PackageServices
-
-open System
-open System.Net
-open System.Net.Http
-open Microsoft.FSharp.Core.Option
-open FSharp.Control.Tasks.V2.ContextInsensitive
-open Newtonsoft.Json.Linq
-open BuildStats.Common
-open BuildStats.HttpClients
+namespace BuildStats
 
 type Package =
     {
@@ -21,7 +12,12 @@ type PackageHttpClient (httpClient : FallbackHttpClient) =
     member __.SendAsync request =
         httpClient.SendAsync request
 
+[<RequireQualifiedAccess>]
 module NuGet =
+    open System.Net.Http
+    open Microsoft.FSharp.Core.Option
+    open FSharp.Control.Tasks.V2.ContextInsensitive
+    open Newtonsoft.Json.Linq
 
     let deserialize (json : string) =
         let obj = Json.deserialize json :?> JObject
@@ -74,7 +70,13 @@ module NuGet =
                 >> bind (convertIntoPackage packageVersion))
         }
 
+[<RequireQualifiedAccess>]
 module MyGet =
+    open System.Net
+    open System.Net.Http
+    open Microsoft.FSharp.Core.Option
+    open FSharp.Control.Tasks.V2.ContextInsensitive
+    open Newtonsoft.Json.Linq
 
     let skipIfNoPackageFound (json : string) =
         match json with
@@ -100,7 +102,7 @@ module MyGet =
                         (subDomain          : string)
                         (feedName           : string,
                          packageName        : string)
-                        (includePreReleases : bool)
+                        (_                  : bool)
                         (packageVersion     : string option) =
         task {
             let filter =

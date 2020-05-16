@@ -1,12 +1,12 @@
-module BuildStats.HttpClients
+namespace BuildStats
 
 open System
 open System.Net
 open System.Net.Http
 open System.Net.Http.Headers
 open System.Threading.Tasks
-open Microsoft.Extensions.Logging
 open FSharp.Control.Tasks.V2.ContextInsensitive
+open Logfella
 
 exception BrokenCircuitException
 
@@ -19,9 +19,8 @@ type BaseHttpClient (clientFactory : IHttpClientFactory) =
             let client = clientFactory.CreateClient()
             client.SendAsync request
 
-type CircuitBreakerHttpClient (httpClient        : IResilientHttpClient,
-                               logger            : ILogger<CircuitBreakerHttpClient>,
-                               minBreakDuration  : TimeSpan) =
+type CircuitBreakerHttpClient (httpClient       : IResilientHttpClient,
+                               minBreakDuration : TimeSpan) =
 
     let mutable isBrokenCircuit = false
     let mutable brokenSince     = DateTime.MinValue
@@ -52,15 +51,22 @@ type CircuitBreakerHttpClient (httpClient        : IResilientHttpClient,
                     | true  -> return response
                     | false ->
                         let breakDuration = getBreakDuration response
-                        logger.LogWarning("Request to '{url}' has failed (Http status code: {statusCode}). Breaking circuit for: {seconds}sec.", request.RequestUri, response.StatusCode, breakDuration.TotalSeconds)
+                        Log.Warning(
+                            sprintf
+                                "Request to '%s' has failed (HTTP status code: %i). Breaking circuit for: %f sec."
+                                (request.RequestUri.ToString())
+                                (int response.StatusCode)
+                                breakDuration.TotalSeconds,
+                                dict [
+                                    "httpClient", "circuitBreakerClient" :> obj
+                                ])
                         brokenSince     <- DateTime.Now
                         isBrokenCircuit <- true
                         return response
             }
 
-type RetryHttpClient (httpClient        : IResilientHttpClient,
-                      logger            : ILogger<RetryHttpClient>,
-                      maxRetries        : int) =
+type RetryHttpClient (httpClient : IResilientHttpClient,
+                      maxRetries : int) =
 
     let getWaitDuration (retryCount : int) =
         TimeSpan.FromSeconds(Math.Pow(2.0, float retryCount))
@@ -82,9 +88,16 @@ type RetryHttpClient (httpClient        : IResilientHttpClient,
                 | false -> return response
                 | true  ->
                     let waitDuration = getWaitDuration retryCount
-                    logger.LogWarning(
-                        "Request to '{url}' has failed. The response status code was: {statusCode}. Max retries left: {retryCount}. Next wait duration: {seconds}sec.",
-                        request.RequestUri, response.StatusCode, retryCount, waitDuration.TotalSeconds)
+                    Log.Warning(
+                        sprintf
+                            "Request to '%s' has failed. The HTTP response status code was: %i. Max retries left: %i. Next wait duration: %f sec."
+                                (request.RequestUri.ToString())
+                                (int response.StatusCode)
+                                retryCount
+                                waitDuration.TotalSeconds,
+                        dict [
+                            "httpClient", "retryClient" :> obj
+                        ])
                     do! Task.Delay waitDuration
                     return! sendAsync request (retryCount - 1)
         }
@@ -93,8 +106,7 @@ type RetryHttpClient (httpClient        : IResilientHttpClient,
         member __.SendAsync (request : HttpRequestMessage) =
             sendAsync request maxRetries
 
-type FallbackHttpClient (httpClient : IResilientHttpClient,
-                         logger     : ILogger<FallbackHttpClient>) =
+type FallbackHttpClient (httpClient : IResilientHttpClient) =
 
     let isClientError (status : HttpStatusCode) =
         let clientErrorCodes =
@@ -106,18 +118,31 @@ type FallbackHttpClient (httpClient : IResilientHttpClient,
     member __.SendAsync (request : HttpRequestMessage) =
         task {
             try
-                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"))
+                request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue("application/json"))
                 let! response = httpClient.SendAsync request
                 match response.StatusCode with
                 | HttpStatusCode.OK -> return! response.Content.ReadAsStringAsync()
                 | _                 ->
                     if isClientError response.StatusCode then
-                        logger.LogWarning("Request to '{url}' has failed due to a HTTP client error: {statusCode}.", request.RequestUri, response.StatusCode)
+                        Log.Warning(
+                            sprintf
+                                "Request to '%s' has failed due to a HTTP client error: %i."
+                                (request.RequestUri.ToString())
+                                (int response.StatusCode),
+                            dict [
+                                "httpClient", "fallbackClient" :> obj
+                            ])
                     return ""
             with
                 | :? BrokenCircuitException -> return ""
                 | ex ->
-                    logger.LogWarning(
-                        "Exception thrown when sending a HTTP request to '{url}': {message}. Stack Trace: {stackTrace}.", request.RequestUri, ex.Message, ex.StackTrace)
+                    Log.Error(
+                        sprintf
+                            "Exception thrown when sending HTTP request to '%s'."
+                                (request.RequestUri.ToString()),
+                        dict [
+                            "httpClient", "fallbackClient" :> obj
+                        ],
+                        ex)
                     return ""
         }
