@@ -1,56 +1,58 @@
-module BuildStats.BuildHistoryCharts
-
-open System
-open System.Net
-open System.Net.Http
-open System.Net.Http.Headers
-open Microsoft.Extensions.Caching.Memory
-open Microsoft.FSharp.Core.Option
-open FSharp.Control.Tasks.V2.ContextInsensitive
-open Newtonsoft.Json.Linq
-open Giraffe
-open BuildStats.Common
-open BuildStats.HttpClients
+namespace BuildStats
 
 // -------------------------------------------
-// Common Types and Functions
+// Common Types
 // -------------------------------------------
 
-type BuildStatus =
-    | Success
-    | Failed
-    | Cancelled
-    | Pending
-    | Unknown
+[<AutoOpen>]
+module BuildChartTypes =
+    open System
 
-type Build =
-    {
-        Id              : int
-        BuildNumber     : int
-        TimeTaken       : TimeSpan
-        Status          : BuildStatus
-        Branch          : string
-        FromPullRequest : bool
-    }
+    type BuildStatus =
+        | Success
+        | Failed
+        | Cancelled
+        | Pending
+        | Unknown
 
-let pullRequestFilter   (inclFromPullRequest : bool)
-                        (build  : Build) =
-    inclFromPullRequest || not build.FromPullRequest
+    type Build =
+        {
+            Id              : int
+            BuildNumber     : int
+            TimeTaken       : TimeSpan
+            Status          : BuildStatus
+            Branch          : string
+            FromPullRequest : bool
+        }
 
-let calculateTimeTaken (started   : Nullable<DateTime>)
-                       (finished  : Nullable<DateTime>) =
-    match started.HasValue with
-    | true ->
-        match finished.HasValue with
-        | true  -> finished.Value - started.Value
-        | false -> TimeSpan.Zero
-    | false     -> TimeSpan.Zero
+// -------------------------------------------
+// Helper Functions
+// -------------------------------------------
+
+[<RequireQualifiedAccess>]
+module BuildStatsHelper =
+    open System
+
+    let prFilter   (inclFromPullRequest : bool)
+                            (build  : Build) =
+        inclFromPullRequest || not build.FromPullRequest
+
+    let timeTaken (started   : Nullable<DateTime>)
+                           (finished  : Nullable<DateTime>) =
+        match started.HasValue with
+        | true ->
+            match finished.HasValue with
+            | true  -> finished.Value - started.Value
+            | false -> TimeSpan.Zero
+        | false     -> TimeSpan.Zero
 
 // -------------------------------------------
 // Build Metrics
 // -------------------------------------------
 
+[<RequireQualifiedAccess>]
 module BuildMetrics =
+    open System
 
     let longestBuildTime (builds : Build list) =
         match builds.Length with
@@ -77,330 +79,346 @@ module BuildMetrics =
             |> TimeSpan.FromMilliseconds
 
 // -------------------------------------------
-// AppVeyor
+// CI HTTP Clients
 // -------------------------------------------
 
-type AppVeyorHttpClient (httpClient : FallbackHttpClient) =
+[<AutoOpen>]
+module BuildChartHttpClients =
+    open System
+    open System.Net
+    open System.Net.Http
+    open System.Net.Http.Headers
+    open Microsoft.Extensions.Caching.Memory
+    open Microsoft.FSharp.Core.Option
+    open FSharp.Control.Tasks.V2.ContextInsensitive
+    open Newtonsoft.Json.Linq
+    open Giraffe
 
-    let parseToJArray (json : string) =
-        let obj = Json.deserialize json :?> JObject
-        obj.Value<JArray> "builds"
+    // ...........
+    // AppVeyor
+    // ```````````
 
-    let parseStatus (status : string) =
-        match status with
-        | "success"             -> Success
-        | "failed"              -> Failed
-        | "cancelled"           -> Cancelled
-        | "queued" | "running"  -> Pending
-        | _                     -> Unknown
+    type AppVeyorHttpClient (httpClient : FallbackHttpClient) =
 
-    let isPullRequest (pullRequestId : string) =
-        isNotNull pullRequestId
+        let parseToJArray (json : string) =
+            let obj = Json.deserialize json :?> JObject
+            obj.Value<JArray> "builds"
 
-    let convertToBuilds (items : JArray option) =
-        match items with
-        | None       -> []
-        | Some items ->
-            items
-            |> Seq.map (fun x ->
-                let started  = x.Value<Nullable<DateTime>> "started"
-                let finished = x.Value<Nullable<DateTime>> "finished"
-                {
-                    Id              = x.Value<int>    "buildId"
-                    BuildNumber     = x.Value<int>    "buildNumber"
-                    Status          = x.Value<string> "status"        |> parseStatus
-                    Branch          = x.Value<string> "branch"
-                    FromPullRequest = x.Value<string> "pullRequestId" |> isPullRequest
-                    TimeTaken       = calculateTimeTaken started finished
-                })
-            |> Seq.toList
+        let parseStatus (status : string) =
+            match status with
+            | "success"             -> Success
+            | "failed"              -> Failed
+            | "cancelled"           -> Cancelled
+            | "queued" | "running"  -> Pending
+            | _                     -> Unknown
 
-    member __.GetBuildsAsync (authToken           : string option)
-                             (slug                : string * string)
-                             (buildCount          : int)
-                             (branch              : string option)
-                             (inclFromPullRequest : bool) =
-        task {
-            let account, project = slug
-            let branchFilter =
-                match branch with
-                | Some b -> sprintf "&branch=%s" b
-                | None   -> ""
+        let isPullRequest (pullRequestId : string) =
+            isNotNull pullRequestId
 
-            let url =
-                sprintf "https://ci.appveyor.com/api/projects/%s/%s/history?recordsNumber=%d%s"
-                    account project (5 * buildCount) branchFilter
+        let convertToBuilds (items : JArray option) =
+            match items with
+            | None       -> []
+            | Some items ->
+                items
+                |> Seq.map (fun x ->
+                    let started  = x.Value<Nullable<DateTime>> "started"
+                    let finished = x.Value<Nullable<DateTime>> "finished"
+                    {
+                        Id              = x.Value<int>    "buildId"
+                        BuildNumber     = x.Value<int>    "buildNumber"
+                        Status          = x.Value<string> "status"        |> parseStatus
+                        Branch          = x.Value<string> "branch"
+                        FromPullRequest = x.Value<string> "pullRequestId" |> isPullRequest
+                        TimeTaken       = BuildStatsHelper.timeTaken started finished
+                    })
+                |> Seq.toList
 
-            let request = new HttpRequestMessage(HttpMethod.Get, url)
+        member __.GetBuildsAsync (authToken           : string option)
+                                 (slug                : string * string)
+                                 (buildCount          : int)
+                                 (branch              : string option)
+                                 (inclFromPullRequest : bool) =
+            task {
+                let account, project = slug
+                let branchFilter =
+                    match branch with
+                    | Some b -> sprintf "&branch=%s" b
+                    | None   -> ""
 
-            if authToken.IsSome then
-                let token = AES.decryptUrlEncodedString Config.cryptoKey authToken.Value
-                request.Headers.Authorization <- AuthenticationHeaderValue("Bearer", token)
+                let url =
+                    sprintf "https://ci.appveyor.com/api/projects/%s/%s/history?recordsNumber=%d%s"
+                        account project (5 * buildCount) branchFilter
 
-            let! json = httpClient.SendAsync request
+                let request = new HttpRequestMessage(HttpMethod.Get, url)
 
-            return json
-                |> (Str.toOption
-                >> map parseToJArray
-                >> convertToBuilds)
-                |> List.filter (pullRequestFilter inclFromPullRequest)
-                |> List.truncate buildCount
-        }
+                if authToken.IsSome then
+                    let token = AES.decryptUrlEncodedString Environment.cryptoKey authToken.Value
+                    request.Headers.Authorization <- AuthenticationHeaderValue("Bearer", token)
 
-// -------------------------------------------
-// TravisCI
-// -------------------------------------------
+                let! json = httpClient.SendAsync request
 
-type TravisCIHttpClient (httpClient : FallbackHttpClient, cache : IMemoryCache) =
+                return json
+                    |> (Str.toOption
+                    >> map parseToJArray
+                    >> convertToBuilds)
+                    |> List.filter (BuildStatsHelper.prFilter inclFromPullRequest)
+                    |> List.truncate buildCount
+            }
 
-    let tryGetTLD account project =
-        let key = sprintf "%s%s" account project
-        match cache.TryGetValue<string> key with
-        | true, tld -> Some tld
-        | false, _  -> None
+    // ...........
+    // TravisCI
+    // ```````````
 
-    let cacheTLD account project tld =
-        let key = sprintf "%s%s" account project
-        cache.Set(key, tld) |> ignore
+    type TravisCIHttpClient (httpClient : FallbackHttpClient, cache : IMemoryCache) =
 
-    let parseToJArray (json : string) =
-        let obj = Json.deserialize json :?> JObject
-        obj.Value<JArray> "builds"
+        let tryGetTLD account project =
+            let key = sprintf "%s%s" account project
+            match cache.TryGetValue<string> key with
+            | true, tld -> Some tld
+            | false, _  -> None
 
-    let parseStatus (status : string) =
-        match status with
-        | "failed"  | "broken"
-        | "failing" | "errored" -> Failed
-        | "passed"  | "fixed"   -> Success
-        | "canceled"            -> Cancelled
-        | "pending"             -> Pending
-        | _                     -> Unknown
+        let cacheTLD account project tld =
+            let key = sprintf "%s%s" account project
+            cache.Set(key, tld) |> ignore
 
-    let isPullRequest eventType = eventType = "pull_request"
+        let parseToJArray (json : string) =
+            let obj = Json.deserialize json :?> JObject
+            obj.Value<JArray> "builds"
 
-    let convertToBuilds (items : JArray option) =
-        match items with
-        | None -> []
-        | Some items ->
-            items
-            |> Seq.map (fun x ->
-                let started  = x.Value<Nullable<DateTime>> "started_at"
-                let finished = x.Value<Nullable<DateTime>> "finished_at"
-                let state    = x.Value<string>             "state"
-                {
-                    Id              = x.Value<int>    "id"
-                    BuildNumber     = x.Value<int>    "number"
-                    Branch          = (x.Value<JObject> "branch").Value<string> "name"
-                    FromPullRequest = x.Value<string> "event_type" |> isPullRequest
-                    TimeTaken       = calculateTimeTaken started finished
-                    Status          = parseStatus state
-                })
-            |> Seq.toList
+        let parseStatus (status : string) =
+            match status with
+            | "failed"  | "broken"
+            | "failing" | "errored" -> Failed
+            | "passed"  | "fixed"   -> Success
+            | "canceled"            -> Cancelled
+            | "pending"             -> Pending
+            | _                     -> Unknown
 
-    let rec getBuildsAsync (isFallback          : bool)
-                           (authToken           : string option)
-                           (slug                : string * string)
-                           (buildCount          : int)
-                           (branch              : string option)
-                           (inclFromPullRequest : bool) =
-        task {
-            let account, project = slug
+        let isPullRequest eventType = eventType = "pull_request"
 
-            let request = new HttpRequestMessage()
-            request.Method <- HttpMethod.Get
-            request.Headers.Add("Travis-API-Version", "3")
-            request.Headers.TryAddWithoutValidation("User-Agent", "BuildStats.info-API") |> ignore
+        let convertToBuilds (items : JArray option) =
+            match items with
+            | None -> []
+            | Some items ->
+                items
+                |> Seq.map (fun x ->
+                    let started  = x.Value<Nullable<DateTime>> "started_at"
+                    let finished = x.Value<Nullable<DateTime>> "finished_at"
+                    let state    = x.Value<string>             "state"
+                    {
+                        Id              = x.Value<int>    "id"
+                        BuildNumber     = x.Value<int>    "number"
+                        Branch          = (x.Value<JObject> "branch").Value<string> "name"
+                        FromPullRequest = x.Value<string> "event_type" |> isPullRequest
+                        TimeTaken       = BuildStatsHelper.timeTaken started finished
+                        Status          = parseStatus state
+                    })
+                |> Seq.toList
 
-            let topLevelDomain =
-                match isFallback, authToken with
-                | true, _       -> "org"
-                | false, None   -> defaultArg (tryGetTLD account project) "com"
-                | false, Some t ->
-                    let token = AES.decryptUrlEncodedString Config.cryptoKey t
-                    request.Headers.Authorization <- AuthenticationHeaderValue("token", token)
-                    "com"
+        let rec getBuildsAsync (isFallback          : bool)
+                               (authToken           : string option)
+                               (slug                : string * string)
+                               (buildCount          : int)
+                               (branch              : string option)
+                               (inclFromPullRequest : bool) =
+            task {
+                let account, project = slug
 
-            let branchFilter =
-                match branch with
-                | Some b -> sprintf "&branch.name=%s" b
-                | None   -> ""
+                let request = new HttpRequestMessage()
+                request.Method <- HttpMethod.Get
+                request.Headers.Add("Travis-API-Version", "3")
+                request.Headers.TryAddWithoutValidation("User-Agent", "BuildStats.info-API") |> ignore
 
-            let eventFilter =
-                match inclFromPullRequest with
-                | true  -> ""
-                | false -> "&build.event_type[]=push&build.event_type[]=cron&build.event_type[]=api"
+                let topLevelDomain =
+                    match isFallback, authToken with
+                    | true, _       -> "org"
+                    | false, None   -> defaultArg (tryGetTLD account project) "com"
+                    | false, Some t ->
+                        let token = AES.decryptUrlEncodedString Environment.cryptoKey t
+                        request.Headers.Authorization <- AuthenticationHeaderValue("token", token)
+                        "com"
 
-            let url =
-                sprintf "https://api.travis-ci.%s/repo/%s/builds?limit=%d%s%s"
-                    topLevelDomain
-                    (WebUtility.UrlEncode (sprintf "%s/%s" account project))
-                    buildCount
-                    branchFilter
-                    eventFilter
+                let branchFilter =
+                    match branch with
+                    | Some b -> sprintf "&branch.name=%s" b
+                    | None   -> ""
 
-            request.RequestUri <- new Uri(url)
+                let eventFilter =
+                    match inclFromPullRequest with
+                    | true  -> ""
+                    | false -> "&build.event_type[]=push&build.event_type[]=cron&build.event_type[]=api"
 
-            let! json = httpClient.SendAsync request
-
-            let builds =
-                json
-                |> (Str.toOption
-                >> map parseToJArray
-                >> convertToBuilds)
-
-            if isFallback || not builds.IsEmpty then
-                cacheTLD account project topLevelDomain
-                return builds
-            else
-                return!
-                    getBuildsAsync
-                        true
-                        authToken
-                        slug
+                let url =
+                    sprintf "https://api.travis-ci.%s/repo/%s/builds?limit=%d%s%s"
+                        topLevelDomain
+                        (WebUtility.UrlEncode (sprintf "%s/%s" account project))
                         buildCount
-                        branch
-                        inclFromPullRequest
-        }
+                        branchFilter
+                        eventFilter
 
-    member __.GetBuildsAsync (authToken           : string option)
-                             (slug                : string * string)
-                             (buildCount          : int)
-                             (branch              : string option)
-                             (inclFromPullRequest : bool) =
-        getBuildsAsync false authToken slug buildCount branch inclFromPullRequest
+                request.RequestUri <- Uri(url)
 
-// -------------------------------------------
-// CircleCI
-// -------------------------------------------
+                let! json = httpClient.SendAsync request
 
-type CircleCIHttpClient (httpClient : FallbackHttpClient) =
+                let builds =
+                    json
+                    |> (Str.toOption
+                    >> map parseToJArray
+                    >> convertToBuilds)
 
-    let parseToJArray (json : string) =
-        Json.deserialize json :?> JArray
+                if isFallback || not builds.IsEmpty then
+                    cacheTLD account project topLevelDomain
+                    return builds
+                else
+                    return!
+                        getBuildsAsync
+                            true
+                            authToken
+                            slug
+                            buildCount
+                            branch
+                            inclFromPullRequest
+            }
 
-    let parseStatus (status : string) =
-        match status with
-        | "success"   | "fixed"                 | "no_tests"    -> Success
-        | "failed"    | "infrastructure_fail"   | "timedout"    -> Failed
-        | "canceled"  | "not_run" | "retried"   | "not_running" -> Cancelled
-        | "scheduled" | "queued"                | "running"     -> Pending
-        | _                                                     -> Unknown
+        member __.GetBuildsAsync (authToken           : string option)
+                                 (slug                : string * string)
+                                 (buildCount          : int)
+                                 (branch              : string option)
+                                 (inclFromPullRequest : bool) =
+            getBuildsAsync false authToken slug buildCount branch inclFromPullRequest
 
-    let isPullRequest (subject : string) =
-        isNotNull subject && subject.ToLowerInvariant().Contains("pull request")
+    // ...........
+    // CircleCI
+    // ```````````
 
-    let convertToBuilds (items : JArray option) =
-        match items with
-        | None       -> []
-        | Some items ->
-            items
-            |> Seq.map (fun x ->
-                let started  = x.Value<Nullable<DateTime>> "start_time"
-                let finished = x.Value<Nullable<DateTime>> "stop_time"
-                {
-                    Id              = x.Value<int>    "build_num"
-                    BuildNumber     = x.Value<int>    "build_num"
-                    Status          = x.Value<string> "status"  |> parseStatus
-                    Branch          = x.Value<string> "branch"
-                    FromPullRequest = x.Value<string> "subject" |> isPullRequest
-                    TimeTaken       = calculateTimeTaken started finished
-                })
-            |> Seq.toList
+    type CircleCIHttpClient (httpClient : FallbackHttpClient) =
 
-    member __.GetBuildsAsync  (authToken           : string option)
-                              (slug                : string * string)
-                              (buildCount          : int)
-                              (branch              : string option)
-                              (inclFromPullRequest : bool) =
-        task {
-            let account, project = slug
-            let branchFilter =
-                match branch with
-                | Some b -> sprintf "/tree/%s" <| WebUtility.UrlEncode b
-                | None   -> ""
+        let parseToJArray (json : string) =
+            Json.deserialize json :?> JArray
 
-            // CircleCI has a max limit of 100 items per request
-            // ToDo: Refactor to pull more items when buildCount is higher
-            let limit = min 100 (5 * buildCount)
-            let url =
-                sprintf "https://circleci.com/api/v1/project/%s/%s%s?limit=%i"
-                    account project branchFilter limit
+        let parseStatus (status : string) =
+            match status with
+            | "success"   | "fixed"                 | "no_tests"    -> Success
+            | "failed"    | "infrastructure_fail"   | "timedout"    -> Failed
+            | "canceled"  | "not_run" | "retried"   | "not_running" -> Cancelled
+            | "scheduled" | "queued"                | "running"     -> Pending
+            | _                                                     -> Unknown
 
-            let request = new HttpRequestMessage(HttpMethod.Get, url)
-            let! json   = httpClient.SendAsync request
+        let isPullRequest (subject : string) =
+            isNotNull subject && subject.ToLowerInvariant().Contains("pull request")
 
-            return json
-                |> (Str.toOption
-                >> map parseToJArray
-                >> convertToBuilds)
-                |> List.filter (pullRequestFilter inclFromPullRequest)
-                |> List.truncate buildCount
-        }
+        let convertToBuilds (items : JArray option) =
+            match items with
+            | None       -> []
+            | Some items ->
+                items
+                |> Seq.map (fun x ->
+                    let started  = x.Value<Nullable<DateTime>> "start_time"
+                    let finished = x.Value<Nullable<DateTime>> "stop_time"
+                    {
+                        Id              = x.Value<int>    "build_num"
+                        BuildNumber     = x.Value<int>    "build_num"
+                        Status          = x.Value<string> "status"  |> parseStatus
+                        Branch          = x.Value<string> "branch"
+                        FromPullRequest = x.Value<string> "subject" |> isPullRequest
+                        TimeTaken       = BuildStatsHelper.timeTaken started finished
+                    })
+                |> Seq.toList
 
-// -------------------------------------------
-// Azure Pipelines
-// -------------------------------------------
+        member __.GetBuildsAsync  (_                   : string option)
+                                  (slug                : string * string)
+                                  (buildCount          : int)
+                                  (branch              : string option)
+                                  (inclFromPullRequest : bool) =
+            task {
+                let account, project = slug
+                let branchFilter =
+                    match branch with
+                    | Some b -> sprintf "/tree/%s" <| WebUtility.UrlEncode b
+                    | None   -> ""
 
-type AzurePipelinesHttpClient (httpClient : FallbackHttpClient) =
+                // CircleCI has a max limit of 100 items per request
+                // ToDo: Refactor to pull more items when buildCount is higher
+                let limit = min 100 (5 * buildCount)
+                let url =
+                    sprintf "https://circleci.com/api/v1/project/%s/%s%s?limit=%i"
+                        account project branchFilter limit
 
-    let parseToJArray (json : string) =
-        let obj = Json.deserialize json :?> JObject
-        obj.Value<JArray> "value"
+                let request = new HttpRequestMessage(HttpMethod.Get, url)
+                let! json   = httpClient.SendAsync request
 
-    let parseStatus (status : string) =
-        match status with
-        | "succeeded"                     -> Success
-        | "failed" | "partiallySucceeded" -> Failed
-        | "canceled"                      -> Cancelled
-        | "none"                          -> Pending
-        | _                               -> Unknown
+                return json
+                    |> (Str.toOption
+                    >> map parseToJArray
+                    >> convertToBuilds)
+                    |> List.filter (BuildStatsHelper.prFilter inclFromPullRequest)
+                    |> List.truncate buildCount
+            }
 
-    let isPullRequest (reason : string) =
-        isNotNull reason && reason.Equals("pullRequest")
+    // ...........
+    // Azure Pipelines
+    // ```````````
 
-    let convertToBuilds (items : JArray option) =
-        match items with
-        | None       -> []
-        | Some items ->
-            items
-            |> Seq.map (fun x ->
-                let started  = x.Value<Nullable<DateTime>> "startTime"
-                let finished = x.Value<Nullable<DateTime>> "finishTime"
-                {
-                    Id              = x.Value<int>     "id"
-                    BuildNumber     = x.Value<int>     "id"
-                    Status          = x.Value<string>  "result"  |> parseStatus
-                    Branch          = (x.Value<string> "sourceBranch").Replace("refs/heads/", "")
-                    FromPullRequest = x.Value<string>  "reason" |> isPullRequest
-                    TimeTaken       = calculateTimeTaken started finished
-                })
-            |> Seq.toList
+    type AzurePipelinesHttpClient (httpClient : FallbackHttpClient) =
 
-    member __.GetBuildsAsync  (authToken           : string option)
-                              (slug                : string * string * int)
-                              (buildCount          : int)
-                              (branch              : string option)
-                              (inclFromPullRequest : bool) =
-        task {
-            let account, project, definitionId = slug
-            let branchFilter =
-                match branch with
-                | Some b -> sprintf "&branchName=refs/heads/%s" <| WebUtility.UrlEncode b
-                | None   -> ""
+        let parseToJArray (json : string) =
+            let obj = Json.deserialize json :?> JObject
+            obj.Value<JArray> "value"
 
-            let limit = min 200 (4 * buildCount)
-            let apiVersion = "4.1"
-            let url =
-                sprintf "https://dev.azure.com/%s/%s/_apis/build/builds?api-version=%s&definitions=%i&$top=%i%s"
-                    account project apiVersion definitionId limit branchFilter
+        let parseStatus (status : string) =
+            match status with
+            | "succeeded"                     -> Success
+            | "failed" | "partiallySucceeded" -> Failed
+            | "canceled"                      -> Cancelled
+            | "none"                          -> Pending
+            | _                               -> Unknown
 
-            let request = new HttpRequestMessage(HttpMethod.Get, url)
-            let! json   = httpClient.SendAsync request
+        let isPullRequest (reason : string) =
+            isNotNull reason && reason.Equals("pullRequest")
 
-            return json
-                |> (Str.toOption
-                >> map parseToJArray
-                >> convertToBuilds)
-                |> List.filter (pullRequestFilter inclFromPullRequest)
-                |> List.truncate buildCount
-        }
+        let convertToBuilds (items : JArray option) =
+            match items with
+            | None       -> []
+            | Some items ->
+                items
+                |> Seq.map (fun x ->
+                    let started  = x.Value<Nullable<DateTime>> "startTime"
+                    let finished = x.Value<Nullable<DateTime>> "finishTime"
+                    {
+                        Id              = x.Value<int>     "id"
+                        BuildNumber     = x.Value<int>     "id"
+                        Status          = x.Value<string>  "result"  |> parseStatus
+                        Branch          = (x.Value<string> "sourceBranch").Replace("refs/heads/", "")
+                        FromPullRequest = x.Value<string>  "reason" |> isPullRequest
+                        TimeTaken       = BuildStatsHelper.timeTaken started finished
+                    })
+                |> Seq.toList
+
+        member __.GetBuildsAsync  (_                   : string option)
+                                  (slug                : string * string * int)
+                                  (buildCount          : int)
+                                  (branch              : string option)
+                                  (inclFromPullRequest : bool) =
+            task {
+                let account, project, definitionId = slug
+                let branchFilter =
+                    match branch with
+                    | Some b -> sprintf "&branchName=refs/heads/%s" <| WebUtility.UrlEncode b
+                    | None   -> ""
+
+                let limit = min 200 (4 * buildCount)
+                let apiVersion = "4.1"
+                let url =
+                    sprintf "https://dev.azure.com/%s/%s/_apis/build/builds?api-version=%s&definitions=%i&$top=%i%s"
+                        account project apiVersion definitionId limit branchFilter
+
+                let request = new HttpRequestMessage(HttpMethod.Get, url)
+                let! json   = httpClient.SendAsync request
+
+                return json
+                    |> (Str.toOption
+                    >> map parseToJArray
+                    >> convertToBuilds)
+                    |> List.filter (BuildStatsHelper.prFilter inclFromPullRequest)
+                    |> List.truncate buildCount
+            }

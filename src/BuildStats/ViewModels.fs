@@ -1,9 +1,6 @@
-module BuildStats.ViewModels
+namespace BuildStats
 
 open System
-open BuildStats.PackageServices
-open BuildStats.BuildHistoryCharts
-open BuildStats.TextSize
 
 type PackageModel =
     {
@@ -26,9 +23,9 @@ type PackageModel =
             | dl when dl >= thousand -> float dl / float thousand   |> sprintf "▾ %.1fk"
             | dl                     -> dl                          |> sprintf "▾ %i"
         let version        = sprintf "v%s" package.Version
-        let feedWidth      = measureTextWidth package.Feed + padding * 2
-        let versionWidth   = defaultArg vWidth (measureTextWidth version + padding * 2)
-        let downloadsWidth = defaultArg dWidth (measureTextWidth downloads + padding * 2)
+        let feedWidth      = TextSize.measureWidth package.Feed + padding * 2
+        let versionWidth   = defaultArg vWidth (TextSize.measureWidth version + padding * 2)
+        let downloadsWidth = defaultArg dWidth (TextSize.measureWidth downloads + padding * 2)
         {
             Width          = max (feedWidth + versionWidth + downloadsWidth) 62
             FeedWidth      = feedWidth
@@ -79,7 +76,7 @@ type BuildHistoryModel =
         let barWidth     = 5
         let gap          = 3
         let totalHeight  = maxBarHeight + 12 * (linesOfText + 1) + gap * linesOfText
-        let branchWidth  = measureTextWidth branchText
+        let branchWidth  = TextSize.measureWidth branchText
         let chartsWidth  = builds.Length * (barWidth + gap) - gap
         let totalWidth   = max 180 (max branchWidth chartsWidth)
 

@@ -1,67 +1,120 @@
-module BuildStats.App
+namespace BuildStats
 
-open System
-open System.IO
-open Microsoft.AspNetCore.Builder
-open Microsoft.AspNetCore.Hosting
-open Microsoft.Extensions.Hosting
-open Serilog
-open Serilog.Events
-open Giraffe
-open BuildStats.Common
+module Program =
+    open System
+    open System.IO
+    open System.Net.Http
+    open System.Collections.Generic
+    open Microsoft.AspNetCore.Builder
+    open Microsoft.AspNetCore.Hosting
+    open Microsoft.Extensions.Hosting
+    open Microsoft.Extensions.Caching.Memory
+    open Microsoft.Extensions.DependencyInjection
+    open Giraffe
+    open Logfella
+    open Logfella.LogWriters
+    open Logfella.AspNetCore
+    open Logfella.Adapters
 
-[<EntryPoint>]
-let main args =
-    let parseLogLevel =
-        function
-        | "verbose" -> LogEventLevel.Verbose
-        | "debug"   -> LogEventLevel.Debug
-        | "info"    -> LogEventLevel.Information
-        | "warning" -> LogEventLevel.Warning
-        | "error"   -> LogEventLevel.Error
-        | "fatal"   -> LogEventLevel.Fatal
-        | _         -> LogEventLevel.Warning
+    let private googleCloudLogWriter =
+        GoogleCloudLogWriter
+            .Create(Environment.logSeverity)
+            .AddServiceContext(
+                Environment.appName,
+                Environment.appVersion)
+            .UseGoogleCloudTimestamp()
+            .AddLabels(
+                dict [
+                    "appName", Environment.appName
+                    "appVersion", Environment.appVersion
+                ])
 
-    let logLevelConsole =
-        match isNotNull args && args.Length > 0 with
-        | true  -> args.[0]
-        | false -> Config.logLevelConsole
-        |> parseLogLevel
+    let private muteFilter =
+        Func<Severity, string, IDictionary<string, obj>, exn, bool>(
+            fun severity msg data ex ->
+                msg.StartsWith "The response could not be cached for this request")
 
-    Log.Logger <-
-        (LoggerConfiguration())
-            .MinimumLevel.Information()
-            .Enrich.WithProperty("Environment", Config.environmentName)
-            .Enrich.WithProperty("Application", "CI-BuildStats")
-            .WriteTo.Console(logLevelConsole)
-            .CreateLogger()
+    let private defaultLogWriter =
+        Mute.When(muteFilter)
+            .Otherwise(
+                match Environment.isProduction with
+                | false -> ConsoleLogWriter(Environment.logSeverity).AsLogWriter()
+                | true  -> googleCloudLogWriter.AsLogWriter())
 
-    try
+    let createResilientHttpClient (svc : IServiceProvider) =
+        FallbackHttpClient(
+            CircuitBreakerHttpClient(
+                RetryHttpClient(
+                    BaseHttpClient(svc.GetService<IHttpClientFactory>()),
+                    maxRetries = 1),
+                minBreakDuration = TimeSpan.FromSeconds 1.0))
+
+    let configureServices (services : IServiceCollection) =
+        services
+            .AddMemoryCache()
+            .AddHttpClient()
+            .AddSingleton<TravisCIHttpClient>(
+                fun svc -> TravisCIHttpClient(createResilientHttpClient svc, svc.GetService<IMemoryCache>()))
+            .AddSingleton<AppVeyorHttpClient>(
+                fun svc -> AppVeyorHttpClient(createResilientHttpClient svc))
+            .AddSingleton<CircleCIHttpClient>(
+                fun svc -> CircleCIHttpClient(createResilientHttpClient svc))
+            .AddSingleton<AzurePipelinesHttpClient>(
+                fun svc -> AzurePipelinesHttpClient(createResilientHttpClient svc))
+            .AddTransient<PackageHttpClient>(
+                fun svc ->
+                    PackageHttpClient(
+                        FallbackHttpClient(
+                            BaseHttpClient(
+                                svc.GetService<IHttpClientFactory>())))
+            )
+            .AddProxies(
+                Environment.proxyCount,
+                Environment.knownProxyNetworks,
+                Environment.knownProxies)
+            .AddResponseCaching()
+            .AddGiraffe()
+            |> ignore
+
+    let configureApp (app : IApplicationBuilder) =
+        app.UseGiraffeErrorHandler(HttpHandlers.genericError)
+           .UseRequestBasedLogWriter(
+                fun ctx ->
+                    googleCloudLogWriter
+                        .AddHttpContext(ctx)
+                        .AddCorrelationId(Guid.NewGuid().ToString("N"))
+                        .AsLogWriter())
+           .UseGiraffeErrorHandler(HttpHandlers.genericError)
+           .UseRequestLogging(Environment.enableRequestLogging, false)
+           .UseForwardedHeaders()
+           .UseHttpsRedirection(Environment.domainName)
+           .UseResponseCaching()
+           .UseGiraffe(WebApp.routes)
+
+    [<EntryPoint>]
+    let main args =
         try
-            Log.Information "Starting BuildStats.info..."
+            Log.SetDefaultLogWriter(defaultLogWriter)
+            Logging.outputEnvironmentSummary Environment.summary
 
             Host.CreateDefaultBuilder()
-                .ConfigureWebHostDefaults(
+                .UseLogfella()
+                .ConfigureWebHost(
                     fun webHostBuilder ->
                         webHostBuilder
-                            .UseSentry(
-                                fun sentry ->
-                                      sentry.Debug            <- false
-                                      sentry.Environment      <- Config.environmentName
-                                      sentry.Release          <- Config.version
-                                      sentry.AttachStacktrace <- true
-                                      sentry.Dsn              <- Config.sentryDsn)
-                            .ConfigureKestrel(
+                            .ConfigureSentry(
+                                Environment.sentryDsn,
+                                Environment.name,
+                                Environment.appVersion)
+                            .UseKestrel(
                                 fun k -> k.AddServerHeader <- false)
                             .UseContentRoot(Directory.GetCurrentDirectory())
-                            .Configure(Web.configureApp)
-                            .ConfigureServices(Web.configureServices)
+                            .Configure(configureApp)
+                            .ConfigureServices(configureServices)
                             |> ignore)
                 .Build()
                 .Run()
             0
         with ex ->
-            Log.Fatal(ex, "Host terminated unexpectedly.")
+            Log.Emergency("Host terminated unexpectedly.", ex)
             1
-    finally
-        Log.CloseAndFlush()

@@ -2,8 +2,6 @@ module BuildStats.SVGs
 
 open System
 open Giraffe.GiraffeViewEngine
-open BuildStats.ViewModels
-open BuildStats.TextSize
 
 let svg      = tag     "svg"
 let g        = tag     "g"
@@ -209,7 +207,7 @@ let measureCharsSVG =
     defaultSvg 800 800 [
         defaultG "#000000" [
             yield!
-                chars
+                TextSize.chars
                 |> Seq.map (fun kv -> kv.Key, kv.Value)
                 |> Seq.mapFold (fun (x, i) (c, w) ->
                     match isEven i with
@@ -218,7 +216,7 @@ let measureCharsSVG =
                 |> fst
 
             yield!
-                chars
+                TextSize.chars
                 |> Seq.map (fun kv -> kv.Key, kv.Value)
                 |> Seq.mapFold (fun x (c, w) ->
                     text [
