@@ -46,6 +46,10 @@ let indexView =
             p [] [ rawText "Display the most beautiful badge for your NuGet or MyGet package:" ]
             img [ _src "/nuget/nunit" ]
 
+            h3 [] [ rawText "Crates Badges" ]
+            p [] [ rawText "Display the most beautiful badge for your Crates.io package:" ]
+            img [ _src "/crate/rand" ]
+
             h3 [] [ rawText "About" ]
             p [] [
                 rawText "For more information please visit the "

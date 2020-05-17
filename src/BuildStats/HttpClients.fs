@@ -16,7 +16,9 @@ type IResilientHttpClient =
 type BaseHttpClient (clientFactory : IHttpClientFactory) =
     interface IResilientHttpClient with
         member __.SendAsync (request : HttpRequestMessage) =
+            let userAgent = sprintf "%s/%s" Environment.name Environment.appVersion
             let client = clientFactory.CreateClient()
+            client.DefaultRequestHeaders.Add("User-Agent", userAgent)
             client.SendAsync request
 
 type CircuitBreakerHttpClient (httpClient       : IResilientHttpClient,

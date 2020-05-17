@@ -71,6 +71,58 @@ module NuGet =
         }
 
 [<RequireQualifiedAccess>]
+module Crate =
+    open System.Net.Http
+    open Microsoft.FSharp.Core.Option
+    open FSharp.Control.Tasks.V2.ContextInsensitive
+    open Newtonsoft.Json.Linq
+
+    let deserialize (json : string) =
+        Json.deserialize json :?> JObject
+
+    let convertIntoPackage (packageVersion : string option) (obj : JObject) =
+        match packageVersion with
+        | None ->
+            let create = obj.Value<JObject> "crate"
+            {
+                Feed = "crates.io"
+                Name = create.Value<string> "id"
+                Version = create.Value<string> "max_version"
+                Downloads = create.Value<int> "downloads"
+            } |> Some
+        | Some version ->
+            let versions = obj.Value<JArray> "versions"
+            versions
+            |> fun a -> a.Children()
+            |> Seq.tryFind(fun x ->
+                (x.Value<string> "num").Equals version)
+            |> function
+                | None -> None
+                | Some item ->
+                    {
+                        Feed = "crates.io"
+                        Name = item.Value<string> "crate"
+                        Version = item.Value<string> "num"
+                        Downloads = item.Value<int> "downloads"
+                    } |> Some
+
+    let getPackageAsync (httpClient         : PackageHttpClient)
+                        (packageName        : string)
+                        (includePreReleases : bool) // ToDo
+                        (packageVersion     : string option) =
+        task {
+            let url = sprintf "https://crates.io/api/v1/crates/%s" packageName
+            let request = new HttpRequestMessage(HttpMethod.Get, url)
+            let! json = httpClient.SendAsync request
+
+            return
+                json
+                |> (Str.toOption
+                >> map deserialize
+                >> bind (convertIntoPackage packageVersion))
+        }
+
+[<RequireQualifiedAccess>]
 module MyGet =
     open System.Net
     open System.Net.Http
