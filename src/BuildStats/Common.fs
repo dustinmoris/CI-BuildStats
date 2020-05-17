@@ -18,6 +18,24 @@ module Str =
         | _         -> Some str
 
 // -------------------------------------
+// Parsers
+// -------------------------------------
+
+[<RequireQualifiedAccess>]
+module Parse =
+    open System
+
+    let boolOrDefault (fallback : bool) (value : string) =
+        match bool.TryParse value with
+        | true, v  -> v
+        | false, _ -> fallback
+
+    let intOrDefault (fallback : int) (value : string) =
+        match Int32.TryParse value with
+        | true, v  -> v
+        | false, _ -> fallback
+
+// -------------------------------------
 // Serialization
 // -------------------------------------
 

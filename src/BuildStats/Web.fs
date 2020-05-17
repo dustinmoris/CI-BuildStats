@@ -53,22 +53,28 @@ module HttpHandlers =
 
     let notFound msg = setStatusCode 404 >=> text msg
 
-    let private package getPackageFunc slug =
+    let private package logoSvg getPackageFunc slug =
         fun (next : HttpFunc) (ctx : HttpContext) ->
             task {
                 let httpClient = ctx.GetService<PackageHttpClient>()
 
                 let preRelease =
                     match ctx.TryGetQueryStringValue "includePreReleases" with
-                    | Some value -> bool.Parse value
+                    | Some value -> Parse.boolOrDefault false value
                     | None       -> false
                 let versionWidth =
                     match ctx.TryGetQueryStringValue "vWidth" with
-                    | Some value -> Some (Int32.Parse value)
+                    | Some value ->
+                        match Int32.TryParse value with
+                        | true, v  -> Some v
+                        | false, _ -> None
                     | None       -> None
                 let downloadsWidth =
                     match ctx.TryGetQueryStringValue "dWidth" with
-                    | Some value -> Some (Int32.Parse value)
+                    | Some value ->
+                        match Int32.TryParse value with
+                        | true, v  -> Some v
+                        | false, _ -> None
                     | None       -> None
 
                 let packageVersion =
@@ -80,31 +86,32 @@ module HttpHandlers =
                     | Some pkg ->
                         pkg
                         |> PackageModel.FromPackage versionWidth downloadsWidth
-                        |> SVGs.packageSVG
+                        |> SVGs.package logoSvg
                         |> renderXmlNodes
                         |> cachedSvg
                     | None -> notFound "Package not found"
                     <|| (next, ctx)
             }
 
-    let nuget           = package NuGet.getPackageAsync
-    let mygetOfficial   = package MyGet.getPackageFromOfficialFeedAsync
-    let mygetEnterprise = package MyGet.getPackageFromEnterpriseFeedAsync
+    let crate           = package SVGs.rust Crate.getPackageAsync
+    let nuget           = package SVGs.nuget NuGet.getPackageAsync
+    let mygetOfficial   = package SVGs.nuget MyGet.getPackageFromOfficialFeedAsync
+    let mygetEnterprise = package SVGs.nuget MyGet.getPackageFromEnterpriseFeedAsync
 
     let private getBuildHistory getBuildsFunc slug =
         fun (next : HttpFunc) (ctx : HttpContext) ->
             task {
                 let includePullRequests =
                     match ctx.TryGetQueryStringValue "includeBuildsFromPullRequest" with
-                    | Some x -> bool.Parse x
+                    | Some x -> Parse.boolOrDefault true x
                     | None   -> true
                 let buildCount =
                     match ctx.TryGetQueryStringValue "buildCount" with
-                    | Some x -> int x
+                    | Some x -> Parse.intOrDefault 25 x
                     | None   -> 25
                 let showStats =
                     match ctx.TryGetQueryStringValue "showStats" with
-                    | Some x -> bool.Parse x
+                    | Some x -> Parse.boolOrDefault true x
                     | None   -> true
 
                 let branch    = ctx.TryGetQueryStringValue "branch"
@@ -181,6 +188,7 @@ module WebApp =
                     if not Environment.isProduction then route "/error" >=> warbler (fun _ -> json(1/0))
 
                     // SVG endpoints
+                    routef "/crate/%s"       HttpHandlers.crate
                     routef "/nuget/%s"       HttpHandlers.nuget
                     routef "/myget/%s/%s/%s" HttpHandlers.mygetEnterprise
                     routef "/myget/%s/%s"    HttpHandlers.mygetOfficial
