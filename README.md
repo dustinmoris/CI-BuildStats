@@ -12,6 +12,7 @@ A little SVG widget to display build history charts and other badges for public 
     - [Configuration](#configuration)
 - [NuGet Badges](#nuget-badges)
 - [MyGet Badges](#myget-badges)
+- [Creates Badges](#crates-badges)
 - [API Documentation](#api-documentation)
 - [Docker image](#docker-image)
 - [Contributing](#contributing)
@@ -175,9 +176,35 @@ For example the badge and Markdown for the [Microsoft.Bot.Builder](https://botbu
 [![MyGet Badge](https://buildstats.info/myget/botbuilder/botbuilder-v4-dotnet-daily/Microsoft.Bot.Builder?includePreReleases=true)](https://botbuilder.myget.org/feed/botbuilder-v4-dotnet-daily/package/nuget/Microsoft.Bot.Builder)
 ```
 
+## Crates Badges
+
+The URL to a Crates.io badge from the official feed is:
+
+```
+https://buildstats.info/crate/{crateName}
+```
+
+For example the badge and Markdown for the [rand](https://github.com/rust-random/rand) Crates.io badge would be:
+
+[![Crate Badge](https://buildstats.info/crate/rand)](https://crates.io/crates/rand)
+
+```
+[![Crate Badge](https://buildstats.info/crate/rand)](https://crates.io/crates/rand)
+```
+
+### Setting a specific package version
+
+By adding the `packageVersion` query parameter you can set a specific version:
+
+[![Crate Badge](https://buildstats.info/crate/rand?packageVersion=0.7.0)](https://crates.io/crates/rand/0.7.0)
+
+```
+[![Crate Badge](https://buildstats.info/crate/rand?packageVersion=0.7.0)](https://crates.io/crates/rand/0.7.0)
+```
+
 ### Additional settings
 
-The `includePreReleases`, `packageVersion`, `vWidth` and `dWidth` query parameters work the same way as for NuGet badges (see above for more information).
+The `includePreReleases`, `vWidth` and `dWidth` query parameters work the same way as for NuGet badges (see above for more information).
 
 ## API Documentation
 
