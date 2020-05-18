@@ -30,7 +30,7 @@ module HttpHandlers =
 
     let css (bundle : string) =
         setHttpHeader "Content-Type" "text/css"
-        >=> setHttpHeader "Cache-Control" "public, max-age=31536000"
+        >=> setHttpHeader "Cache-Control" "public, max-age=31536000, stale-while-revalidate=86400"
         >=> setHttpHeader "ETag" Views.cssHash
         >=> setBodyFromString bundle
 
