@@ -117,7 +117,7 @@ module Environment =
             ]
             "Security", dict [
                 "Crypto Key", cryptoKey.ToSecret()
-                "API Secret", apiSecret.ToSecret()
+                "API Secret", if isProduction then apiSecret.ToSecret() else apiSecret
             ]
             "Proxies", dict [
                 "Proxy count", proxyCount.ToString()
