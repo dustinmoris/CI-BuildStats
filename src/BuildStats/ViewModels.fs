@@ -25,7 +25,7 @@ type PackageModel =
         let version        = sprintf "v%s" package.Version
         let feedWidth      = TextSize.measureWidth package.Feed + padding * 2
         let versionWidth   = defaultArg vWidth (TextSize.measureWidth version + padding * 2)
-        let downloadsWidth = defaultArg dWidth (TextSize.measureWidth downloads + padding * 2)
+        let downloadsWidth = defaultArg dWidth (TextSize.measureWidth downloads + padding * 2 - 7)
         {
             Width          = max (feedWidth + versionWidth + downloadsWidth) 62
             FeedWidth      = feedWidth
