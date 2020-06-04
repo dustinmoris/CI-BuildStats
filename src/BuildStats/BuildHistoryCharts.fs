@@ -34,7 +34,7 @@ module BuildStatsHelper =
     open System
 
     let prFilter   (inclFromPullRequest : bool)
-                            (build  : Build) =
+                   (build               : Build) =
         inclFromPullRequest || not build.FromPullRequest
 
     let timeTaken (started   : Nullable<DateTime>)
@@ -421,4 +421,91 @@ module BuildChartHttpClients =
                     >> convertToBuilds)
                     |> List.filter (BuildStatsHelper.prFilter inclFromPullRequest)
                     |> List.truncate buildCount
+            }
+
+    // ...........
+    // GitHub Actions
+    // ```````````
+
+    type GitHubActionsHttpClient (httpClient : FallbackHttpClient) =
+
+        let parseToJArray (json : string) =
+            let obj = Json.deserialize json :?> JObject
+            obj.Value<int> "total_count", obj.Value<JArray> "workflow_runs"
+
+        let parseStatus (status : string) (conclusion : string) =
+            match status with
+            | "queued" | "in_progress" -> Pending
+            | "completed" ->
+                match conclusion with
+                | "success"               -> Success
+                | "failure" | "timed_out" -> Failed
+                | "cancelled"             -> Cancelled
+                | "action_required"       -> Pending
+                | "neutral" | "skipped"   -> Unknown
+                | _                       -> Unknown
+            | _ -> Unknown
+
+        let isPullRequest (event : string) =
+            isNotNull event && event.Equals("pull_request")
+
+        let convertToBuilds (items : JArray) =
+            items
+            |> Seq.map (fun x ->
+                let started  = x.Value<Nullable<DateTime>> "created_at"
+                let finished = x.Value<Nullable<DateTime>> "updated_at"
+
+                let status     = x.Value<string>  "status"
+                let conclusion = x.Value<string>  "conclusion"
+                let outcome    = parseStatus status conclusion
+
+                {
+                    Id              = x.Value<int>     "id"
+                    BuildNumber     = x.Value<int>     "run_number"
+                    Status          = outcome
+                    Branch          = (x.Value<string> "head_branch")
+                    FromPullRequest = x.Value<string>  "event" |> isPullRequest
+                    TimeTaken       = BuildStatsHelper.timeTaken started finished
+                })
+            |> Seq.toList
+
+        member __.GetBuildsAsync  (_                   : string option)
+                                  (slug                : string * string)
+                                  (buildCount          : int)
+                                  (branch              : string option)
+                                  (inclFromPullRequest : bool) =
+            task {
+                let owner, repo = slug
+                let branchFilter =
+                    match branch with
+                    | Some b -> sprintf "?branch=%s" <| WebUtility.UrlEncode b
+                    | None   -> ""
+
+                // ToDo: Only shows a max of 30 runs per page
+                // Check `link` HTTP header for next page
+                // or check `total_count` property
+                let url =
+                    sprintf "https://api.github.com/repos/%s/%s/actions/runs%s"
+                        owner repo branchFilter
+
+                let request = new HttpRequestMessage(HttpMethod.Get, url)
+                let! json   = httpClient.SendAsync request
+
+                let totalCount, jArray =
+                    Str.toOption json
+                    |> function
+                        | None -> 0, None
+                        | Some j ->
+                            let count, arr = parseToJArray j
+                            count, Some arr
+
+                return
+                    jArray
+                    |> function
+                        | None -> []
+                        | Some arr ->
+                            arr
+                            |> convertToBuilds
+                            |> List.filter (BuildStatsHelper.prFilter inclFromPullRequest)
+                            |> List.truncate buildCount
             }

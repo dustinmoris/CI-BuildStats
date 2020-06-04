@@ -61,6 +61,8 @@ module Program =
                 fun svc -> CircleCIHttpClient(createResilientHttpClient svc))
             .AddSingleton<AzurePipelinesHttpClient>(
                 fun svc -> AzurePipelinesHttpClient(createResilientHttpClient svc))
+            .AddSingleton<GitHubActionsHttpClient>(
+                fun svc -> GitHubActionsHttpClient(createResilientHttpClient svc))
             .AddTransient<PackageHttpClient>(
                 fun svc ->
                     PackageHttpClient(

@@ -44,6 +44,7 @@ module HttpHandlers =
                 "includeBuildsFromPullRequest"
                 "buildCount"
                 "showStats"
+                "branch"
                 "authToken"
                 "vWidth"
                 "dWidth"
@@ -136,6 +137,11 @@ module HttpHandlers =
             let client = ctx.GetService<AzurePipelinesHttpClient>()
             getBuildHistory client.GetBuildsAsync slug next ctx
 
+    let github slug =
+        fun (next : HttpFunc) (ctx : HttpContext) ->
+            let client = ctx.GetService<GitHubActionsHttpClient>()
+            getBuildHistory client.GetBuildsAsync slug next ctx
+
     let circleCi slug =
         fun (next : HttpFunc) (ctx : HttpContext) ->
             let client = ctx.GetService<CircleCIHttpClient>()
@@ -196,6 +202,7 @@ module WebApp =
                     routef "/travisci/chart/%s/%s" HttpHandlers.travisCi
                     routef "/circleci/chart/%s/%s" HttpHandlers.circleCi
                     routef "/azurepipelines/chart/%s/%s/%i" HttpHandlers.azure
+                    routef "/github/chart/%s/%s" HttpHandlers.github
                 ]
             POST >=> route "/create" >=> HttpHandlers.encryptAuthToken
             HttpHandlers.notFound "Not Found" ]

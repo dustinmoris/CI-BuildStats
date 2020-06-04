@@ -22,7 +22,7 @@ A little SVG widget to display build history charts and other badges for public 
 
 The SVG widget currently works for public repositories built with:
 
-<a href="https://www.appveyor.com/" title="AppVeyor"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/assets/AppVeyor.png" width="80" height="80" style="margin-right: 30px;" alt="AppVeyor" title="AppVeyor"/></a><a href="https://travis-ci.org/" title="TravisCI"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/assets/TravisCI.jpg" width="80" height="80" style="margin-right: 30px;" alt="TravisCI" title="TravisCI"/></a><a href="https://circleci.com/" title="CircleCI"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/assets/CircleCI.png" width="80" height="80" style="margin-right: 10px;" alt="CircleCI" title="CircleCI"/></a><a href="https://dev.azure.com/" title="Azure Pipelines"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/assets/AzurePipelines.png" width="80" height="80" style="margin-right: 30px;" alt="Azure Pipelines" title="Azure Pipelines"/></a>
+<a href="https://www.appveyor.com/" title="AppVeyor"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/assets/AppVeyor.png" width="80" height="80" style="margin-right: 30px;" alt="AppVeyor" title="AppVeyor"/></a><a href="https://travis-ci.org/" title="TravisCI"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/assets/TravisCI.jpg" width="80" height="80" style="margin-right: 30px;" alt="TravisCI" title="TravisCI"/></a><a href="https://circleci.com/" title="CircleCI"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/assets/CircleCI.png" width="80" height="80" style="margin-right: 10px;" alt="CircleCI" title="CircleCI"/></a><a href="https://dev.azure.com/" title="Azure Pipelines"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/assets/AzurePipelines.png" width="80" height="80" style="margin-right: 30px;" alt="Azure Pipelines" title="Azure Pipelines"/></a><a href="https://github.com/" title="GitHub Actions"><img src="https://raw.githubusercontent.com/dustinmoris/CI-BuildStats/master/assets/GitHub.png" width="80" height="80" style="margin-right: 30px;" alt="GitHub Actions" title="GitHub Actions"/></a>
 
 ### How it works
 
@@ -38,6 +38,7 @@ Replace `{buildSystem}` with one of the supported build systems:
 -   travisci
 -   circleci
 -   azurepipelines
+-   github
 
 Replace `{account}` and `{project}` with your personal values.
 
