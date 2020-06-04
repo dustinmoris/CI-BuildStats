@@ -40,6 +40,7 @@ let indexView =
                 li [] [ a [ _href "https://travis-ci.org/"; _target "_blank" ] [ rawText "TravisCI" ] ]
                 li [] [ a [ _href "https://circleci.com/"; _target "_blank" ] [ rawText "CircleCI" ] ]
                 li [] [ a [ _href "https://azure.microsoft.com/en-us/services/devops/pipelines/"; _target "_blank" ] [ rawText "Azure Pipelines" ] ]
+                li [] [ a [ _href "https://github.com/"; _target "_blank" ] [ rawText "GitHub" ] ]
             ]
 
             h3 [] [ rawText "NuGet and MyGet Badges" ]
