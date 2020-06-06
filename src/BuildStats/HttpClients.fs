@@ -7,6 +7,7 @@ open System.Net.Http.Headers
 open System.Threading.Tasks
 open FSharp.Control.Tasks.V2.ContextInsensitive
 open Logfella
+open Microsoft.Net.Http.Headers
 
 exception BrokenCircuitException
 
@@ -28,9 +29,12 @@ type CircuitBreakerHttpClient (httpClient       : IResilientHttpClient,
     let mutable brokenSince     = DateTime.MinValue
 
     let getBreakDuration (response : HttpResponseMessage) =
-        match response.Headers.RetryAfter.Delta.HasValue with
-        | true  -> max minBreakDuration response.Headers.RetryAfter.Delta.Value
+        match response.Headers.Contains HeaderNames.RetryAfter with
         | false -> minBreakDuration
+        | true  ->
+            match response.Headers.RetryAfter.Delta.HasValue with
+            | true  -> max minBreakDuration response.Headers.RetryAfter.Delta.Value
+            | false -> minBreakDuration
 
     let isClientError (status : HttpStatusCode) =
         let clientErrorCodes =
