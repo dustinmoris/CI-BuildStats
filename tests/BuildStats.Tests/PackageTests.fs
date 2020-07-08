@@ -134,15 +134,22 @@ module PackageTests =
     /// -------------------------------------
 
     [<Fact>]
-    let ``NEventSocket returns correct result``() =
-        let package = MyGet.getPackageFromOfficialFeedAsync httpClient ("neventsocket-prerelease", "NEventSocket") false None |> runTask
+    let ``FSharp.Core returns correct result``() =
+        let package = MyGet.getPackageFromOfficialFeedAsync httpClient ("dotnet-core", "FSharp.Core") false None |> runTask
 
-        package.Value.Name        |> shouldEqual "NEventSocket"
-        package.Value.Downloads   |> shouldBeGreaterThan 4
+        package.Value.Name        |> shouldEqual "FSharp.Core"
+        package.Value.Downloads   |> shouldBeGreaterThan 0
 
     [<Fact>]
     let ``MyGet Package written in lowercase returns correct result``() =
-        let package = MyGet.getPackageFromOfficialFeedAsync httpClient ("neventsocket-prerelease", "neventsocket") false None |> runTask
+        let package = MyGet.getPackageFromOfficialFeedAsync httpClient ("dotnet-core", "fsharp.core") false None |> runTask
+
+        package.Value.Name        |> shouldEqual "FSharp.Core"
+        package.Value.Downloads   |> shouldBeGreaterThan 0
+
+    [<Fact>]
+    let ``NEventSocket PreRelease package returns correct result``() =
+        let package = MyGet.getPackageFromOfficialFeedAsync httpClient ("neventsocket-prerelease", "NEventSocket") true None |> runTask
 
         package.Value.Name        |> shouldEqual "NEventSocket"
         package.Value.Downloads   |> shouldBeGreaterThan 4
