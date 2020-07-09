@@ -155,12 +155,12 @@ The URL to a MyGet badge from the official feed is:
 https://buildstats.info/myget/{feedName}/{packageName}
 ```
 
-For example the badge and Markdown for the [NEventSocket](https://github.com/danbarua/NEventSocket) MyGet badge would be:
+For example the badge and Markdown for the FSharp.Core package in the .NET Core feed would be:
 
-[![MyGet Badge](https://buildstats.info/myget/neventsocket-prerelease/NEventSocket)](https://www.myget.org/feed/neventsocket-prerelease/package/nuget/NEventSocket)
+[![MyGet Badge](https://buildstats.info/myget/dotnet-core/FSharp.Core)](https://www.myget.org/feed/dotnet-core/package/nuget/FSharp.Core)
 
 ```
-[![MyGet Badge](https://buildstats.info/myget/neventsocket-prerelease/NEventSocket)](https://www.myget.org/feed/neventsocket-prerelease/package/nuget/NEventSocket)
+[![MyGet Badge](https://buildstats.info/myget/dotnet-core/NEventSocket)](https://www.myget.org/feed/dotnet-core/package/nuget/FSharp.Core)
 ```
 
 The URL to a MyGet badge from an Enterprise feed is:
