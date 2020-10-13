@@ -12,7 +12,7 @@ A little SVG widget to display build history charts and other badges for public 
     - [Configuration](#configuration)
 - [NuGet Badges](#nuget-badges)
 - [MyGet Badges](#myget-badges)
-- [Creates Badges](#crates-badges)
+- [Crates Badges](#crates-badges)
 - [API Documentation](#api-documentation)
 - [Docker image](#docker-image)
 - [Contributing](#contributing)
