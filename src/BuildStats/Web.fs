@@ -1,13 +1,14 @@
 namespace BuildStats
+open System.Threading.Tasks
 
 [<RequireQualifiedAccess>]
 module HttpHandlers =
     open System
     open Microsoft.Extensions.Logging
     open Microsoft.AspNetCore.Http
-    open FSharp.Control.Tasks.V2.ContextInsensitive
     open Giraffe
-    open Giraffe.GiraffeViewEngine
+    open Giraffe.ViewEngine
+    open FSharp.Control.Tasks
 
     let accessForbidden =
         fun (next : HttpFunc) (ctx : HttpContext) ->
@@ -81,14 +82,14 @@ module HttpHandlers =
                 let packageVersion =
                     ctx.TryGetQueryStringValue "packageVersion"
 
-                let! package = getPackageFunc httpClient slug preRelease packageVersion
+                let! package = (getPackageFunc httpClient slug preRelease packageVersion) : Task<_>
                 return!
                     match package with
                     | Some pkg ->
                         pkg
                         |> PackageModel.FromPackage versionWidth downloadsWidth
                         |> SVGs.package logoSvg
-                        |> renderXmlNodes
+                        |> RenderView.AsString.xmlNodes
                         |> cachedSvg
                     | None -> notFound "Package not found"
                     <|| (next, ctx)
@@ -117,12 +118,13 @@ module HttpHandlers =
 
                 let branch    = ctx.TryGetQueryStringValue "branch"
                 let authToken = ctx.TryGetQueryStringValue "authToken"
-                let! builds   = getBuildsFunc authToken slug buildCount branch includePullRequests
+                let! builds   =
+                    (getBuildsFunc authToken slug buildCount branch includePullRequests) : Task<_>
                 return!
                     builds
                     |> BuildHistoryModel.FromBuilds showStats
                     |> SVGs.buildHistorySVG
-                    |> renderXmlNode
+                    |> RenderView.AsString.xmlNode
                     |> cachedSvg
                     <|| (next, ctx)
             }
@@ -166,43 +168,43 @@ module HttpHandlers =
 
 module WebApp =
     open Giraffe
-    open Giraffe.GiraffeViewEngine
+    open Giraffe.ViewEngine
+    open Giraffe.EndpointRouting
 
-    let routes : HttpHandler =
-        choose [
-            choose [ GET; HEAD ] >=>
-                choose [
-                    // Assets
-                    route Views.cssPath >=> HttpHandlers.css Views.minifiedCss
+    let endpoints : Endpoint list =
+        [
+            GET_HEAD [
+                // Assets
+                route Views.cssPath (HttpHandlers.css Views.minifiedCss)
 
-                    // HTML Views
-                    route "/"       >=> htmlView Views.indexView
-                    route "/create" >=> htmlView Views.createApiTokenView
+                // HTML Views
+                route "/"       (htmlView Views.indexView)
+                route "/create" (htmlView Views.createApiTokenView)
 
-                    // Protected
-                    route "/tests"
-                    >=> HttpHandlers.requiresApiSecret
-                    >=> htmlView Views.visualTestsView
+                // Protected
+                route "/tests"
+                    (HttpHandlers.requiresApiSecret
+                    >=> htmlView Views.visualTestsView)
 
-                    route "/chars"
-                    >=> HttpHandlers.requiresApiSecret
-                    >=> (SVGs.measureCharsSVG |> renderXmlNode |> HttpHandlers.cachedSvg)
+                route "/chars"
+                    (HttpHandlers.requiresApiSecret
+                    >=> (SVGs.measureCharsSVG |> RenderView.AsString.xmlNode |> HttpHandlers.cachedSvg))
 
-                    // Health status
-                    route "/ping"    >=> text "pong"
-                    route "/version" >=> json {| version = Environment.appVersion |}
-                    if not Environment.isProduction then route "/error" >=> warbler (fun _ -> json(1/0))
+                // Health status
+                route "/ping"    (text "pong")
+                route "/version" (json {| version = Environment.appVersion |})
+                if not Environment.isProduction then route "/error" (warbler (fun _ -> json(1/0)))
 
-                    // SVG endpoints
-                    routef "/crate/%s"       HttpHandlers.crate
-                    routef "/nuget/%s"       HttpHandlers.nuget
-                    routef "/myget/%s/%s/%s" HttpHandlers.mygetEnterprise
-                    routef "/myget/%s/%s"    HttpHandlers.mygetOfficial
-                    routef "/appveyor/chart/%s/%s" HttpHandlers.appVeyor
-                    routef "/travisci/chart/%s/%s" HttpHandlers.travisCi
-                    routef "/circleci/chart/%s/%s" HttpHandlers.circleCi
-                    routef "/azurepipelines/chart/%s/%s/%i" HttpHandlers.azure
-                    routef "/github/chart/%s/%s" HttpHandlers.github
-                ]
-            POST >=> route "/create" >=> HttpHandlers.encryptAuthToken
-            HttpHandlers.notFound "Not Found" ]
+                // SVG endpoints
+                routef "/crate/%s"       HttpHandlers.crate
+                routef "/nuget/%s"       HttpHandlers.nuget
+                routef "/myget/%s/%s/%s" HttpHandlers.mygetEnterprise
+                routef "/myget/%s/%s"    HttpHandlers.mygetOfficial
+                routef "/appveyor/chart/%s/%s" HttpHandlers.appVeyor
+                routef "/travisci/chart/%s/%s" HttpHandlers.travisCi
+                routef "/circleci/chart/%s/%s" HttpHandlers.circleCi
+                routef "/azurepipelines/chart/%s/%s/%i" HttpHandlers.azure
+                routef "/github/chart/%s/%s" HttpHandlers.github
+            ]
+            POST [ route "/create" HttpHandlers.encryptAuthToken ]
+        ]

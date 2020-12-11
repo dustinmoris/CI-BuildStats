@@ -3,7 +3,7 @@ namespace BuildStats
 [<RequireQualifiedAccess>]
 module SVGs =
     open System
-    open Giraffe.GiraffeViewEngine
+    open Giraffe.ViewEngine
 
     let private svg      = tag     "svg"
     let private g        = tag     "g"

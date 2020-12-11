@@ -16,7 +16,7 @@ type PackageHttpClient (httpClient : FallbackHttpClient) =
 module NuGet =
     open System.Net.Http
     open Microsoft.FSharp.Core.Option
-    open FSharp.Control.Tasks.V2.ContextInsensitive
+    open FSharp.Control.Tasks
     open Newtonsoft.Json.Linq
 
     let deserialize (json : string) =
@@ -74,7 +74,7 @@ module NuGet =
 module Crate =
     open System.Net.Http
     open Microsoft.FSharp.Core.Option
-    open FSharp.Control.Tasks.V2.ContextInsensitive
+    open FSharp.Control.Tasks
     open Newtonsoft.Json.Linq
 
     let deserialize (json : string) =
@@ -126,7 +126,7 @@ module Crate =
 module MyGet =
     open System.Net.Http
     open Microsoft.FSharp.Core.Option
-    open FSharp.Control.Tasks.V2.ContextInsensitive
+    open FSharp.Control.Tasks
     open Newtonsoft.Json.Linq
 
     let deserialize (json : string) =
