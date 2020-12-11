@@ -1,0 +1,61 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ develop, master ]
+  pull_request:
+    branches: [ develop, master ]
+  release:
+    types:
+      - published
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.100
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build
+  deploy:
+    needs: build
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    env:
+      PROJECT: dustinmoris
+      IMAGE: ci-buildstats
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build
+        run: |
+          PATTERN="refs/tags/v"
+          SUB=""
+          TAG="${GITHUB_REF/$PATTERN/$SUB}"
+          docker build -t "$PROJECT"/"$IMAGE":"$TAG" -f src/BuildStats/Dockerfile .
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+
+      - name: Publish
+        run: |
+          PATTERN="refs/tags/v"
+          SUB=""
+          TAG="${GITHUB_REF/$PATTERN/$SUB}"
+          docker push $PROJECT/$IMAGE:$TAG

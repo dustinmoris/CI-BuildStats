@@ -11,6 +11,7 @@ module Program =
     open Microsoft.Extensions.Caching.Memory
     open Microsoft.Extensions.DependencyInjection
     open Giraffe
+    open Giraffe.EndpointRouting
     open Logfella
     open Logfella.LogWriters
     open Logfella.AspNetCore
@@ -55,14 +56,14 @@ module Program =
             .AddHttpClient()
             .AddSingleton<TravisCIHttpClient>(
                 fun svc -> TravisCIHttpClient(createResilientHttpClient svc, svc.GetService<IMemoryCache>()))
-            .AddSingleton<AppVeyorHttpClient>(
-                fun svc -> AppVeyorHttpClient(createResilientHttpClient svc))
-            .AddSingleton<CircleCIHttpClient>(
-                fun svc -> CircleCIHttpClient(createResilientHttpClient svc))
-            .AddSingleton<AzurePipelinesHttpClient>(
-                fun svc -> AzurePipelinesHttpClient(createResilientHttpClient svc))
-            .AddSingleton<GitHubActionsHttpClient>(
-                fun svc -> GitHubActionsHttpClient(createResilientHttpClient svc))
+            .AddSingleton<AppVeyorHttpClient>(createResilientHttpClient >> AppVeyorHttpClient)
+                // fun svc -> AppVeyorHttpClient(createResilientHttpClient svc))
+            .AddSingleton<CircleCIHttpClient>(createResilientHttpClient >> CircleCIHttpClient)
+                // fun svc -> CircleCIHttpClient(createResilientHttpClient svc))
+            .AddSingleton<AzurePipelinesHttpClient>(createResilientHttpClient >> AzurePipelinesHttpClient)
+                // fun svc -> AzurePipelinesHttpClient(createResilientHttpClient svc))
+            .AddSingleton<GitHubActionsHttpClient>(createResilientHttpClient >>  GitHubActionsHttpClient)
+                // fun svc -> GitHubActionsHttpClient(createResilientHttpClient svc))
             .AddTransient<PackageHttpClient>(
                 fun svc ->
                     PackageHttpClient(
@@ -75,6 +76,7 @@ module Program =
                 Environment.knownProxyNetworks,
                 Environment.knownProxies)
             .AddResponseCaching()
+            .AddRouting()
             .AddGiraffe()
             |> ignore
 
@@ -83,7 +85,7 @@ module Program =
            .UseWhen(
                 (fun _ -> Environment.isProduction),
                 fun x ->
-                    x.UseRequestBasedLogWriter(
+                    x.UseRequestScopedLogWriter(
                         fun ctx ->
                             Mute.When(muteFilter)
                                 .Otherwise(
@@ -93,11 +95,16 @@ module Program =
                                         .AsLogWriter()))
                     |> ignore)
            .UseGiraffeErrorHandler(HttpHandlers.genericError)
-           .UseRequestLogging(Environment.enableRequestLogging, false)
+           .UseRequestLogging(
+                fun o ->
+                    o.IsEnabled     <- Environment.enableRequestLogging
+                    o.LogOnlyAfter  <- false)
            .UseForwardedHeaders()
            .UseHttpsRedirection(Environment.domainName)
            .UseResponseCaching()
-           .UseGiraffe(WebApp.routes)
+           .UseRouting()
+           .UseGiraffe(WebApp.endpoints)
+           .UseGiraffe(HttpHandlers.notFound "Not Found")
 
     [<EntryPoint>]
     let main args =

@@ -90,7 +90,7 @@ module BuildChartHttpClients =
     open System.Net.Http.Headers
     open Microsoft.Extensions.Caching.Memory
     open Microsoft.FSharp.Core.Option
-    open FSharp.Control.Tasks.V2.ContextInsensitive
+    open FSharp.Control.Tasks
     open Newtonsoft.Json.Linq
     open Giraffe
 
