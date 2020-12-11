@@ -16,12 +16,12 @@ ProjectSection(SolutionItems) = preProject
 	.gitattributes = .gitattributes
 	.gitignore = .gitignore
 	NuGet.config = NuGet.config
+	README.md = README.md
+	LICENSE = LICENSE
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_docs", "_docs", "{297E8815-6C99-4965-B743-1F77E84EBA59}"
 ProjectSection(SolutionItems) = preProject
-	README.md = README.md
-	LICENSE = LICENSE
 EndProjectSection
 EndProject
 Global
