@@ -16,13 +16,6 @@ ProjectSection(SolutionItems) = preProject
 	NuGet.config = NuGet.config
 EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_psscripts", "_psscripts", "{37842F53-276D-43F4-A6D2-85D482AB8C4C}"
-ProjectSection(SolutionItems) = preProject
-	.psscripts\build-functions.ps1 = .psscripts\build-functions.ps1
-	.psscripts\install-dotnet.ps1 = .psscripts\install-dotnet.ps1
-	.psscripts\nuget-updates.ps1 = .psscripts\nuget-updates.ps1
-EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_docs", "_docs", "{297E8815-6C99-4965-B743-1F77E84EBA59}"
 ProjectSection(SolutionItems) = preProject
 	README.md = README.md
