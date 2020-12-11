@@ -2,11 +2,11 @@ FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
 WORKDIR /app
 
 # Copy csproj and restore as distinct layers
-COPY src/*.fsproj ./
+COPY src/BuildStats/*.fsproj ./
 RUN dotnet restore
 
 # Copy everything else and build
-COPY src/. ./
+COPY src/BuildStats/. ./
 RUN dotnet publish -c Release -o published
 
 # Build runtime image
