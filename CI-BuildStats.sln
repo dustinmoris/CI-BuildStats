@@ -13,9 +13,6 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BuildStats.Tests", "tests\B
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_build", "_build", "{ED48320B-3073-4F7F-B692-00862473CF5B}"
 ProjectSection(SolutionItems) = preProject
-	build.ps1 = build.ps1
-	appveyor.yml = appveyor.yml
-	global.json = global.json
 	NuGet.config = NuGet.config
 EndProjectSection
 EndProject
@@ -30,7 +27,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_docs", "_docs", "{297E8815
 ProjectSection(SolutionItems) = preProject
 	README.md = README.md
 	LICENSE = LICENSE
-	api.raml = api.raml
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_git", "_git", "{3220A93E-2200-43E0-95F6-1F450C93F877}"
