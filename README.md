@@ -13,7 +13,6 @@ A little SVG widget to display build history charts and other badges for public 
 - [NuGet Badges](#nuget-badges)
 - [MyGet Badges](#myget-badges)
 - [Crates Badges](#crates-badges)
-- [API Documentation](#api-documentation)
 - [Docker image](#docker-image)
 - [Contributing](#contributing)
 - [Support](#support)
@@ -206,10 +205,6 @@ By adding the `packageVersion` query parameter you can set a specific version:
 ### Additional settings
 
 The `includePreReleases`, `vWidth` and `dWidth` query parameters work the same way as for NuGet badges (see above for more information).
-
-## API Documentation
-
-For complete API documentation please check out the attached [api.raml](https://github.com/dustinmoris/CI-BuildStats/blob/master/api.raml) or visit the public [API Portal](https://anypoint.mulesoft.com/apiplatform/dustinmoris/#/portals/organizations/1c966d9b-793c-46bc-a87a-427b9a4a9b4a/apis/76973/versions/79960).
 
 ## Docker image
 

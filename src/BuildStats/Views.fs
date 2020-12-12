@@ -33,7 +33,7 @@ let indexView =
 
             h3 [] [ rawText "Build History Chart" ]
             p [] [ rawText "Add a build history widget to your public Git repository:" ]
-            img [ _src "/appveyor/chart/dustinmoris/ci-buildstats?branch=master" ]
+            img [ _src "/github/chart/dustinmoris/CI-BuildStats?branch=develop" ]
             p [ _style "margin-top: 2em;" ] [ rawText "Build history charts are currently supported for:" ]
             ul [] [
                 li [] [ a [ _href "https://www.appveyor.com/"; _target "_blank" ] [ rawText "AppVeyor" ] ]
