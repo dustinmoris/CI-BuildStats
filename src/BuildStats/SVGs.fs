@@ -201,7 +201,7 @@ module SVGs =
         defaultSvg model.Width model.Height [
             defaultG "#777777" [
                 yield text [
-                    attr "x" "0"; attr "y" "12"; attr "font-weight" "bold"; attr "fill" "#000000"
+                    attr "x" "0"; attr "y" "12"; attr "font-weight" "bold"; attr "fill" "#007ec6"
                 ] [ rawText model.Branch ]
 
                 if model.ShowStats then
