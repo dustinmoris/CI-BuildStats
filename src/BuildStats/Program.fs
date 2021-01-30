@@ -7,6 +7,7 @@ module Program =
     open System.Collections.Generic
     open Microsoft.AspNetCore.Builder
     open Microsoft.AspNetCore.Hosting
+    open Microsoft.AspNetCore.Http
     open Microsoft.Extensions.Hosting
     open Microsoft.Extensions.Caching.Memory
     open Microsoft.Extensions.DependencyInjection
@@ -17,30 +18,43 @@ module Program =
     open Logfella.AspNetCore
     open Logfella.Adapters
 
-    let private googleCloudLogWriter =
-        GoogleCloudLogWriter
-            .Create(Environment.logSeverity)
-            .AddServiceContext(
-                Environment.appName,
-                Environment.appVersion)
-            .UseGoogleCloudTimestamp()
-            .AddLabels(
-                dict [
-                    "appName", Environment.appName
-                    "appVersion", Environment.appVersion
-                ])
-
     let private muteFilter =
         Func<Severity, string, IDictionary<string, obj>, exn, bool>(
             fun severity msg data ex ->
                 msg.StartsWith "The response could not be cached for this request")
 
-    let private defaultLogWriter =
-        Mute.When(muteFilter)
-            .Otherwise(
-                match Environment.isProduction with
-                | true  -> googleCloudLogWriter.AsLogWriter()
-                | false -> ConsoleLogWriter(Environment.logSeverity).AsLogWriter())
+    let private createLogWriter (ctx : HttpContext option) =
+        match Env.isProduction with
+        | false -> ConsoleLogWriter(Env.logSeverity).AsLogWriter()
+        | true  ->
+            let basic =
+                GoogleCloudLogWriter
+                    .Create(Env.logSeverity)
+                    .AddServiceContext(
+                        Env.appName,
+                        Env.appVersion)
+                    .UseGoogleCloudTimestamp()
+                    .AddLabels(
+                        dict [
+                            "appName", Env.appName
+                            "appVersion", Env.appVersion
+                        ])
+            let final =
+                match ctx with
+                | None     -> basic
+                | Some ctx ->
+                    basic
+                        .AddHttpContext(ctx)
+                        .AddCorrelationId(Guid.NewGuid().ToString("N"))
+            Mute.When(muteFilter)
+                .Otherwise(final)
+
+    let private createReqLogWriter =
+        Func<HttpContext, ILogWriter>(Some >> createLogWriter)
+
+    let private toggleRequestLogging =
+        Action<RequestLoggingOptions>(
+            fun x -> x.IsEnabled <- Env.enableRequestLogging)
 
     let createResilientHttpClient (svc : IServiceProvider) =
         FallbackHttpClient(
@@ -57,13 +71,9 @@ module Program =
             .AddSingleton<TravisCIHttpClient>(
                 fun svc -> TravisCIHttpClient(createResilientHttpClient svc, svc.GetService<IMemoryCache>()))
             .AddSingleton<AppVeyorHttpClient>(createResilientHttpClient >> AppVeyorHttpClient)
-                // fun svc -> AppVeyorHttpClient(createResilientHttpClient svc))
             .AddSingleton<CircleCIHttpClient>(createResilientHttpClient >> CircleCIHttpClient)
-                // fun svc -> CircleCIHttpClient(createResilientHttpClient svc))
             .AddSingleton<AzurePipelinesHttpClient>(createResilientHttpClient >> AzurePipelinesHttpClient)
-                // fun svc -> AzurePipelinesHttpClient(createResilientHttpClient svc))
             .AddSingleton<GitHubActionsHttpClient>(createResilientHttpClient >>  GitHubActionsHttpClient)
-                // fun svc -> GitHubActionsHttpClient(createResilientHttpClient svc))
             .AddTransient<PackageHttpClient>(
                 fun svc ->
                     PackageHttpClient(
@@ -72,9 +82,9 @@ module Program =
                                 svc.GetService<IHttpClientFactory>())))
             )
             .AddProxies(
-                Environment.proxyCount,
-                Environment.knownProxyNetworks,
-                Environment.knownProxies)
+                Env.proxyCount,
+                Env.knownProxyNetworks,
+                Env.knownProxies)
             .AddResponseCaching()
             .AddRouting()
             .AddGiraffe()
@@ -82,25 +92,11 @@ module Program =
 
     let configureApp (app : IApplicationBuilder) =
         app.UseGiraffeErrorHandler(HttpHandlers.genericError)
-           .UseWhen(
-                (fun _ -> Environment.isProduction),
-                fun x ->
-                    x.UseRequestScopedLogWriter(
-                        fun ctx ->
-                            Mute.When(muteFilter)
-                                .Otherwise(
-                                    googleCloudLogWriter
-                                        .AddHttpContext(ctx)
-                                        .AddCorrelationId(Guid.NewGuid().ToString("N"))
-                                        .AsLogWriter()))
-                    |> ignore)
+           .UseRequestScopedLogWriter(createReqLogWriter)
            .UseGiraffeErrorHandler(HttpHandlers.genericError)
-           .UseRequestLogging(
-                fun o ->
-                    o.IsEnabled     <- Environment.enableRequestLogging
-                    o.LogOnlyAfter  <- false)
+           .UseRequestLogging(toggleRequestLogging)
            .UseForwardedHeaders()
-           .UseHttpsRedirection(Environment.domainName)
+           .UseHttpsRedirection(Env.forceHttps, Env.domainName)
            .UseResponseCaching()
            .UseRouting()
            .UseGiraffe(WebApp.endpoints)
@@ -109,18 +105,18 @@ module Program =
     [<EntryPoint>]
     let main args =
         try
-            Log.SetDefaultLogWriter(defaultLogWriter)
-            Logging.outputEnvironmentSummary Environment.summary
+            Log.SetDefaultLogWriter(createLogWriter None)
+            Logging.outputEnvironmentSummary Env.summary
 
-            Host.CreateDefaultBuilder()
+            Host.CreateDefaultBuilder(args)
                 .UseLogfella()
                 .ConfigureWebHost(
                     fun webHostBuilder ->
                         webHostBuilder
                             .ConfigureSentry(
-                                Environment.sentryDsn,
-                                Environment.name,
-                                Environment.appVersion)
+                                Env.sentryDsn,
+                                Env.name,
+                                Env.appVersion)
                             .UseKestrel(
                                 fun k -> k.AddServerHeader <- false)
                             .UseContentRoot(Directory.GetCurrentDirectory())

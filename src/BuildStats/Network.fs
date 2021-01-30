@@ -76,18 +76,22 @@ module NetworkExtensions =
                     cfg.ForwardedHeaders      <- ForwardedHeaders.All)
 
     type IApplicationBuilder with
-        member this.UseHttpsRedirection (domainName : string) =
-            this.Use(
-                fun ctx next ->
-                    let host = ctx.Request.Host.Host
-                    // Only HTTPS redirect for the chosen domain:
-                    let mustUseHttps =
-                        host = domainName
-                        || host.EndsWith ("." + domainName)
-                    // Otherwise prevent the HTTP redirection middleware
-                    // to redirect by force setting the scheme to https:
-                    if not mustUseHttps then
-                        ctx.Request.Scheme <- "https"
-                    next.Invoke())
-                .UseHttpsRedirection()
+        member this.UseHttpsRedirection (isEnabled : bool, domainName : string) =
+            match isEnabled with
+            | true ->
+                this.Use(
+                    fun ctx next ->
+                        let host = ctx.Request.Host.Host
+                        // Only HTTPS redirect for the chosen domain:
+                        let mustUseHttps =
+                            host = domainName
+                            || host.EndsWith ("." + domainName)
+                        // Otherwise prevent the HTTP redirection middleware
+                        // to redirect by force setting the scheme to https:
+                        if not mustUseHttps then
+                            ctx.Request.Scheme  <- "https"
+                            ctx.Request.IsHttps <- true
+                        next.Invoke())
+                    .UseHttpsRedirection()
+            | false -> this
 

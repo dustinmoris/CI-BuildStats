@@ -21,10 +21,10 @@ module HttpHandlers =
 
     let private validateApiSecret (ctx : HttpContext) =
         match ctx.TryGetRequestHeader "X-API-SECRET" with
-        | Some v -> Environment.apiSecret.Equals v
+        | Some v -> Env.apiSecret.Equals v
         | None   ->
             match ctx.TryGetQueryStringValue "apiSecret" with
-            | Some v -> Environment.apiSecret.Equals v
+            | Some v -> Env.apiSecret.Equals v
             | None   -> false
 
     let requiresApiSecret = authorizeRequest validateApiSecret accessForbidden
@@ -158,7 +158,7 @@ module HttpHandlers =
         fun (_ : HttpFunc) (ctx : HttpContext) ->
             task {
                 let plainText = (ctx.Request.Form.["plaintext"]).ToString()
-                let cipherText = AES.encryptToUrlEncodedString Environment.cryptoKey plainText
+                let cipherText = AES.encryptToUrlEncodedString Env.cryptoKey plainText
                 return! ctx.WriteTextAsync (sprintf "Encrypted auth token: %s" cipherText)
             }
 
@@ -192,8 +192,8 @@ module WebApp =
 
                 // Health status
                 route "/ping"    (text "pong")
-                route "/version" (json {| version = Environment.appVersion |})
-                if not Environment.isProduction then route "/error" (warbler (fun _ -> json(1/0)))
+                route "/version" (json {| version = Env.appVersion |})
+                if not Env.isProduction then route "/error" (warbler (fun _ -> json(1/0)))
 
                 // SVG endpoints
                 routef "/crate/%s"       HttpHandlers.crate

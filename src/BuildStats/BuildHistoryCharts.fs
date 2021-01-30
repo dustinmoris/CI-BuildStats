@@ -152,7 +152,7 @@ module BuildChartHttpClients =
                 let request = new HttpRequestMessage(HttpMethod.Get, url)
 
                 if authToken.IsSome then
-                    let token = AES.decryptUrlEncodedString Environment.cryptoKey authToken.Value
+                    let token = AES.decryptUrlEncodedString Env.cryptoKey authToken.Value
                     request.Headers.Authorization <- AuthenticationHeaderValue("Bearer", token)
 
                 let! json = httpClient.SendAsync request
@@ -234,7 +234,7 @@ module BuildChartHttpClients =
                     | true, _       -> "org"
                     | false, None   -> defaultArg (tryGetTLD account project) "com"
                     | false, Some t ->
-                        let token = AES.decryptUrlEncodedString Environment.cryptoKey t
+                        let token = AES.decryptUrlEncodedString Env.cryptoKey t
                         request.Headers.Authorization <- AuthenticationHeaderValue("token", token)
                         "com"
 
