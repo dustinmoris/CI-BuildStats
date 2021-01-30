@@ -135,16 +135,16 @@ module PackageTests =
 
     [<Fact>]
     let ``FSharp.Core returns correct result``() =
-        let package = MyGet.getPackageFromOfficialFeedAsync httpClient ("dotnet-core", "FSharp.Core") false None |> runTask
+        let package = MyGet.getPackageFromOfficialFeedAsync httpClient ("akkadotnet", "Akka.DI.Ninject") false None |> runTask
 
-        package.Value.Name        |> shouldEqual "FSharp.Core"
+        package.Value.Name        |> shouldEqual "Akka.DI.Ninject"
         package.Value.Downloads   |> shouldBeGreaterThan 0
 
     [<Fact>]
     let ``MyGet Package written in lowercase returns correct result``() =
-        let package = MyGet.getPackageFromOfficialFeedAsync httpClient ("dotnet-core", "fsharp.core") false None |> runTask
+        let package = MyGet.getPackageFromOfficialFeedAsync httpClient ("akkadotnet", "akka.di.ninject") false None |> runTask
 
-        package.Value.Name        |> shouldEqual "FSharp.Core"
+        package.Value.Name        |> shouldEqual "Akka.DI.Ninject"
         package.Value.Downloads   |> shouldBeGreaterThan 0
 
     [<Fact>]
