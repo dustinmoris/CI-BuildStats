@@ -1,7 +1,7 @@
 namespace BuildStats
 
 [<RequireQualifiedAccess>]
-module Environment =
+module Env =
     open System
     open System.Diagnostics
     open Logfella
@@ -13,6 +13,7 @@ module Environment =
         let LOG_LEVEL = "LOG_LEVEL"
         let SENTRY_DSN = "SENTRY_DSN"
         let DOMAIN_NAME = "DOMAIN_NAME"
+        let FORCE_HTTPS = "FORCE_HTTPS"
         let CRYPTO_KEY = "CRYPTO_KEY"
         let API_SECRET = "API_SECRET"
         let ENABLE_REQUEST_LOGGING = "ENABLE_REQUEST_LOGGING"
@@ -55,6 +56,12 @@ module Environment =
         Config.environmentVarOrDefault
             Keys.DOMAIN_NAME
             "buildstats.info"
+
+    let forceHttps =
+        Config.typedEnvironmentVarOrDefault
+            None
+            Keys.FORCE_HTTPS
+            false
 
     let baseUrl =
         match isProduction with

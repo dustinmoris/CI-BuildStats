@@ -45,7 +45,7 @@ jobs:
           PATTERN="refs/tags/v"
           SUB=""
           TAG="${GITHUB_REF/$PATTERN/$SUB}"
-          docker build -t "$PROJECT"/"$IMAGE":"$TAG" -f src/BuildStats/Dockerfile .
+          docker build --build-arg version=$TAG -t "$PROJECT"/"$IMAGE":"$TAG" -f src/BuildStats/Dockerfile .
 
       - name: Login to Docker Hub
         uses: docker/login-action@v1

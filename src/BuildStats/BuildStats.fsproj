@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <Version>5.29.0</Version>
     <AssemblyName>BuildStats</AssemblyName>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
@@ -21,7 +20,7 @@
     <Compile Include="Config.fs" />
     <Compile Include="Network.fs" />
     <Compile Include="Logging.fs" />
-    <Compile Include="Environment.fs" />
+    <Compile Include="Env.fs" />
     <Compile Include="Common.fs" />
     <Compile Include="HttpClients.fs" />
     <Compile Include="BuildHistoryCharts.fs" />
@@ -35,7 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Dockerfile;Assets\*.*">
+    <Content Include="Assets\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
