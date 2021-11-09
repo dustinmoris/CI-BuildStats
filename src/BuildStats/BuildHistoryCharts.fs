@@ -55,31 +55,37 @@ module BuildMetrics =
     open System
 
     let longestBuildTime (builds : Build list) =
-        match builds.Length with
-        | 0 -> TimeSpan.Zero
-        | _ ->
-            builds
-            |> List.filter (fun b -> b.Status = Success)
-            |> List.maxBy (fun x -> x.TimeTaken.TotalMilliseconds)
-            |> fun x -> x.TimeTaken
+        builds
+        |> List.filter (fun b -> b.Status = Success)
+        |> fun builds ->
+            match builds.Length with
+            | 0 -> TimeSpan.Zero
+            | _ ->
+                builds
+                |> List.maxBy (fun x -> x.TimeTaken.TotalMilliseconds)
+                |> fun x -> x.TimeTaken
 
     let shortestBuildTime (builds : Build list) =
-        match builds.Length with
-        | 0 -> TimeSpan.Zero
-        | _ ->
-            builds
-            |> List.filter (fun b -> b.Status = Success)
-            |> List.minBy (fun x -> x.TimeTaken.TotalMilliseconds)
-            |> fun x -> x.TimeTaken
+        builds
+        |> List.filter (fun b -> b.Status = Success)
+        |> fun builds ->
+            match builds.Length with
+            | 0 -> TimeSpan.Zero
+            | _ ->
+                builds
+                |> List.minBy (fun x -> x.TimeTaken.TotalMilliseconds)
+                |> fun x -> x.TimeTaken
 
     let averageBuildTime (builds : Build list) =
-        match builds.Length with
-        | 0 -> TimeSpan.Zero
-        | _ ->
-            builds
-            |> List.filter (fun b -> b.Status = Success)
-            |> List.averageBy (fun x -> x.TimeTaken.TotalMilliseconds)
-            |> TimeSpan.FromMilliseconds
+        builds
+        |> List.filter (fun b -> b.Status = Success)
+        |> fun builds ->
+            match builds.Length with
+            | 0 -> TimeSpan.Zero
+            | _ ->
+                builds
+                |> List.averageBy (fun x -> x.TimeTaken.TotalMilliseconds)
+                |> TimeSpan.FromMilliseconds
 
 // -------------------------------------------
 // CI HTTP Clients
