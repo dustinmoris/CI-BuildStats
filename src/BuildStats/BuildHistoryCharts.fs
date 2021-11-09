@@ -38,7 +38,7 @@ module BuildStatsHelper =
         inclFromPullRequest || not build.FromPullRequest
 
     let timeTaken (started   : Nullable<DateTime>)
-                           (finished  : Nullable<DateTime>) =
+                  (finished  : Nullable<DateTime>) =
         match started.HasValue with
         | true ->
             match finished.HasValue with
@@ -59,6 +59,7 @@ module BuildMetrics =
         | 0 -> TimeSpan.Zero
         | _ ->
             builds
+            |> List.filter (fun b -> b.Status = Success)
             |> List.maxBy (fun x -> x.TimeTaken.TotalMilliseconds)
             |> fun x -> x.TimeTaken
 
@@ -67,6 +68,7 @@ module BuildMetrics =
         | 0 -> TimeSpan.Zero
         | _ ->
             builds
+            |> List.filter (fun b -> b.Status = Success)
             |> List.minBy (fun x -> x.TimeTaken.TotalMilliseconds)
             |> fun x -> x.TimeTaken
 
@@ -75,6 +77,7 @@ module BuildMetrics =
         | 0 -> TimeSpan.Zero
         | _ ->
             builds
+            |> List.filter (fun b -> b.Status = Success)
             |> List.averageBy (fun x -> x.TimeTaken.TotalMilliseconds)
             |> TimeSpan.FromMilliseconds
 
