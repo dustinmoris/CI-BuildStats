@@ -17,8 +17,8 @@ module BuildChartTypes =
 
     type Build =
         {
-            Id              : int
-            BuildNumber     : int
+            Id              : int64
+            BuildNumber     : int64
             TimeTaken       : TimeSpan
             Status          : BuildStatus
             Branch          : string
@@ -99,7 +99,6 @@ module BuildChartHttpClients =
     open System.Net.Http.Headers
     open Microsoft.Extensions.Caching.Memory
     open Microsoft.FSharp.Core.Option
-    open FSharp.Control.Tasks
     open Newtonsoft.Json.Linq
     open Giraffe
 
@@ -133,8 +132,8 @@ module BuildChartHttpClients =
                     let started  = x.Value<Nullable<DateTime>> "started"
                     let finished = x.Value<Nullable<DateTime>> "finished"
                     {
-                        Id              = x.Value<int>    "buildId"
-                        BuildNumber     = x.Value<int>    "buildNumber"
+                        Id              = x.Value<int64>    "buildId"
+                        BuildNumber     = x.Value<int64>    "buildNumber"
                         Status          = x.Value<string> "status"        |> parseStatus
                         Branch          = x.Value<string> "branch"
                         FromPullRequest = x.Value<string> "pullRequestId" |> isPullRequest
@@ -158,13 +157,15 @@ module BuildChartHttpClients =
                     sprintf "https://ci.appveyor.com/api/projects/%s/%s/history?recordsNumber=%d%s"
                         account project (5 * buildCount) branchFilter
 
-                let request = new HttpRequestMessage(HttpMethod.Get, url)
+                let requestFactory =
+                    fun _ ->
+                        let request = new HttpRequestMessage(HttpMethod.Get, url)
+                        if authToken.IsSome then
+                            let token = AES.decryptUrlEncodedString Env.cryptoKey authToken.Value
+                            request.Headers.Authorization <- AuthenticationHeaderValue("Bearer", token)
+                        request
 
-                if authToken.IsSome then
-                    let token = AES.decryptUrlEncodedString Env.cryptoKey authToken.Value
-                    request.Headers.Authorization <- AuthenticationHeaderValue("Bearer", token)
-
-                let! json = httpClient.SendAsync request
+                let! json = httpClient.SendAsync requestFactory
 
                 return json
                     |> (Str.toOption
@@ -215,8 +216,8 @@ module BuildChartHttpClients =
                     let finished = x.Value<Nullable<DateTime>> "finished_at"
                     let state    = x.Value<string>             "state"
                     {
-                        Id              = x.Value<int>    "id"
-                        BuildNumber     = x.Value<int>    "number"
+                        Id              = x.Value<int64>    "id"
+                        BuildNumber     = x.Value<int64>    "number"
                         Branch          = (x.Value<JObject> "branch").Value<string> "name"
                         FromPullRequest = x.Value<string> "event_type" |> isPullRequest
                         TimeTaken       = BuildStatsHelper.timeTaken started finished
@@ -233,19 +234,13 @@ module BuildChartHttpClients =
             task {
                 let account, project = slug
 
-                let request = new HttpRequestMessage()
-                request.Method <- HttpMethod.Get
-                request.Headers.Add("Travis-API-Version", "3")
-                request.Headers.TryAddWithoutValidation("User-Agent", "BuildStats.info-API") |> ignore
-
-                let topLevelDomain =
+                let topLevelDomain, token =
                     match isFallback, authToken with
-                    | true, _       -> "org"
-                    | false, None   -> defaultArg (tryGetTLD account project) "com"
+                    | true, _       -> "org", None
+                    | false, None   -> defaultArg (tryGetTLD account project) "com", None
                     | false, Some t ->
-                        let token = AES.decryptUrlEncodedString Env.cryptoKey t
-                        request.Headers.Authorization <- AuthenticationHeaderValue("token", token)
-                        "com"
+                        let tkn = AES.decryptUrlEncodedString Env.cryptoKey t
+                        "com", Some tkn
 
                 let branchFilter =
                     match branch with
@@ -265,9 +260,20 @@ module BuildChartHttpClients =
                         branchFilter
                         eventFilter
 
-                request.RequestUri <- Uri(url)
+                let requestFactory =
+                    fun _ ->
+                        let request = new HttpRequestMessage()
+                        request.Method <- HttpMethod.Get
+                        request.Headers.Add("Travis-API-Version", "3")
+                        request.Headers.TryAddWithoutValidation("User-Agent", "BuildStats.info-API") |> ignore
+                        request.RequestUri <- Uri(url)
+                        match token with
+                        | None   -> ()
+                        | Some t ->
+                            request.Headers.Authorization <- AuthenticationHeaderValue("token", t)
+                        request
 
-                let! json = httpClient.SendAsync request
+                let! json = httpClient.SendAsync requestFactory
 
                 let builds =
                     json
@@ -325,8 +331,8 @@ module BuildChartHttpClients =
                     let started  = x.Value<Nullable<DateTime>> "start_time"
                     let finished = x.Value<Nullable<DateTime>> "stop_time"
                     {
-                        Id              = x.Value<int>    "build_num"
-                        BuildNumber     = x.Value<int>    "build_num"
+                        Id              = x.Value<int64>    "build_num"
+                        BuildNumber     = x.Value<int64>    "build_num"
                         Status          = x.Value<string> "status"  |> parseStatus
                         Branch          = x.Value<string> "branch"
                         FromPullRequest = x.Value<string> "subject" |> isPullRequest
@@ -353,8 +359,8 @@ module BuildChartHttpClients =
                     sprintf "https://circleci.com/api/v1/project/%s/%s%s?limit=%i"
                         account project branchFilter limit
 
-                let request = new HttpRequestMessage(HttpMethod.Get, url)
-                let! json   = httpClient.SendAsync request
+                let requestFactory = fun _ -> new HttpRequestMessage(HttpMethod.Get, url)
+                let! json   = httpClient.SendAsync requestFactory
 
                 return json
                     |> (Str.toOption
@@ -394,8 +400,8 @@ module BuildChartHttpClients =
                     let started  = x.Value<Nullable<DateTime>> "startTime"
                     let finished = x.Value<Nullable<DateTime>> "finishTime"
                     {
-                        Id              = x.Value<int>     "id"
-                        BuildNumber     = x.Value<int>     "id"
+                        Id              = x.Value<int64>     "id"
+                        BuildNumber     = x.Value<int64>     "id"
                         Status          = x.Value<string>  "result"  |> parseStatus
                         Branch          = (x.Value<string> "sourceBranch").Replace("refs/heads/", "")
                         FromPullRequest = x.Value<string>  "reason" |> isPullRequest
@@ -421,8 +427,8 @@ module BuildChartHttpClients =
                     sprintf "https://dev.azure.com/%s/%s/_apis/build/builds?api-version=%s&definitions=%i&$top=%i%s"
                         account project apiVersion definitionId limit branchFilter
 
-                let request = new HttpRequestMessage(HttpMethod.Get, url)
-                let! json   = httpClient.SendAsync request
+                let requestFactory = fun _ -> new HttpRequestMessage(HttpMethod.Get, url)
+                let! json   = httpClient.SendAsync requestFactory
 
                 return json
                     |> (Str.toOption
@@ -469,8 +475,8 @@ module BuildChartHttpClients =
                 let outcome    = parseStatus status conclusion
 
                 {
-                    Id              = x.Value<int>     "id"
-                    BuildNumber     = x.Value<int>     "run_number"
+                    Id              = x.Value<int64>     "id"
+                    BuildNumber     = x.Value<int64>     "run_number"
                     Status          = outcome
                     Branch          = (x.Value<string> "head_branch")
                     FromPullRequest = x.Value<string>  "event" |> isPullRequest
@@ -497,8 +503,8 @@ module BuildChartHttpClients =
                     sprintf "https://api.github.com/repos/%s/%s/actions/runs%s"
                         owner repo branchFilter
 
-                let request = new HttpRequestMessage(HttpMethod.Get, url)
-                let! json   = httpClient.SendAsync request
+                let requestFactory = fun _ -> new HttpRequestMessage(HttpMethod.Get, url)
+                let! json   = httpClient.SendAsync requestFactory
 
                 let totalCount, jArray =
                     Str.toOption json

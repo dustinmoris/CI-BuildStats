@@ -8,7 +8,6 @@ module HttpHandlers =
     open Microsoft.AspNetCore.Http
     open Giraffe
     open Giraffe.ViewEngine
-    open FSharp.Control.Tasks
 
     let accessForbidden =
         fun (next : HttpFunc) (ctx : HttpContext) ->

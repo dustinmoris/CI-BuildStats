@@ -16,7 +16,6 @@ type PackageHttpClient (httpClient : FallbackHttpClient) =
 module NuGet =
     open System.Net.Http
     open Microsoft.FSharp.Core.Option
-    open FSharp.Control.Tasks
     open Newtonsoft.Json.Linq
 
     let deserialize (json : string) =
@@ -60,8 +59,8 @@ module NuGet =
                         (packageVersion     : string option) =
         task {
             let url = sprintf "https://api-v2v3search-0.nuget.org/query?q=%s&skip=0&take=10&prerelease=%b&semVerLevel=2.0.0" packageName includePreReleases
-            let request = new HttpRequestMessage(HttpMethod.Get, url)
-            let! json = httpClient.SendAsync request
+            let requestFactory = fun _ -> new HttpRequestMessage(HttpMethod.Get, url)
+            let! json = httpClient.SendAsync requestFactory
             return
                 json
                 |> (Str.toOption
@@ -74,7 +73,6 @@ module NuGet =
 module Crate =
     open System.Net.Http
     open Microsoft.FSharp.Core.Option
-    open FSharp.Control.Tasks
     open Newtonsoft.Json.Linq
 
     let deserialize (json : string) =
@@ -112,8 +110,8 @@ module Crate =
                         (packageVersion     : string option) =
         task {
             let url = sprintf "https://crates.io/api/v1/crates/%s" packageName
-            let request = new HttpRequestMessage(HttpMethod.Get, url)
-            let! json = httpClient.SendAsync request
+            let requestFactory = fun _ -> new HttpRequestMessage(HttpMethod.Get, url)
+            let! json = httpClient.SendAsync requestFactory
 
             return
                 json
@@ -126,7 +124,6 @@ module Crate =
 module MyGet =
     open System.Net.Http
     open Microsoft.FSharp.Core.Option
-    open FSharp.Control.Tasks
     open Newtonsoft.Json.Linq
 
     let deserialize (json : string) =
@@ -172,8 +169,8 @@ module MyGet =
                         (packageVersion     : string option) =
         task {
             let url = sprintf "https://%s.myget.org/F/%s/api/v3/query?q=%s&skip=0&take=10&prerelease=%b&semVerLevel=2.0.0" subDomain feedName packageName includePreReleases
-            let request = new HttpRequestMessage(HttpMethod.Get, url)
-            let! json = httpClient.SendAsync request
+            let requestFactory = fun _ -> new HttpRequestMessage(HttpMethod.Get, url)
+            let! json = httpClient.SendAsync requestFactory
             return
                 json
                 |> (Str.toOption

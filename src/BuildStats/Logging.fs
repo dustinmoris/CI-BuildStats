@@ -72,7 +72,7 @@ module LoggingExtensions =
             | None -> this
             | Some dsn ->
                 this.UseSentry(
-                    fun sentry ->
+                    fun (sentry : Sentry.AspNetCore.SentryAspNetCoreOptions) ->
                         sentry.Debug            <- false
                         sentry.Environment      <- environmentName
                         sentry.Release          <- appVersion

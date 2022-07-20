@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>BuildStats</AssemblyName>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
@@ -9,11 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.*" />
-    <PackageReference Include="NUglify" Version="1.11.*" />
-    <PackageReference Include="Giraffe" Version="5.0.0-rc-6" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.*" />
+    <PackageReference Include="NUglify" Version="1.20.*" />
+    <PackageReference Include="Giraffe" Version="6.0.0" />
     <PackageReference Include="Logfella" Version="7.1.*" />
-    <PackageReference Include="Sentry.AspNetCore" Version="2.1.*" />
+    <PackageReference Include="Sentry.AspNetCore" Version="3.19.*" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,6 +37,7 @@
     <Content Include="Assets\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Dockerfile" />
   </ItemGroup>
 
 </Project>

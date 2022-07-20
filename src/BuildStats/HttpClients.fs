@@ -5,21 +5,24 @@ open System.Net
 open System.Net.Http
 open System.Net.Http.Headers
 open System.Threading.Tasks
-open FSharp.Control.Tasks
 open Logfella
 open Microsoft.Net.Http.Headers
 
 exception BrokenCircuitException
 
+type HttpRequestFactory = unit -> HttpRequestMessage
+
 type IResilientHttpClient =
-    abstract member SendAsync : HttpRequestMessage -> Task<HttpResponseMessage>
+    abstract member SendAsync : HttpRequestFactory -> Task<HttpResponseMessage>
 
 type BaseHttpClient (clientFactory : IHttpClientFactory) =
     interface IResilientHttpClient with
-        member __.SendAsync (request : HttpRequestMessage) =
+        member __.SendAsync (requestFactory : HttpRequestFactory) =
             let userAgent = sprintf "%s/%s" Env.name Env.appVersion
             let client = clientFactory.CreateClient()
             client.DefaultRequestHeaders.Add("User-Agent", userAgent)
+            let request = requestFactory()
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue("application/json"))
             client.SendAsync request
 
 type CircuitBreakerHttpClient (httpClient       : IResilientHttpClient,
@@ -44,7 +47,7 @@ type CircuitBreakerHttpClient (httpClient       : IResilientHttpClient,
         clientErrorCodes |> List.contains ((int)status)
 
     interface IResilientHttpClient with
-        member __.SendAsync (request : HttpRequestMessage) =
+        member __.SendAsync (requestFactory : HttpRequestFactory) =
             task {
                 match isBrokenCircuit with
                 | true  ->
@@ -52,7 +55,7 @@ type CircuitBreakerHttpClient (httpClient       : IResilientHttpClient,
                     isBrokenCircuit <- brokenDuration <= minBreakDuration
                     return raise BrokenCircuitException
                 | false ->
-                    let! response = httpClient.SendAsync request
+                    let! response = httpClient.SendAsync requestFactory
                     match response.IsSuccessStatusCode || isClientError response.StatusCode with
                     | true  -> return response
                     | false ->
@@ -60,7 +63,7 @@ type CircuitBreakerHttpClient (httpClient       : IResilientHttpClient,
                         Log.Warning(
                             sprintf
                                 "Request to '%s' has failed (HTTP status code: %i). Breaking circuit for: %f sec."
-                                (request.RequestUri.ToString())
+                                (response.RequestMessage.RequestUri.ToString())
                                 (int response.StatusCode)
                                 breakDuration.TotalSeconds,
                                 dict [
@@ -83,9 +86,9 @@ type RetryHttpClient (httpClient : IResilientHttpClient,
         || status = HttpStatusCode.ServiceUnavailable
         || status = HttpStatusCode.GatewayTimeout
 
-    let rec sendAsync (request : HttpRequestMessage) (retryCount : int) : Task<HttpResponseMessage> =
+    let rec sendAsync (requestFactory : HttpRequestFactory) (retryCount : int) : Task<HttpResponseMessage> =
         task {
-            let! response = httpClient.SendAsync request
+            let! response = httpClient.SendAsync requestFactory
 
             match response.IsSuccessStatusCode with
             | true  -> return response
@@ -97,7 +100,7 @@ type RetryHttpClient (httpClient : IResilientHttpClient,
                     Log.Warning(
                         sprintf
                             "Request to '%s' has failed. The HTTP response status code was: %i. Max retries left: %i. Next wait duration: %f sec."
-                                (request.RequestUri.ToString())
+                                (response.RequestMessage.RequestUri.ToString())
                                 (int response.StatusCode)
                                 retryCount
                                 waitDuration.TotalSeconds,
@@ -105,12 +108,12 @@ type RetryHttpClient (httpClient : IResilientHttpClient,
                             "httpClient", "retryClient" :> obj
                         ])
                     do! Task.Delay waitDuration
-                    return! sendAsync request (retryCount - 1)
+                    return! sendAsync requestFactory (retryCount - 1)
         }
 
     interface IResilientHttpClient with
-        member __.SendAsync (request : HttpRequestMessage) =
-            sendAsync request maxRetries
+        member __.SendAsync (requestFactory : HttpRequestFactory) =
+            sendAsync requestFactory maxRetries
 
 type FallbackHttpClient (httpClient : IResilientHttpClient) =
 
@@ -121,11 +124,10 @@ type FallbackHttpClient (httpClient : IResilientHttpClient) =
               423; 424; 426; 428; 431; 444; 451; 499 ]
         clientErrorCodes |> List.contains ((int)status)
 
-    member __.SendAsync (request : HttpRequestMessage) =
+    member __.SendAsync (requestFactory : HttpRequestFactory) =
         task {
             try
-                request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue("application/json"))
-                let! response = httpClient.SendAsync request
+                let! response = httpClient.SendAsync requestFactory
                 match response.StatusCode with
                 | HttpStatusCode.OK -> return! response.Content.ReadAsStringAsync()
                 | _                 ->
@@ -133,7 +135,7 @@ type FallbackHttpClient (httpClient : IResilientHttpClient) =
                         Log.Warning(
                             sprintf
                                 "Request to '%s' has failed due to a HTTP client error: %i."
-                                (request.RequestUri.ToString())
+                                (response.RequestMessage.RequestUri.ToString())
                                 (int response.StatusCode),
                             dict [
                                 "httpClient", "fallbackClient" :> obj
@@ -141,11 +143,10 @@ type FallbackHttpClient (httpClient : IResilientHttpClient) =
                     return ""
             with
                 | :? BrokenCircuitException -> return ""
+                | :? TaskCanceledException  -> return ""
                 | ex ->
                     Log.Error(
-                        sprintf
-                            "Exception thrown when sending HTTP request to '%s'."
-                                (request.RequestUri.ToString()),
+                        "Exception thrown when trying to send HTTP request.",
                         dict [
                             "httpClient", "fallbackClient" :> obj
                         ],
