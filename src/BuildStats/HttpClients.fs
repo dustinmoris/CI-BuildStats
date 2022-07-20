@@ -5,7 +5,6 @@ open System.Net
 open System.Net.Http
 open System.Net.Http.Headers
 open System.Threading.Tasks
-open FSharp.Control.Tasks
 open Logfella
 open Microsoft.Net.Http.Headers
 
