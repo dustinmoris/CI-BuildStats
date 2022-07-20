@@ -17,8 +17,8 @@ module BuildChartTypes =
 
     type Build =
         {
-            Id              : int
-            BuildNumber     : int
+            Id              : int64
+            BuildNumber     : int64
             TimeTaken       : TimeSpan
             Status          : BuildStatus
             Branch          : string
@@ -132,8 +132,8 @@ module BuildChartHttpClients =
                     let started  = x.Value<Nullable<DateTime>> "started"
                     let finished = x.Value<Nullable<DateTime>> "finished"
                     {
-                        Id              = x.Value<int>    "buildId"
-                        BuildNumber     = x.Value<int>    "buildNumber"
+                        Id              = x.Value<int64>    "buildId"
+                        BuildNumber     = x.Value<int64>    "buildNumber"
                         Status          = x.Value<string> "status"        |> parseStatus
                         Branch          = x.Value<string> "branch"
                         FromPullRequest = x.Value<string> "pullRequestId" |> isPullRequest
@@ -216,8 +216,8 @@ module BuildChartHttpClients =
                     let finished = x.Value<Nullable<DateTime>> "finished_at"
                     let state    = x.Value<string>             "state"
                     {
-                        Id              = x.Value<int>    "id"
-                        BuildNumber     = x.Value<int>    "number"
+                        Id              = x.Value<int64>    "id"
+                        BuildNumber     = x.Value<int64>    "number"
                         Branch          = (x.Value<JObject> "branch").Value<string> "name"
                         FromPullRequest = x.Value<string> "event_type" |> isPullRequest
                         TimeTaken       = BuildStatsHelper.timeTaken started finished
@@ -331,8 +331,8 @@ module BuildChartHttpClients =
                     let started  = x.Value<Nullable<DateTime>> "start_time"
                     let finished = x.Value<Nullable<DateTime>> "stop_time"
                     {
-                        Id              = x.Value<int>    "build_num"
-                        BuildNumber     = x.Value<int>    "build_num"
+                        Id              = x.Value<int64>    "build_num"
+                        BuildNumber     = x.Value<int64>    "build_num"
                         Status          = x.Value<string> "status"  |> parseStatus
                         Branch          = x.Value<string> "branch"
                         FromPullRequest = x.Value<string> "subject" |> isPullRequest
@@ -400,8 +400,8 @@ module BuildChartHttpClients =
                     let started  = x.Value<Nullable<DateTime>> "startTime"
                     let finished = x.Value<Nullable<DateTime>> "finishTime"
                     {
-                        Id              = x.Value<int>     "id"
-                        BuildNumber     = x.Value<int>     "id"
+                        Id              = x.Value<int64>     "id"
+                        BuildNumber     = x.Value<int64>     "id"
                         Status          = x.Value<string>  "result"  |> parseStatus
                         Branch          = (x.Value<string> "sourceBranch").Replace("refs/heads/", "")
                         FromPullRequest = x.Value<string>  "reason" |> isPullRequest
@@ -475,8 +475,8 @@ module BuildChartHttpClients =
                 let outcome    = parseStatus status conclusion
 
                 {
-                    Id              = x.Value<int>     "id"
-                    BuildNumber     = x.Value<int>     "run_number"
+                    Id              = x.Value<int64>     "id"
+                    BuildNumber     = x.Value<int64>     "run_number"
                     Status          = outcome
                     Branch          = (x.Value<string> "head_branch")
                     FromPullRequest = x.Value<string>  "event" |> isPullRequest
