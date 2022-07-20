@@ -37,6 +37,7 @@
     <Content Include="Assets\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Dockerfile" />
   </ItemGroup>
 
 </Project>
