@@ -131,7 +131,7 @@ By adding the `packageVersion` query parameter you can set a specific version:
 [![NuGet Badge](https://buildstats.info/nuget/Giraffe?packageVersion=3.0.0)](https://www.nuget.org/packages/Giraffe/3.0.0)
 
 ```
-[![NuGet Badge](https://buildstats.info/nuget/NServiceBus.PostgreSQL?includePreReleases=true)](https://www.nuget.org/packages/NServiceBus.PostgreSQL/1.0.0-CI00021)
+[![NuGet Badge](https://buildstats.info/nuget/Giraffe?packageVersion=3.0.0)](https://www.nuget.org/packages/Giraffe/3.0.0)
 ```
 
 ### Setting a fixed width
